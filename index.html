@@ -329,8 +329,8 @@
             <div class="dpad-btn" id="btn-right">▶</div>
         </div>
         <div id="mobile-lookpad">
-            <div>👆 LOOK PAD</div>
-            <div style="font-size:9px; color:#ffda66; margin-top:2px;">Swipe to look round / aim</div>
+            <div>👆 LOOK ROUND PAD</div>
+            <div style="font-size:9px; color:#ffda66; margin-top:2px;">Swipe to orbit & look round camera view</div>
         </div>
     </div>
 
@@ -362,7 +362,7 @@
         • <b>A / D</b>: Steer / Rotate Knight<br>
         • <b>F</b>: Toggle Head Mounted Torch 🔦<br>
         • <b>E</b>: Call Lift<br>
-        • <b>Mouse Cursor</b>: Aim Head & Flashlight Beam (Pitch & Yaw)<br>
+        • <b>Mouse Drag / Look Pad</b>: Orbit & Look Round Camera View 360°<br>
         • <b>Mouse Left-Click</b>: Slash / Strike / Spin Portal Reels / Click Podium & Studio Touch Screens & Trivia Answers<br>
         • <b>Mouse Right-Click</b>: Thrust / Parry<br>
     </div>
@@ -376,7 +376,6 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        // Properly define mobile device detector
         const isMobileDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || /Mobi|Android/i.test(navigator.userAgent);
         if (isMobileDevice) {
             const mobileControlsEl = document.getElementById('mobile-controls');
@@ -2508,8 +2507,13 @@
         const raycaster = new THREE.Raycaster();
         const mouseVec = new THREE.Vector2();
 
-        let touchLookPitch = 0.35;
-        let touchLookYaw = 0;
+        // CAMERA FREE LOOK / ORBIT / LOOK ROUND ANGLES
+        let cameraYawOffset = 0;   // Free look rotation around the player
+        let cameraPitchOffset = 0.2; // Vertical camera angle offset
+        let isMouseDownLook = false;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+
         let activeLookTouchId = null;
         let lastTouchX = 0;
         let lastTouchY = 0;
@@ -2548,17 +2552,87 @@
             keys[k] = false;
         };
 
+        window.onmousedown = (e) => {
+            if (!knight || !gameRunning) return;
+            if (checkObjectClick(e)) return;
+
+            // If left/right click started not on UI, allow look dragging or combat
+            if (e.button === 0) {
+                // Check portal reel trigger
+                if (playerCurrentFloor === "BASEMENT" && undergroundGroup.visible) {
+                    const pPos = knight.group.position;
+                    let hitReel = false;
+                    for (let w of reelWalls) {
+                        let dist = (w.axis === 'z')
+                            ? (Math.abs(pPos.x - w.x) < 4.0 && Math.abs(pPos.z - w.z) < 8.5)
+                            : (Math.abs(pPos.z - w.z) < 4.0 && Math.abs(pPos.x - w.x) < 8.5);
+                        if (dist) {
+                            triggerWallSpin(w);
+                            hitReel = true;
+                            break;
+                        }
+                    }
+                    if (hitReel) return;
+                }
+            }
+
+            isMouseDownLook = true;
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+
+            let chosenType = '';
+            if (e.button === 0) {
+                if (knight.activeZone === 1) chosenType = 'shield_high_shove';
+                else if (knight.activeZone === 2) chosenType = 'sword_high_cleave';
+                else if (knight.activeZone === 3) chosenType = 'shield_mid_shove';
+                else if (knight.activeZone === 4) chosenType = 'sword_mid_slash';
+                else if (knight.activeZone === 5) chosenType = 'shield_low_shove';
+                else if (knight.activeZone === 6) chosenType = 'sword_low_slash';
+                else chosenType = 'sword_mid_slash';
+            } else if (e.button === 2) {
+                if (knight.activeZone === 1) chosenType = 'shield_high_punch';
+                else if (knight.activeZone === 2) chosenType = 'sword_high_thrust';
+                else if (knight.activeZone === 3) chosenType = 'shield_mid_punch';
+                else if (knight.activeZone === 4) chosenType = 'sword_mid_thrust';
+                else if (knight.activeZone === 5) chosenType = 'shield_low_guard';
+                else if (knight.activeZone === 6) chosenType = 'sword_low_thrust';
+                else chosenType = 'sword_mid_thrust';
+            }
+
+            if (chosenType) {
+                triggerAttack(chosenType);
+            }
+        };
+
         window.onmousemove = (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
+
+            if (isMouseDownLook) {
+                const dx = e.clientX - lastMouseX;
+                const dy = e.clientY - lastMouseY;
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+
+                // LOOK ROUND / ORBIT CAMERA AROUND KNIGHT
+                cameraYawOffset -= dx * 0.005;
+                cameraPitchOffset += dy * 0.005;
+                cameraPitchOffset = Math.max(-0.2, Math.min(1.4, cameraPitchOffset));
+            }
         };
+
+        window.onmouseup = () => {
+            isMouseDownLook = false;
+        };
+
         window.onmouseleave = () => {
             mouse.x = window.innerWidth / 2;
             mouse.y = window.innerHeight / 2;
+            isMouseDownLook = false;
         };
         window.oncontextmenu = (e) => e.preventDefault();
 
-        // Touch listeners for mobile devices
+        // Touch listeners for mobile devices (D-pad & LOOK ROUND PAD)
         if (isMobileDevice) {
             const bindTouchHold = (elemId, keyName) => {
                 const el = document.getElementById(elemId);
@@ -2572,44 +2646,42 @@
             bindTouchHold('btn-left', 'a');
             bindTouchHold('btn-right', 'd');
 
-            window.addEventListener('touchstart', (e) => {
-                for (let i = 0; i < e.targetTouches.length; i++) {
-                    const touch = e.targetTouches[i];
-                    if (touch.clientX > 180 && touch.clientY < window.innerHeight - 140) {
-                        if (activeLookTouchId === null) {
-                            activeLookTouchId = touch.identifier;
-                            lastTouchX = touch.clientX;
-                            lastTouchY = touch.clientY;
-                        }
-                    }
-                }
-            }, { passive: false });
-
-            window.addEventListener('touchmove', (e) => {
-                for (let i = 0; i < e.targetTouches.length; i++) {
-                    const touch = e.targetTouches[i];
-                    if (touch.identifier === activeLookTouchId) {
-                        const dx = touch.clientX - lastTouchX;
-                        const dy = touch.clientY - lastTouchY;
+            const lookpadEl = document.getElementById('mobile-lookpad');
+            if (lookpadEl) {
+                lookpadEl.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    if (e.targetTouches.length > 0) {
+                        const touch = e.targetTouches[0];
+                        activeLookTouchId = touch.identifier;
                         lastTouchX = touch.clientX;
                         lastTouchY = touch.clientY;
-
-                        touchLookYaw -= dx * 0.008;
-                        touchLookPitch -= dy * 0.008;
-                        touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
                     }
-                }
-            }, { passive: false });
+                }, { passive: false });
 
-            const endTouchLook = (e) => {
-                for (let i = 0; i < e.changedTouches.length; i++) {
-                    if (e.changedTouches[i].identifier === activeLookTouchId) {
-                        activeLookTouchId = null;
+                lookpadEl.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    for (let i = 0; i < e.targetTouches.length; i++) {
+                        const touch = e.targetTouches[i];
+                        if (touch.identifier === activeLookTouchId) {
+                            const dx = touch.clientX - lastTouchX;
+                            const dy = touch.clientY - lastTouchY;
+                            lastTouchX = touch.clientX;
+                            lastTouchY = touch.clientY;
+
+                            // LOOK ROUND CAMERA VIEW
+                            cameraYawOffset -= dx * 0.008;
+                            cameraPitchOffset += dy * 0.008;
+                            cameraPitchOffset = Math.max(-0.2, Math.min(1.4, cameraPitchOffset));
+                        }
                     }
-                }
-            };
-            window.addEventListener('touchend', endTouchLook);
-            window.addEventListener('touchcancel', endTouchLook);
+                }, { passive: false });
+
+                const endLookpad = (e) => {
+                    activeLookTouchId = null;
+                };
+                lookpadEl.addEventListener('touchend', endLookpad);
+                lookpadEl.addEventListener('touchcancel', endLookpad);
+            }
         }
 
         function handleInteractionKey() {
@@ -3120,53 +3192,12 @@
             knight.attackType = type;
         }
 
-        window.onmousedown = (e) => {
-            if (!knight || !gameRunning) return;
-            if (checkObjectClick(e)) return;
-
-            if (e.button === 0 && playerCurrentFloor === "BASEMENT" && undergroundGroup.visible) {
-                const pPos = knight.group.position;
-                for (let w of reelWalls) {
-                    let dist = (w.axis === 'z')
-                        ? (Math.abs(pPos.x - w.x) < 4.0 && Math.abs(pPos.z - w.z) < 8.5)
-                        : (Math.abs(pPos.z - w.z) < 4.0 && Math.abs(pPos.x - w.x) < 8.5);
-                    if (dist) {
-                        triggerWallSpin(w);
-                        break;
-                    }
-                }
-            }
-
-            let chosenType = '';
-            if (e.button === 0) {
-                if (knight.activeZone === 1) chosenType = 'shield_high_shove';
-                else if (knight.activeZone === 2) chosenType = 'sword_high_cleave';
-                else if (knight.activeZone === 3) chosenType = 'shield_mid_shove';
-                else if (knight.activeZone === 4) chosenType = 'sword_mid_slash';
-                else if (knight.activeZone === 5) chosenType = 'shield_low_shove';
-                else if (knight.activeZone === 6) chosenType = 'sword_low_slash';
-                else chosenType = 'sword_mid_slash';
-            } else if (e.button === 2) {
-                if (knight.activeZone === 1) chosenType = 'shield_high_punch';
-                else if (knight.activeZone === 2) chosenType = 'sword_high_thrust';
-                else if (knight.activeZone === 3) chosenType = 'shield_mid_punch';
-                else if (knight.activeZone === 4) chosenType = 'sword_mid_thrust';
-                else if (knight.activeZone === 5) chosenType = 'shield_low_guard';
-                else if (knight.activeZone === 6) chosenType = 'sword_low_thrust';
-                else chosenType = 'sword_mid_thrust';
-            }
-
-            if (chosenType) {
-                triggerAttack(chosenType);
-            }
-        };
-
         function applyDirectionalRigging(zone, delta) {
             const normX = (mouse.x / window.innerWidth) * 2 - 1;
             const normY = (mouse.y / window.innerHeight) * 2 - 1;
 
-            const targetHeadPitch = (-normY * 0.75) + touchLookPitch;
-            const targetHeadYaw = (-normX * 0.95) + touchLookYaw;
+            const targetHeadPitch = -normY * 0.75;
+            const targetHeadYaw = -normX * 0.95;
             const targetHeadRoll = -normX * normY * 0.15;
 
             const tHeadRot = new THREE.Euler(targetHeadPitch, targetHeadYaw, targetHeadRoll);
@@ -3751,9 +3782,11 @@
                     const targetHeight = isInStudio ? 4.5 : 4.2;
                     const lookHeight = 2.2;
 
-                    const targetCamX = knight.group.position.x + Math.sin(knight.angle) * targetDist;
-                    const targetCamZ = knight.group.position.z + Math.cos(knight.angle) * targetDist;
-                    const targetCamY = knight.group.position.y + targetHeight;
+                    // FREE / LOOK ROUND CAMERA ORBIT AROUND KNIGHT
+                    const totalCamAngle = knight.angle + cameraYawOffset;
+                    const targetCamX = knight.group.position.x + Math.sin(totalCamAngle) * targetDist;
+                    const targetCamZ = knight.group.position.z + Math.cos(totalCamAngle) * targetDist;
+                    const targetCamY = knight.group.position.y + targetHeight + (cameraPitchOffset * 2.0);
 
                     camera.position.x += (targetCamX - camera.position.x) * 0.16;
                     camera.position.y += (targetCamY - camera.position.y) * 0.16;
