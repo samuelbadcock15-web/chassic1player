@@ -362,7 +362,8 @@
         • <b>A / D</b>: Steer / Rotate Knight<br>
         • <b>F</b>: Toggle Head Mounted Torch 🔦<br>
         • <b>E</b>: Call Lift<br>
-        • <b>Look Pad / Drag</b>: Rotate World View / Camera Angle<br>
+        • <b>Look Pad (Bottom Right)</b>: Rotate World View / Camera Angle<br>
+        • <b>Mouse / Screen Drag</b>: Turn Knight's Head & Torso<br>
         • <b>Click / Tap</b>: Slash / Strike / Spin Portal Reels / Click Podium & Studio Touch Screens & Trivia Answers<br>
     </div>
 
@@ -2510,7 +2511,7 @@
         const raycaster = new THREE.Raycaster();
         const mouseVec = new THREE.Vector2();
 
-        let worldCameraAngle = 0; // World rotation angle controlled by Look Pad / Mouse dragging
+        let worldCameraAngle = 0; // World rotation angle controlled by Look Pad / Right mouse dragging
         let activeLookTouchId = null;
         let lastTouchX = 0;
 
@@ -2548,11 +2549,11 @@
             keys[k] = false;
         };
 
-        // Desktop mouse dragging to rotate the world view
-        let isMouseDown = false;
+        // Mouse handlers: Left drag / normal mouse movement turns head/torso; Right drag rotates world view
+        let isRightMouseDown = false;
         window.onmousedown = (e) => {
             if (e.button === 2) { // Right click drag for world look
-                isMouseDown = true;
+                isRightMouseDown = true;
                 lastTouchX = e.clientX;
                 return;
             }
@@ -2591,7 +2592,7 @@
         window.onmousemove = (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
-            if (isMouseDown) {
+            if (isRightMouseDown) {
                 const dx = e.clientX - lastTouchX;
                 lastTouchX = e.clientX;
                 worldCameraAngle -= dx * 0.008;
@@ -2600,14 +2601,14 @@
 
         window.onmouseup = (e) => {
             if (e.button === 2) {
-                isMouseDown = false;
+                isRightMouseDown = false;
             }
         };
 
         window.onmouseleave = () => {
             mouse.x = window.innerWidth / 2;
             mouse.y = window.innerHeight / 2;
-            isMouseDown = false;
+            isRightMouseDown = false;
         };
         window.oncontextmenu = (e) => e.preventDefault();
 
@@ -3134,7 +3135,11 @@
         }
 
         function applyDirectionalRigging(zone, delta) {
-            let tHeadRot = new THREE.Euler(0, 0, 0);
+            // Mouse tracking: calculate head/torso turn based on cursor position on the screen
+            let normX = (mouse.x / window.innerWidth) * 2 - 1;
+            let normY = -((mouse.y / window.innerHeight) * 2 - 1);
+
+            let tHeadRot = new THREE.Euler(-normY * 0.4, -normX * 0.7, 0);
             let tSwordRot = knight.defaultSwordRot.clone();
             let tSwordPos = knight.defaultSwordPos.clone();
             let tShieldRot = knight.defaultShieldRot.clone();
