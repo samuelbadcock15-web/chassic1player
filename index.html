@@ -245,7 +245,6 @@
             color: #111;
         }
 
-        /* Mobile Touch Controls Overlay */
         #mobile-controls {
             position: absolute;
             top: 0;
@@ -254,7 +253,7 @@
             height: 100%;
             pointer-events: none;
             z-index: 120;
-            display: none; /* Enabled via JS on mobile/touch */
+            display: none;
         }
         #dpad-container {
             position: absolute;
@@ -288,27 +287,27 @@
         #btn-right { top: 45px; right: 0; width: 45px; height: 50px; }
 
         #mobile-lookpad {
-    position: absolute;
-    bottom: 150px; /* Moved up from 30px */
-    right: 20px;  /* Moved to the right corner */
-    width: 140px;
-    height: 120px;
-    background: rgba(14, 10, 24, 0.85);
-    border: 2px solid #ff0055;
-    border-radius: 8px;
-    color: #00f0ff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: bold;
-    text-align: center;
-    pointer-events: auto;
-    box-shadow: 0 0 10px rgba(255,0,85,0.3);
-    padding: 6px;
-    line-height: 1.3;
-}
+            position: absolute;
+            bottom: 150px;
+            right: 20px;
+            width: 140px;
+            height: 120px;
+            background: rgba(14, 10, 24, 0.85);
+            border: 2px solid #ff0055;
+            border-radius: 8px;
+            color: #00f0ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+            pointer-events: auto;
+            box-shadow: 0 0 10px rgba(255,0,85,0.3);
+            padding: 6px;
+            line-height: 1.3;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -322,7 +321,6 @@
 
     <div id="info-btn" title="Toggle Instructions">i</div>
 
-    <!-- Mobile Touch Controls UI -->
     <div id="mobile-controls">
         <div id="dpad-container">
             <div class="dpad-btn" id="btn-up">▲</div>
@@ -361,7 +359,7 @@
         <hr>
         <b>Controls:</b><br>
         • <b>W / S</b>: Move Forward / Backward<br>
-        • <b>A / D</b>: Steer / Rotate Knight (Even when locked in podium stage!)<br>
+        • <b>A / D</b>: Steer / Rotate Knight<br>
         • <b>F</b>: Toggle Head Mounted Torch 🔦<br>
         • <b>E</b>: Call Lift<br>
         • <b>Mouse Cursor</b>: Aim Head & Flashlight Beam (Pitch & Yaw)<br>
@@ -378,50 +376,12 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        // REPLACE your old mobile touch listener code with this:
-if (isMobileDevice) {
-    // Keep your D-pad bindings as they are, then add this:
-    
-    window.addEventListener('touchstart', (e) => {
-        for (let i = 0; i < e.targetTouches.length; i++) {
-            const touch = e.targetTouches[i];
-            // Ignore touches on the left D-pad (X < 180) and bottom-right UI area
-            if (touch.clientX > 180 && touch.clientY < window.innerHeight - 140) {
-                if (activeLookTouchId === null) {
-                    activeLookTouchId = touch.identifier;
-                    lastTouchX = touch.clientX;
-                    lastTouchY = touch.clientY;
-                }
-            }
+        // Properly define mobile device detector
+        const isMobileDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || /Mobi|Android/i.test(navigator.userAgent);
+        if (isMobileDevice) {
+            const mobileControlsEl = document.getElementById('mobile-controls');
+            if (mobileControlsEl) mobileControlsEl.style.display = 'block';
         }
-    }, { passive: false });
-
-    window.addEventListener('touchmove', (e) => {
-        for (let i = 0; i < e.targetTouches.length; i++) {
-            const touch = e.targetTouches[i];
-            if (touch.identifier === activeLookTouchId) {
-                const dx = touch.clientX - lastTouchX;
-                const dy = touch.clientY - lastTouchY;
-                lastTouchX = touch.clientX;
-                lastTouchY = touch.clientY;
-
-                touchLookYaw -= dx * 0.008;
-                touchLookPitch -= dy * 0.008;
-                touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
-            }
-        }
-    }, { passive: false });
-
-    const endTouchLook = (e) => {
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            if (e.changedTouches[i].identifier === activeLookTouchId) {
-                activeLookTouchId = null;
-            }
-        }
-    };
-    window.addEventListener('touchend', endTouchLook);
-    window.addEventListener('touchcancel', endTouchLook);
-}
 
         let selectedGameMode = 'solo';
         let studioGameActive = false;
@@ -1145,9 +1105,6 @@ if (isMobileDevice) {
             studioSouthWall
         );
 
-        // ==========================================
-        // GIANT OUTSIDE CUSTODIAN & OUTSIDE MACHINES
-        // ==========================================
         const outsideGroup = new THREE.Group();
         studioGroup.add(outsideGroup);
 
@@ -2551,9 +2508,8 @@ if (isMobileDevice) {
         const raycaster = new THREE.Raycaster();
         const mouseVec = new THREE.Vector2();
 
-        // Variables for touch look pad and aim pitch/yaw
-        let touchLookPitch = 0.35; // Raised upward from 0
-let touchLookYaw = 0;
+        let touchLookPitch = 0.35;
+        let touchLookYaw = 0;
         let activeLookTouchId = null;
         let lastTouchX = 0;
         let lastTouchY = 0;
@@ -2602,7 +2558,7 @@ let touchLookYaw = 0;
         };
         window.oncontextmenu = (e) => e.preventDefault();
 
-        // Mobile touch control bindings for D-Pad and Lookpad
+        // Touch listeners for mobile devices
         if (isMobileDevice) {
             const bindTouchHold = (elemId, keyName) => {
                 const el = document.getElementById(elemId);
@@ -2616,46 +2572,44 @@ let touchLookYaw = 0;
             bindTouchHold('btn-left', 'a');
             bindTouchHold('btn-right', 'd');
 
-            const lookpad = document.getElementById('mobile-lookpad');
-            if (lookpad) {
-                lookpad.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    if (e.targetTouches.length > 0 && activeLookTouchId === null) {
-                        const touch = e.targetTouches[0];
-                        activeLookTouchId = touch.identifier;
-                        lastTouchX = touch.clientX;
-                        lastTouchY = touch.clientY;
-                    }
-                }, { passive: false });
-
-                lookpad.addEventListener('touchmove', (e) => {
-                    e.preventDefault();
-                    for (let i = 0; i < e.targetTouches.length; i++) {
-                        const touch = e.targetTouches[i];
-                        if (touch.identifier === activeLookTouchId) {
-                            const dx = touch.clientX - lastTouchX;
-                            const dy = touch.clientY - lastTouchY;
+            window.addEventListener('touchstart', (e) => {
+                for (let i = 0; i < e.targetTouches.length; i++) {
+                    const touch = e.targetTouches[i];
+                    if (touch.clientX > 180 && touch.clientY < window.innerHeight - 140) {
+                        if (activeLookTouchId === null) {
+                            activeLookTouchId = touch.identifier;
                             lastTouchX = touch.clientX;
                             lastTouchY = touch.clientY;
-
-                            touchLookYaw -= dx * 0.008;
-                            touchLookPitch -= dy * 0.008;
-                            // Clamp pitch
-                            touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
                         }
                     }
-                }, { passive: false });
+                }
+            }, { passive: false });
 
-                const endTouchLook = (e) => {
-                    for (let i = 0; i < e.changedTouches.length; i++) {
-                        if (e.changedTouches[i].identifier === activeLookTouchId) {
-                            activeLookTouchId = null;
-                        }
+            window.addEventListener('touchmove', (e) => {
+                for (let i = 0; i < e.targetTouches.length; i++) {
+                    const touch = e.targetTouches[i];
+                    if (touch.identifier === activeLookTouchId) {
+                        const dx = touch.clientX - lastTouchX;
+                        const dy = touch.clientY - lastTouchY;
+                        lastTouchX = touch.clientX;
+                        lastTouchY = touch.clientY;
+
+                        touchLookYaw -= dx * 0.008;
+                        touchLookPitch -= dy * 0.008;
+                        touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
                     }
-                };
-                lookpad.addEventListener('touchend', endTouchLook);
-                lookpad.addEventListener('touchcancel', endTouchLook);
-            }
+                }
+            }, { passive: false });
+
+            const endTouchLook = (e) => {
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === activeLookTouchId) {
+                        activeLookTouchId = null;
+                    }
+                }
+            };
+            window.addEventListener('touchend', endTouchLook);
+            window.addEventListener('touchcancel', endTouchLook);
         }
 
         function handleInteractionKey() {
@@ -3633,8 +3587,8 @@ let touchLookYaw = 0;
                     });
                 }
 
-                inLiftX = (nextPos.x > -40.5 && nextPos.x < -29.5);
-                inLiftZ = (nextPos.z > -50.5 && nextPos.z < -39.5);
+                let inLiftX = (nextPos.x > -40.5 && nextPos.x < -29.5);
+                let inLiftZ = (nextPos.z > -50.5 && nextPos.z < -39.5);
                 let insideShaftFootprint = inLiftX && inLiftZ;
 
                 let liftDoorOpen = (elevatorState === "OPEN" || elevatorState === "OPENING") && (currentFloor === playerCurrentFloor);
@@ -4020,12 +3974,12 @@ let touchLookYaw = 0;
                 FeedSystemData.forEach((item, index) => {
                     let itemY = 130 + (index * 50);
                     bCtx.fillStyle = "#00f0ff";
-                    bStr = `[${item.id}]`;
+                    let bStr = `[${item.id}]`;
                     bCtx.fillText(bStr, 50, itemY);
                     bCtx.fillStyle = "#ffffff";
                     bCtx.fillText(item.label, 140, itemY);
                     let pulseState = (Math.sin(time * 10 + index) > 0);
-                    bCtx.fillStyle = item.status === "PROCESSING" && pulseState ? "#ff0055" : "#00f66";
+                    bCtx.fillStyle = item.status === "PROCESSING" && pulseState ? "#ff0055" : "#39ff14";
                     bCtx.textAlign = "right";
                     bCtx.fillText(item.status, 970, itemY);
                     bCtx.textAlign = "left";
@@ -4037,8 +3991,9 @@ let touchLookYaw = 0;
         }
 
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerWidth ? window.innerWidth : window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight; 
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
         renderer.render(scene, camera);
