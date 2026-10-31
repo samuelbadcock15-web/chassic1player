@@ -2516,7 +2516,6 @@
 
         function handleMainStudioScreenClick(uv) {
             if (studioPoweredDown) {
-                // If studio is powered down and player clicks main screen, restart power immediately
                 studioPoweredDown = false;
                 powerOffCountdown = 10.0;
                 showHostState = 'WAITING_FOR_HOST';
@@ -3201,7 +3200,7 @@
                 if (lockedOutTimer < 0) lockedOutTimer = 0;
             }
 
-// Check if player is away from the centre of the game show board when game is active & locked in
+            // Check if player is away from the centre of the game show board when game is active & locked in
             if (soloGameLockedIn && studioGameActive && !gameWon && !studioPoweredDown) {
                 // Centre of the game show board anchor point
                 let boardCentreWorldPos = new THREE.Vector3(-35.0, finalLandingY, studioCenterZ - 30.0);
@@ -3236,12 +3235,12 @@
                     if (playerAwayFromPodium) {
                         // Player returned to podium!
                         playerAwayFromPodium = false;
-                        lockedOutTimer = 30.0; // 30 seconds terminal lockout for running away
+                        // Removed the 30-second lockout override so returning player can resume immediately without being blocked!
 
                         let jokeText = RETURN_JOKES[returnJokeIndex];
                         returnJokeIndex = (returnJokeIndex + 1) % RETURN_JOKES.length;
 
-                        let returnSpeech = `Welcome back! ${jokeText} Note that your terminal is locked for 30 seconds for running away.`;
+                        let returnSpeech = `Welcome back! ${jokeText}`;
                         if ('speechSynthesis' in window) {
                             window.speechSynthesis.cancel();
                             window.speechSynthesis.speak(new SpeechSynthesisUtterance(returnSpeech));
