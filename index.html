@@ -315,6 +315,7 @@
 
         let triviaCountdownSeconds = 30.0;
         let triviaTimerActive = false;
+        let pendingQuestionTrigger = false;
 
         let isHopping = false;
         let hopProgress = 1.0;
@@ -1245,7 +1246,7 @@
 
                 qBoardCtx.fillStyle = '#00ff66';
                 qBoardCtx.font = '13px monospace';
-                qBoardCtx.fillText("All timers frozen until you step back inside!", 256, 260);
+                qBoardCtx.fillText("All speech & timers frozen until you step back!", 256, 260);
                 qBoardTex.needsUpdate = true;
                 return;
             }
@@ -2639,38 +2640,45 @@
 
                 setTimeout(() => {
                     if (playerAwayFromPodium || studioPoweredDown) return;
-                    showHostState = 'TRIVIA';
-                    answerLockedIn = false;
-                    triviaTimerActive = false;
-                    triviaCountdownSeconds = 30.0;
-                    
-                    const currentQ = getCurrentTriviaQuestionObject();
-                    let hostQuestionSpeech = `Now visiting ${visitedCountryName}. Here is your question: ${currentQ.q}. You have 30 seconds to answer!`;
-                    
-                    if ('speechSynthesis' in window) {
-                        window.speechSynthesis.cancel();
-                        let utter = new SpeechSynthesisUtterance(hostQuestionSpeech);
-                        utter.onend = () => {
-                            if (!playerAwayFromPodium && !studioPoweredDown) {
-                                triviaTimerActive = true;
-                                renderStageQuestionBoard();
-                                renderPodium1Screen();
-                            }
-                        };
-                        window.speechSynthesis.speak(utter);
-                    } else {
-                        setTimeout(() => {
-                            if (!playerAwayFromPodium && !studioPoweredDown) {
-                                triviaTimerActive = true;
-                            }
-                        }, 4000);
-                    }
-
-                    renderStageQuestionBoard();
-                    renderPodium1Screen();
-                    document.getElementById('ctrl-status-msg').textContent = "Listen to host, then select your answer!";
-                }, 3500);
+                    startTriviaQuestionSequence();
+                }, 2500);
             }, 2500);
+        }
+
+        function startTriviaQuestionSequence() {
+            showHostState = 'TRIVIA';
+            answerLockedIn = false;
+            triviaTimerActive = false;
+            pendingQuestionTrigger = true;
+            triviaCountdownSeconds = 30.0;
+            
+            const currentQ = getCurrentTriviaQuestionObject();
+            let hostQuestionSpeech = `Now visiting ${visitedCountryName}. Here is your question: ${currentQ.q}. You have 30 seconds to answer!`;
+            
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                let utter = new SpeechSynthesisUtterance(hostQuestionSpeech);
+                utter.onend = () => {
+                    if (!playerAwayFromPodium && !studioPoweredDown) {
+                        pendingQuestionTrigger = false;
+                        triviaTimerActive = true;
+                        renderStageQuestionBoard();
+                        renderPodium1Screen();
+                    }
+                };
+                window.speechSynthesis.speak(utter);
+            } else {
+                setTimeout(() => {
+                    if (!playerAwayFromPodium && !studioPoweredDown) {
+                        pendingQuestionTrigger = false;
+                        triviaTimerActive = true;
+                    }
+                }, 4000);
+            }
+
+            renderStageQuestionBoard();
+            renderPodium1Screen();
+            document.getElementById('ctrl-status-msg').textContent = "Listen to host, then select your answer!";
         }
 
         function selectTriviaAnswer(aIdx) {
@@ -2726,6 +2734,7 @@
             showCorrectAnswerReveal = false;
             answerLockedIn = false;
             triviaTimerActive = false;
+            pendingQuestionTrigger = false;
 
             const rollBtn = document.getElementById('btn-ctrl-roll');
             rollBtn.disabled = false;
@@ -3216,9 +3225,11 @@
                     if (!playerAwayFromPodium) {
                         playerAwayFromPodium = true;
                         awayCountdownTimer = 10.0;
-                        let awaySpeech = "Game paused! Please return to the centre of the game show board.";
                         if ('speechSynthesis' in window) {
                             window.speechSynthesis.cancel();
+                        }
+                        let awaySpeech = "Game paused! Please return to the centre of the game show board.";
+                        if ('speechSynthesis' in window) {
                             window.speechSynthesis.speak(new SpeechSynthesisUtterance(awaySpeech));
                         }
                     } else {
@@ -3227,9 +3238,11 @@
                             studioPoweredDown = true;
                             playerAwayFromPodium = false;
                             powerOffCountdown = 10.0;
-                            let powerDownSpeech = "Would anyone else like to take his place? No one? Studio powers power down!";
                             if ('speechSynthesis' in window) {
                                 window.speechSynthesis.cancel();
+                            }
+                            let powerDownSpeech = "Would anyone else like to take his place? No one? Studio powers power down!";
+                            if ('speechSynthesis' in window) {
                                 window.speechSynthesis.speak(new SpeechSynthesisUtterance(powerDownSpeech));
                             }
                         }
@@ -3237,6 +3250,11 @@
                 } else {
                     if (playerAwayFromPodium) {
                         playerAwayFromPodium = false;
+
+                        // If player returns while question was pending or timer active, ensure speech queue doesn't stay dead
+                        if (pendingQuestionTrigger) {
+                            startTriviaQuestionSequence();
+                        }
 
                         let jokeText = RETURN_JOKES[returnJokeIndex];
                         returnJokeIndex = (returnJokeIndex + 1) % RETURN_JOKES.length;
@@ -3776,7 +3794,8 @@
                 FeedSystemData.forEach((item, index) => {
                     let itemY = 130 + (index * 50);
                     bCtx.fillStyle = "#00f0ff";
-                    bCtx.fillText(`[${item.id}]`, 50, itemY);
+                    bStr = `[${item.id}]`;
+                    bCtx.fillText(bStr, 50, itemY);
                     bCtx.fillStyle = "#ffffff";
                     bCtx.fillText(item.label, 140, itemY);
                     let pulseState = (Math.sin(time * 10 + index) > 0);
