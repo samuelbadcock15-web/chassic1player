@@ -205,7 +205,7 @@
         }
         .ctrl-btn:hover { background: #00a8ff; }
         .ctrl-btn:disabled { background: #555; color: #aaa; cursor: not-allowed; }
-        
+
         #ctrl-chat-box {
             margin-top: 8px;
             background: #080313;
@@ -251,7 +251,7 @@
 
     <div id="startScreen">
         <div class="start-title">CHASSIS WORLD : KNIGHT VR</div>
-        <div class="start-subtitle">BASEMENT, GATES OF HECK & GOODY TONIGHT SHOW STUDIO (1-PLAYER INTEGRATED)</div>
+        <div class="start-subtitle">BASEMENT, GATES OF HECK & GOODY TONIGHT SHOW STUDIO (1-PLAYER INTEGRATED) + GIANT OUTSIDE CUSTODIAN</div>
         <button class="start-btn" id="startBtn">START MISSION</button>
     </div>
 
@@ -352,7 +352,7 @@
                 selectedGameMode = 'solo';
                 studioGameActive = true;
                 updateStudioLighting(true);
-                
+
                 document.getElementById('contestant-controller-overlay').style.display = 'block';
 
                 let speechText = "Welcome to the Goody Tonight Show! Click Podium 1, the main studio screen, or use your solo terminal to start.";
@@ -729,7 +729,7 @@
                     ["🛡️", "🔥", "7️⃣"]
                 ]
             };
-           
+
             renderWallReelCanvas(wallObj, 0);
             reelWalls.push(wallObj);
             return wallObj;
@@ -1020,6 +1020,52 @@
             studioSouthWall
         );
 
+        // ==========================================
+        // GIANT OUTSIDE CUSTODIAN & OUTSIDE MACHINES
+        // ==========================================
+        const outsideGroup = new THREE.Group();
+        studioGroup.add(outsideGroup);
+
+        // Giant Cautious/Curious Custodian ("The Watcher outside the Studio")
+        const giantGroup = new THREE.Group();
+        giantGroup.position.set(-35.0 + (studioWidth / 2) - 12.0, finalLandingY, studioCenterZ + 45.0);
+        giantGroup.scale.set(3.5, 3.5, 3.5); // Giant size compared to player
+        
+        const overallsMat = new THREE.MeshStandardMaterial({ color: '#1b365d', roughness: 0.7 });
+        const shirtMat = new THREE.MeshStandardMaterial({ color: '#e67e22', roughness: 0.6 });
+        const skinMat = new THREE.MeshStandardMaterial({ color: '#f5cd79', roughness: 0.5 });
+        const bootsMat = new THREE.MeshStandardMaterial({ color: '#2d3436', roughness: 0.8 });
+
+        const giantBody = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.5, 1.0), overallsMat);
+        giantBody.position.y = 2.2;
+        const giantHead = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.1, 1.1), skinMat);
+        giantHead.position.y = 4.0;
+        
+        // Glowing goggles / eyes on the giant
+        const goggleMat = new THREE.MeshBasicMaterial({ color: '#00f0ff' });
+        const goggleL = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.2), goggleMat);
+        goggleL.position.set(-0.25, 4.1, 0.6);
+        const goggleR = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.2), goggleMat);
+        goggleR.position.set(0.25, 4.1, 0.6);
+
+        // Giant crank lever / machine arm he is operating outside
+        const giantArmR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.8, 0.4), shirtMat);
+        giantArmR.position.set(1.1, 2.4, 0.6);
+        giantArmR.rotation.x = -Math.PI / 4;
+
+        giantGroup.add(giantBody, giantHead, goggleL, goggleR, giantArmR);
+        outsideGroup.add(giantGroup);
+
+        // Giant Spinning Arcade Machines outside the studio windows
+        const giantMachineGeo = new THREE.BoxGeometry(6.0, 14.0, 6.0);
+        const giantMachineMat = new THREE.MeshStandardMaterial({ color: '#2b1055', roughness: 0.4, metalness: 0.6 });
+        
+        for (let i = 0; i < 3; i++) {
+            const gMach = new THREE.Mesh(giantMachineGeo, giantMachineMat);
+            gMach.position.set(-35.0 + (i * 30.0) - 30.0, finalLandingY + 7.0, studioCenterZ + 65.0);
+            outsideGroup.add(gMach);
+        }
+
         const goodyStageRoot = new THREE.Group();
         goodyStageRoot.position.set(-35.0, finalLandingY, studioCenterZ - 30.0);
         studioGroup.add(goodyStageRoot);
@@ -1063,7 +1109,7 @@
         goodyStageRoot.add(feltCarpet);
 
         let currentTriviaIndex = 0;
-        
+
         const COUNTRY_QUESTIONS = {
             "UK": [
                 { q: "In the UK, before the 2019 stake reduction, what was the maximum stake per spin on a Fixed-Odds-Betting-Terminal?", options: ["A) £2", "B) £50", "C) £100", "D) £500"], correct: 2, lesson: "FOBT Reform: The maximum stake on UK FOBTs was successfully reduced from £100 to £2 in 2019." },
@@ -1158,11 +1204,11 @@
             sClockCtx.strokeStyle = '#ff0055';
             sClockCtx.lineWidth = 4;
             sClockCtx.strokeRect(2, 2, 252, 92);
-            
+
             let minutes = Math.floor(showClockSeconds / 60);
             let seconds = Math.floor(showClockSeconds % 60);
             let timeStr = (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-            
+
             sClockCtx.fillStyle = '#ff0055';
             sClockCtx.font = 'bold 13px monospace';
             sClockCtx.textAlign = 'center';
@@ -1275,7 +1321,7 @@
                 qBoardCtx.font = 'bold 18px monospace';
                 qBoardCtx.textAlign = 'center';
                 qBoardCtx.fillText("CONTESTANT 1: ROLL FOR YOUR NEXT DESTINATION!", 256, 75);
-                
+
                 qBoardCtx.fillStyle = '#ff3366';
                 qBoardCtx.font = 'bold 16px monospace';
                 qBoardCtx.fillText(`YOU HAVE ${Math.ceil(rollCountdownSeconds)} SECONDS TO ROLL!`, 256, 115);
@@ -1317,7 +1363,7 @@
 
                 currentQ.options.forEach((opt, idx) => {
                     let optY = 85 + (idx * 46);
-                    
+
                     if (showCorrectAnswerReveal && idx === currentQ.correct) {
                         qBoardCtx.fillStyle = '#00b894'; 
                     } else if (playerSelectedAnswer === idx) {
@@ -1431,7 +1477,7 @@
                 ansLabels.forEach((ansLbl, aIdx) => {
                     let ax = 18 + (aIdx * 56);
                     let isAnsSelected = (playerSelectedAnswer === aIdx);
-                    
+
                     p1Ctx.fillStyle = isAnsSelected ? '#0984e3' : (!triviaTimerActive ? '#1b1428' : (answerLockedIn ? '#110822' : '#220f3d'));
                     p1Ctx.strokeStyle = !triviaTimerActive ? '#444' : '#00f0ff';
                     p1Ctx.lineWidth = 2;
@@ -1535,7 +1581,7 @@
 
         const totalTiles = 31;
         const boardTiles = [];
-        
+
         const extendedCountriesList = [];
         extendedCountriesList.push({ country: "Start Zone", poolKey: "Start" });
         for (let i = 1; i < totalTiles - 1; i++) {
@@ -1732,7 +1778,7 @@
             ctx.font = 'bold 16px monospace';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            
+
             if (wall.isUnlocked) {
                 ctx.fillText(`GATE UNLOCKED! [${wall.lastResult ? wall.lastResult.matchType : 'WIN'}]`, 256, 37);
             } else {
@@ -2576,7 +2622,7 @@
                 showHostState = 'DICE_ROLL';
                 diceFlickering = true;
                 rollCountdownSeconds = 10.0;
-                
+
                 const rollBtn = document.getElementById('btn-ctrl-roll');
                 rollBtn.disabled = false;
                 rollBtn.classList.add('active-roll');
@@ -2598,7 +2644,7 @@
             diceFlickering = false;
             diceVal1 = Math.floor(Math.random() * 6) + 1;
             playElevatorPing();
-            
+
             const rollBtn = document.getElementById('btn-ctrl-roll');
             rollBtn.disabled = true;
             rollBtn.textContent = `ROLLED A ${diceVal1}!`;
@@ -2620,7 +2666,7 @@
 
                 let targetTile = boardTiles[newTargetIndex];
                 visitedCountryName = targetTile.userData.country;
-                
+
                 if (newTargetIndex === boardTiles.length - 1) {
                     currentTriviaCountryIndex = COUNTRIES_LIST.length - 1;
                 } else if (newTargetIndex === 0) {
@@ -2651,10 +2697,10 @@
             triviaTimerActive = false;
             pendingQuestionTrigger = true;
             triviaCountdownSeconds = 30.0;
-            
+
             const currentQ = getCurrentTriviaQuestionObject();
             let hostQuestionSpeech = `Now visiting ${visitedCountryName}. Here is your question: ${currentQ.q}. You have 30 seconds to answer!`;
-            
+
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 let utter = new SpeechSynthesisUtterance(hostQuestionSpeech);
@@ -2777,7 +2823,7 @@
             const txt = ctrlChatInput.value.trim();
             if (!txt) return;
             addCtrlChatMessage("Alex", txt, true);
-            
+
             let lower = txt.toLowerCase();
             if (lower.includes('roll') || lower.includes('dice')) {
                 if (showHostState === 'DICE_ROLL' && diceFlickering) {
@@ -2789,7 +2835,7 @@
                     selectTriviaAnswer(mapIdx[lower]);
                 }
             }
-            
+
             ctrlChatInput.value = '';
         });
         ctrlChatInput.addEventListener('keydown', (e) => {
@@ -3215,7 +3261,6 @@
                 if (lockedOutTimer < 0) lockedOutTimer = 0;
             }
 
-            // Check if player is away from the centre of the game show board when game is active & locked in
             if (soloGameLockedIn && studioGameActive && !gameWon && !studioPoweredDown) {
                 let boardCentreWorldPos = new THREE.Vector3(-35.0, finalLandingY, studioCenterZ - 30.0);
                 let playerWorldPos = knight.group.position;
@@ -3251,7 +3296,6 @@
                     if (playerAwayFromPodium) {
                         playerAwayFromPodium = false;
 
-                        // If player returns while question was pending or timer active, ensure speech queue doesn't stay dead
                         if (pendingQuestionTrigger) {
                             startTriviaQuestionSequence();
                         }
@@ -3283,7 +3327,6 @@
                 }
             }
 
-            // Global Pause for Timers when player is away from podium
             if (!playerAwayFromPodium && !studioPoweredDown) {
                 if (soloGameLockedIn && showClockSeconds > 0) {
                     showClockSeconds -= delta;
@@ -3812,7 +3855,7 @@
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setSize(window.innerWidth, window.innerWidth ? window.innerWidth : window.innerHeight);
         });
 
         renderer.render(scene, camera);
