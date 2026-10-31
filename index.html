@@ -162,7 +162,6 @@
             box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
         }
 
-        /* EMBEDDED CONTESTANT 1 CONTROLLER OVERLAY */
         #contestant-controller-overlay {
             position: absolute;
             top: 15px;
@@ -258,7 +257,6 @@
 
     <div id="info-btn" title="Toggle Instructions">i</div>
 
-    <!-- EMBEDDED CONTESTANT 1 CONTROLLER PANEL -->
     <div id="contestant-controller-overlay">
         <div class="controller-header">
             <span>PODIUM 1: SOLO TERMINAL</span>
@@ -314,7 +312,6 @@
         let visitedCountryName = "Start Zone";
         let counterPositionIndex = 0;
         let gameWon = false;
-        let gameTimerInterval = null;
 
         let triviaCountdownSeconds = 30.0;
         let triviaTimerActive = false;
@@ -325,7 +322,6 @@
         let hopStartIndex = 0;
         let hopTargetIndex = 0;
 
-        // Podiums & Away tracking rules
         let playerAwayFromPodium = false;
         let awayCountdownTimer = 0.0;
         let powerOffCountdown = 10.0;
@@ -1240,16 +1236,16 @@
                 qBoardCtx.fillStyle = '#ff3366';
                 qBoardCtx.font = 'bold 22px monospace';
                 qBoardCtx.textAlign = 'center';
-                qBoardCtx.fillText("THE CONTESTANT NEEDS TO", 256, 120);
-                qBoardCtx.fillText("RETURN TO THE PODIUM PLEASE!", 256, 155);
+                qBoardCtx.fillText("GAME PAUSED: RETURN TO", 256, 120);
+                qBoardCtx.fillText("THE PODIUM PLEASE!", 256, 155);
 
                 qBoardCtx.fillStyle = '#ffda66';
                 qBoardCtx.font = 'bold 16px monospace';
-                qBoardCtx.fillText(`⏱ WAITING FOR RETURN: ${Math.ceil(awayCountdownTimer)}s`, 256, 210);
+                qBoardCtx.fillText(`⏱ AWAY TIMEOUT: ${Math.ceil(awayCountdownTimer)}s`, 256, 210);
 
                 qBoardCtx.fillStyle = '#00ff66';
                 qBoardCtx.font = '13px monospace';
-                qBoardCtx.fillText("If no one steps in within 10s, power goes down!", 256, 260);
+                qBoardCtx.fillText("All timers frozen until you step back inside!", 256, 260);
                 qBoardTex.needsUpdate = true;
                 return;
             }
@@ -1405,7 +1401,7 @@
             } else if (playerAwayFromPodium) {
                 p1Ctx.fillStyle = '#ff3366';
                 p1Ctx.font = 'bold 13px monospace';
-                p1Ctx.fillText("RETURN TO PODIUM!", 128, 92);
+                p1Ctx.fillText("GAME PAUSED", 128, 92);
             } else if (lockedOutTimer > 0) {
                 p1Ctx.fillStyle = '#ff7675';
                 p1Ctx.font = 'bold 12px monospace';
@@ -1545,7 +1541,7 @@
             let countryObj = COUNTRIES_LIST[(i - 1) % COUNTRIES_LIST.length];
             extendedCountriesList.push({ country: countryObj.name, poolKey: countryObj.poolKey });
         }
-        extendedCountriesList.push({ country: "United Kingdom", poolKey: "UK" }); // Tile 31: United Kingdom (Victory)
+        extendedCountriesList.push({ country: "United Kingdom", poolKey: "UK" });
 
         const startCanvas = document.createElement('canvas'); startCanvas.width = 128; startCanvas.height = 128;
         const stCtx = startCanvas.getContext('2d');
@@ -2575,6 +2571,7 @@
             renderPodium1Screen();
 
             setTimeout(() => {
+                if (playerAwayFromPodium || studioPoweredDown) return;
                 showHostState = 'DICE_ROLL';
                 diceFlickering = true;
                 rollCountdownSeconds = 10.0;
@@ -2615,6 +2612,7 @@
             }
 
             setTimeout(() => {
+                if (playerAwayFromPodium || studioPoweredDown) return;
                 showHostState = 'VISITING_COUNTRY';
                 let newTargetIndex = Math.min(counterPositionIndex + diceVal1, boardTiles.length - 1);
                 triggerPawnHop(newTargetIndex);
@@ -2640,6 +2638,7 @@
                 if (gameWon) return;
 
                 setTimeout(() => {
+                    if (playerAwayFromPodium || studioPoweredDown) return;
                     showHostState = 'TRIVIA';
                     answerLockedIn = false;
                     triviaTimerActive = false;
@@ -2652,14 +2651,18 @@
                         window.speechSynthesis.cancel();
                         let utter = new SpeechSynthesisUtterance(hostQuestionSpeech);
                         utter.onend = () => {
-                            triviaTimerActive = true;
-                            renderStageQuestionBoard();
-                            renderPodium1Screen();
+                            if (!playerAwayFromPodium && !studioPoweredDown) {
+                                triviaTimerActive = true;
+                                renderStageQuestionBoard();
+                                renderPodium1Screen();
+                            }
                         };
                         window.speechSynthesis.speak(utter);
                     } else {
                         setTimeout(() => {
-                            triviaTimerActive = true;
+                            if (!playerAwayFromPodium && !studioPoweredDown) {
+                                triviaTimerActive = true;
+                            }
                         }, 4000);
                     }
 
@@ -2681,6 +2684,7 @@
             renderPodium1Screen();
 
             setTimeout(() => {
+                if (playerAwayFromPodium || studioPoweredDown) return;
                 showCorrectAnswerReveal = true;
                 if (playerSelectedAnswer === currentQ.correct) {
                     triviaAnswerStatus = "CORRECT!";
@@ -2704,7 +2708,9 @@
 
                 if (!gameWon) {
                     setTimeout(() => {
-                        nextTriviaQuestion();
+                        if (!playerAwayFromPodium && !studioPoweredDown) {
+                            nextTriviaQuestion();
+                        }
                     }, 12000);
                 }
             }, 1000);
@@ -3202,17 +3208,15 @@
 
             // Check if player is away from the centre of the game show board when game is active & locked in
             if (soloGameLockedIn && studioGameActive && !gameWon && !studioPoweredDown) {
-                // Centre of the game show board anchor point
                 let boardCentreWorldPos = new THREE.Vector3(-35.0, finalLandingY, studioCenterZ - 30.0);
                 let playerWorldPos = knight.group.position;
                 let distFromCentre = playerWorldPos.distanceTo(boardCentreWorldPos);
 
-                // Increased radius threshold (e.g., 24.0 units from the centre)
                 if (distFromCentre > 24.0) {
                     if (!playerAwayFromPodium) {
                         playerAwayFromPodium = true;
                         awayCountdownTimer = 10.0;
-                        let awaySpeech = "The contestant needs to return to the centre of the game show board please!";
+                        let awaySpeech = "Game paused! Please return to the centre of the game show board.";
                         if ('speechSynthesis' in window) {
                             window.speechSynthesis.cancel();
                             window.speechSynthesis.speak(new SpeechSynthesisUtterance(awaySpeech));
@@ -3220,7 +3224,6 @@
                     } else {
                         awayCountdownTimer -= delta;
                         if (awayCountdownTimer <= 0) {
-                            // Time's up! Check replacement (none for now) -> power down
                             studioPoweredDown = true;
                             playerAwayFromPodium = false;
                             powerOffCountdown = 10.0;
@@ -3233,14 +3236,12 @@
                     }
                 } else {
                     if (playerAwayFromPodium) {
-                        // Player returned to podium!
                         playerAwayFromPodium = false;
-                        // Removed the 30-second lockout override so returning player can resume immediately without being blocked!
 
                         let jokeText = RETURN_JOKES[returnJokeIndex];
                         returnJokeIndex = (returnJokeIndex + 1) % RETURN_JOKES.length;
 
-                        let returnSpeech = `Welcome back! ${jokeText}`;
+                        let returnSpeech = `Welcome back! Game resumed. ${jokeText}`;
                         if ('speechSynthesis' in window) {
                             window.speechSynthesis.cancel();
                             window.speechSynthesis.speak(new SpeechSynthesisUtterance(returnSpeech));
@@ -3264,30 +3265,33 @@
                 }
             }
 
-            if (soloGameLockedIn && showClockSeconds > 0 && !playerAwayFromPodium && !studioPoweredDown) {
-                showClockSeconds -= delta;
-                if (showClockSeconds <= 0) {
-                    showClockSeconds = 0;
-                    soloGameLockedIn = false;
+            // Global Pause for Timers when player is away from podium
+            if (!playerAwayFromPodium && !studioPoweredDown) {
+                if (soloGameLockedIn && showClockSeconds > 0) {
+                    showClockSeconds -= delta;
+                    if (showClockSeconds <= 0) {
+                        showClockSeconds = 0;
+                        soloGameLockedIn = false;
+                    }
+                    renderShowClockTexture();
                 }
-                renderShowClockTexture();
-            }
 
-            if (showHostState === 'DICE_ROLL' && rollCountdownSeconds > 0 && !playerAwayFromPodium && !studioPoweredDown) {
-                rollCountdownSeconds -= delta;
-                if (rollCountdownSeconds <= 0) {
-                    rollCountdownSeconds = 0;
-                    if (diceFlickering) {
-                        triggerDiceRollAction();
+                if (showHostState === 'DICE_ROLL' && rollCountdownSeconds > 0) {
+                    rollCountdownSeconds -= delta;
+                    if (rollCountdownSeconds <= 0) {
+                        rollCountdownSeconds = 0;
+                        if (diceFlickering) {
+                            triggerDiceRollAction();
+                        }
                     }
                 }
-            }
 
-            if (showHostState === 'TRIVIA' && triviaTimerActive && !answerLockedIn && triviaCountdownSeconds > 0 && !playerAwayFromPodium && !studioPoweredDown) {
-                triviaCountdownSeconds -= delta;
-                if (triviaCountdownSeconds <= 0) {
-                    triviaCountdownSeconds = 0;
-                    selectTriviaAnswer(99); 
+                if (showHostState === 'TRIVIA' && triviaTimerActive && !answerLockedIn && triviaCountdownSeconds > 0) {
+                    triviaCountdownSeconds -= delta;
+                    if (triviaCountdownSeconds <= 0) {
+                        triviaCountdownSeconds = 0;
+                        selectTriviaAnswer(99); 
+                    }
                 }
             }
 
@@ -3776,7 +3780,7 @@
                     bCtx.fillStyle = "#ffffff";
                     bCtx.fillText(item.label, 140, itemY);
                     let pulseState = (Math.sin(time * 10 + index) > 0);
-                    bCtx.fillStyle = item.status === "PROCESSING" && pulseState ? "#ff0055" : "#00ff66";
+                    bCtx.fillStyle = item.status === "PROCESSING" && pulseState ? "#ff0055" : "#00f66";
                     bCtx.textAlign = "right";
                     bCtx.fillText(item.status, 970, itemY);
                     bCtx.textAlign = "left";
