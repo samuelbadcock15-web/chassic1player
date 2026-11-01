@@ -2608,13 +2608,16 @@
                         lastTouchX = touch.clientX;
                         lastTouchY = touch.clientY;
 
-                        // Head look / aim with strict limits
-// Head look / aim with custom limits
-touchLookYaw -= dx * 0.008;
-touchLookYaw = Math.max(2, Math.min(2, touchLookYaw)); // Wider Left / Right
+                        // Head look / aim
+                        const MAX_PITCH = 0.6;   // Max look up/down (~35 degrees)
+const MAX_YAW = 1.0;     // Max look left/right (~57 degrees)
 
+// For mouse/touch look calculations:
 touchLookPitch -= dy * 0.008;
-touchLookPitch = Math.max(-0.2, Math.min(0.2, touchLookPitch)); // Tighter Down / Up
+touchLookPitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, touchLookPitch));
+
+touchLookYaw -= dx * 0.008;
+touchLookYaw = Math.max(-MAX_YAW, Math.min(MAX_YAW, touchLookYaw));
 
                         // Swipe left/right auto-steer integration with D-pad highlighting
                         const btnLeftEl = document.getElementById('btn-left');
@@ -3208,11 +3211,11 @@ touchLookPitch = Math.max(-0.2, Math.min(0.2, touchLookPitch)); // Tighter Down 
             let targetHeadPitch = (-normY * 0.75) + touchLookPitch;
 let targetHeadYaw = (-normX * 0.95) + touchLookYaw;
 
-// ---> ADD THESE LIMITS HERE <---
-const LIMIT_UP = 0.2;     // Max head tilt UP
-const LIMIT_DOWN = -0.2;  // Max head tilt DOWN
-const LIMIT_LEFT = 2;   // Max head turn LEFT
-const LIMIT_RIGHT = -2; // Max head turn RIGHT
+// STRICT HEAD LIMITS (adjust numbers to taste)
+const LIMIT_UP = 0.4;     // Maximum head tilt UP
+const LIMIT_DOWN = -0.5;  // Maximum head tilt DOWN
+const LIMIT_LEFT = 0.8;   // Maximum head turn LEFT
+const LIMIT_RIGHT = -0.8; // Maximum head turn RIGHT
 
 targetHeadPitch = Math.max(LIMIT_DOWN, Math.min(LIMIT_UP, targetHeadPitch));
 targetHeadYaw = Math.max(LIMIT_RIGHT, Math.min(LIMIT_LEFT, targetHeadYaw));
