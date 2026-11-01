@@ -245,6 +245,7 @@
             color: #111;
         }
 
+        /* Enhanced Mobile Command Deck (Raised Higher) */
         #mobile-controls {
             position: absolute;
             top: 0;
@@ -255,44 +256,79 @@
             z-index: 120;
             display: none;
         }
-        #dpad-container {
+        #mobile-deck-console {
             position: absolute;
-            bottom: 30px;
-            left: 30px;
-            width: 140px;
-            height: 140px;
+            bottom: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 650px;
+            background: rgba(14, 10, 24, 0.90);
+            border: 2px solid #ff0055;
+            border-radius: 14px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             pointer-events: auto;
+            box-shadow: 0 0 25px rgba(255, 0, 85, 0.4);
+            backdrop-filter: blur(6px);
+        }
+
+        /* D-Pad on Console Left */
+        #dpad-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
         }
         .dpad-btn {
             position: absolute;
-            background: rgba(14, 10, 24, 0.85);
-            border: 2px solid #ff0055;
+            background: rgba(26, 18, 48, 0.9);
+            border: 2px solid #00f0ff;
             color: #00f0ff;
-            font-size: 22px;
+            font-size: 18px;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(255,0,85,0.3);
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
         }
         .dpad-btn:active {
-            background: #ff0055;
-            color: #fff;
+            background: #00f0ff;
+            color: #05030a;
         }
-        #btn-up { top: 0; left: 45px; width: 50px; height: 45px; }
-        #btn-down { bottom: 0; left: 45px; width: 50px; height: 45px; }
-        #btn-left { top: 45px; left: 0; width: 45px; height: 50px; }
-        #btn-right { top: 45px; right: 0; width: 45px; height: 50px; }
+        #btn-up { top: 0; left: 38px; width: 44px; height: 38px; }
+        #btn-down { bottom: 0; left: 38px; width: 44px; height: 38px; }
+        #btn-left { top: 38px; left: 0; width: 38px; height: 44px; }
+        #btn-right { top: 38px; right: 0; width: 38px; height: 44px; }
 
+        /* Centralized 3rd Look Pad (Torch Head & View) */
+        #mobile-torch-lookpad {
+            width: 120px;
+            height: 100px;
+            background: rgba(26, 18, 48, 0.85);
+            border: 2px solid #39ff14;
+            border-radius: 8px;
+            color: #39ff14;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+            padding: 4px;
+            line-height: 1.3;
+        }
+
+        /* Right Look Pad on Console */
         #mobile-lookpad {
-            position: absolute;
-            bottom: 30px;
-            right: 20px;
-            width: 140px;
-            height: 120px;
-            background: rgba(14, 10, 24, 0.85);
+            width: 130px;
+            height: 100px;
+            background: rgba(26, 18, 48, 0.85);
             border: 2px solid #ff0055;
             border-radius: 8px;
             color: #00f0ff;
@@ -300,14 +336,51 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             text-align: center;
-            pointer-events: auto;
             box-shadow: 0 0 10px rgba(255,0,85,0.3);
-            padding: 6px;
+            padding: 4px;
             line-height: 1.3;
         }
+
+        /* Top Left & Right Dedicated Combat Overlay Zones */
+        #mobile-combat-overlay {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 125;
+        }
+        .combat-zone-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            pointer-events: auto;
+        }
+        .combat-action-btn {
+            background: rgba(14, 10, 24, 0.85);
+            border: 2px solid #00f0ff;
+            color: #00f0ff;
+            padding: 8px 12px;
+            font-size: 11px;
+            font-family: monospace;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+            text-transform: uppercase;
+            transition: all 0.1s ease;
+        }
+        .combat-action-btn:active, .combat-action-btn:hover {
+            background: #00f0ff;
+            color: #05030a;
+        }
+        .shield-btn { border-color: #39ff14; color: #39ff14; box-shadow: 0 0 10px rgba(57, 255, 20, 0.2); }
+        .shield-btn:active, .shield-btn:hover { background: #39ff14; color: #05030a; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -322,15 +395,36 @@
     <div id="info-btn" title="Toggle Instructions">i</div>
 
     <div id="mobile-controls">
-        <div id="dpad-container">
-            <div class="dpad-btn" id="btn-up">▲</div>
-            <div class="dpad-btn" id="btn-down">▼</div>
-            <div class="dpad-btn" id="btn-left">◀</div>
-            <div class="dpad-btn" id="btn-right">▶</div>
+        <!-- Top left and right combat action panels -->
+        <div id="mobile-combat-overlay">
+            <div class="combat-zone-group">
+                <button class="combat-action-btn shield-btn" id="btn-shield-high">🛡️ High Shield Bash</button>
+                <button class="combat-action-btn shield-btn" id="btn-shield-mid">🛡️ Mid Shield Bash</button>
+                <button class="combat-action-btn shield-btn" id="btn-shield-low">🛡️ Low Shield Bash</button>
+            </div>
+            <div class="combat-zone-group">
+                <button class="combat-action-btn" id="btn-sword-high">⚔️ Top Right Cleave</button>
+                <button class="combat-action-btn" id="btn-sword-mid">⚔️ Mid Right Slash</button>
+                <button class="combat-action-btn" id="btn-sword-low">⚔️ Low Right Slash</button>
+            </div>
         </div>
-        <div id="mobile-lookpad">
-            <div>👆 WORLD LOOK PAD</div>
-            <div style="font-size:9px; color:#ffda66; margin-top:2px;">Swipe to rotate camera/world view</div>
+
+        <!-- Raised Bottom Command Console Deck -->
+        <div id="mobile-deck-console">
+            <div id="dpad-container">
+                <div class="dpad-btn" id="btn-up">▲</div>
+                <div class="dpad-btn" id="btn-down">▼</div>
+                <div class="dpad-btn" id="btn-left">◀</div>
+                <div class="dpad-btn" id="btn-right">▶</div>
+            </div>
+            <div id="mobile-torch-lookpad">
+                <div>🔦 TORCH HEAD</div>
+                <div style="font-size:8px; color:#39ff14; margin-top:2px;">Swipe to aim helmet & torch</div>
+            </div>
+            <div id="mobile-lookpad">
+                <div>👆 WORLD LOOK</div>
+                <div style="font-size:8px; color:#ffda66; margin-top:2px;">Swipe to rotate camera view</div>
+            </div>
         </div>
     </div>
 
@@ -362,9 +456,9 @@
         • <b>A / D</b>: Steer / Rotate Knight<br>
         • <b>F</b>: Toggle Head Mounted Torch 🔦<br>
         • <b>E</b>: Call Lift<br>
-        • <b>Look Pad (Bottom Right)</b>: Rotate World View / Camera Angle<br>
-        • <b>Mouse / Screen Drag</b>: Turn Knight's Head & Torso<br>
-        • <b>Click / Tap</b>: Slash / Strike / Spin Portal Reels / Click Podium & Studio Touch Screens & Trivia Answers<br>
+        • <b>Torch Head Pad (Center)</b>: Aim Knight's Helmet & Spotlight<br>
+        • <b>World Look Pad (Right)</b>: Rotate Camera / World View<br>
+        • <b>Top Combat Buttons</b>: Dedicated Shield Bashes & Sword Slashes<br>
     </div>
 
     <div id="speedometer">
@@ -1192,62 +1286,62 @@
 
         const COUNTRY_QUESTIONS = {
             "UK": [
-                { q: "In the UK, before the 2019 stake reduction, what was the maximum stake per spin on a Fixed-Odds-Betting-Terminal?", options: ["A) £2", "B) £50", "C) £100", "D) £500"], correct: 2, lesson: "FOBT Reform: The maximum stake on UK FOBTs was successfully reduced from £100 to £2 in 2019." },
-                { q: "In the UK, before the 2019 stake reduction, what was the maximum amount a person could stake every 20 seconds on a Fixed-Odds-Betting-Terminal?", options: ["A) £2 every 20 seconds", "B) £50 every 20 seconds", "C) £100 every 20 seconds", "D) £500 every 20 seconds"], correct: 2, lesson: "High-Speed Play: Players could previously risk up to £100 every 20 seconds on electronic casino games in betting shops." },
-                { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Adult Gaming Centres (Arcades)?", options: ["A) Bingo Association", "B) SENSE", "C) Bacta", "D) Moses"], correct: 2, lesson: "Land-Based Exclusions: Bacta operates the self-exclusion scheme for arcades and low-stake gaming machine premises." },
-                { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Casinos?", options: ["A) Bacta", "B) SENSE", "C) Moses", "D) Bingo Association"], correct: 1, lesson: "Land-Based Exclusions: SENSE (Self-Enrollment National Self Exclusion) covers land-based casinos across the UK." },
-                { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Bingo Halls?", options: ["A) Bingo Association", "B) SENSE", "C) Bacta", "D) SmartExclusion"], correct: 0, lesson: "Land-Based Exclusions: The Bingo Association provides dedicated self-exclusion registers for licensed bingo halls." },
-                { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Service Stations?", options: ["A) Bingo Association", "B) Moses", "C) Bacta", "D) SmartExclusion"], correct: 3, lesson: "Land-Based Exclusions: SmartExclusion covers gaming machines located in motorway service areas and adult venues." },
-                { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Betting Shops (Bookies)?", options: ["A) Bingo Association", "B) SENSE", "C) Bacta", "D) Moses"], correct: 3, lesson: "Land-Based Exclusions: MOSES (Multi-Operator Self Exclusion Scheme) allows self-exclusion from betting shops." },
-                { q: "What does the acronym SENSE stand for in the UK's land-based casino self-exclusion scheme?", options: ["A) Self-Enrollment National Self Exclusion", "B) Safe Entry National Security Exclusion", "C) Single Exclusion National Support Exchange", "D) Social Entertainment National Safety Exchange"], correct: 0, lesson: "Terminology: SENSE stands for Self-Enrollment National Self Exclusion for casinos." },
-                { q: "In 2025, approximately how many self-excluded people were still able to enter a UK betting shop and gamble?", options: ["A) 668", "B) 3,288", "C) 4,789", "D) 8,700"], correct: 1, lesson: "Compliance Gaps: Studies highlighted thousands of successful breaches by self-excluded individuals entering betting shops." },
-                { q: "In which year did the statutory £2 maximum stake on UK FOBTs officially come into force?", options: ["A) 2016", "B) 2017", "C) 2018", "D) 2019"], correct: 3, lesson: "Legislative Milestones: The £2 stake limit on B2 gaming machines became law in April 2019." }
+                { q: "In the UK, before the 2019 stake reduction, what was the maximum stake per spin on a Fixed-Odds-Betting-Terminal?", options: ["A) £2", "B) £50", "C) £100", "D) £500"], correct: 2, lesson: "FOBT Reform: The maximum stake on UK FOBTs was successfully reduced from £100 to £2 in 2019[cite: 1]." },
+                { q: "In the UK, before the 2019 stake reduction, what was the maximum amount a person could stake every 20 seconds on a Fixed-Odds-Betting-Terminal?", options: ["A) £2 every 20 seconds", "B) £50 every 20 seconds", "C) £100 every 20 seconds", "D) £500 every 20 seconds"], correct: 2, lesson: "High-Speed Play: Players could previously risk up to £100 every 20 seconds on electronic casino games in betting shops[cite: 1]." },
+                { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Adult Gaming Centres (Arcades)?", options: ["A) Bingo Association", "B) SENSE", "C) Bacta", "D) Moses"], correct: 2, lesson: "Land-Based Exclusions: Bacta operates the self-exclusion scheme for arcades and low-stake gaming machine premises[cite: 1]." },
+                { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Casinos?", options: ["A) Bacta", "B) SENSE", "C) Moses", "D) Bingo Association"], correct: 1, lesson: "Land-Based Exclusions: SENSE (Self-Enrollment National Self Exclusion) covers land-based casinos across the UK[cite: 1]." },
+                { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Bingo Halls?", options: ["A) Bingo Association", "B) SENSE", "C) Bacta", "D) SmartExclusion"], correct: 0, lesson: "Land-Based Exclusions: The Bingo Association provides dedicated self-exclusion registers for licensed bingo halls[cite: 1]." },
+                { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Service Stations?", options: ["A) Bingo Association", "B) Moses", "C) Bacta", "D) SmartExclusion"], correct: 3, lesson: "Land-Based Exclusions: SmartExclusion covers gaming machines located in motorway service areas and adult venues[cite: 1]." },
+                { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Betting Shops (Bookies)?", options: ["A) Bingo Association", "B) SENSE", "C) Bacta", "D) Moses"], correct: 3, lesson: "Land-Based Exclusions: MOSES (Multi-Operator Self Exclusion Scheme) allows self-exclusion from betting shops[cite: 1]." },
+                { q: "What does the acronym SENSE stand for in the UK's land-based casino self-exclusion scheme?", options: ["A) Self-Enrollment National Self Exclusion", "B) Safe Entry National Security Exclusion", "C) Single Exclusion National Support Exchange", "D) Social Entertainment National Safety Exchange"], correct: 0, lesson: "Terminology: SENSE stands for Self-Enrollment National Self Exclusion for casinos[cite: 1]." },
+                { q: "In 2025, approximately how many self-excluded people were still able to enter a UK betting shop and gamble?", options: ["A) 668", "B) 3,288", "C) 4,789", "D) 8,700"], correct: 1, lesson: "Compliance Gaps: Studies highlighted thousands of successful breaches by self-excluded individuals entering betting shops[cite: 1]." },
+                { q: "In which year did the statutory £2 maximum stake on UK FOBTs officially come into force?", options: ["A) 2016", "B) 2017", "C) 2018", "D) 2019"], correct: 3, lesson: "Legislative Milestones: The £2 stake limit on B2 gaming machines became law in April 2019[cite: 1]." }
             ],
             "Canada": [
-                { q: "In Ontario, what is the name of the land-based self-exclusion scheme that covers Casinos?", options: ["A) SENSE", "B) MyPlay Break", "C) Bacta", "D) BetGuard"], correct: 1, lesson: "Canadian Models: MyPlay Break provides land-based casino self-exclusion options in Ontario." },
-                { q: "What is the name of Ontario's national online self-exclusion scheme?", options: ["A) BetGuard", "B) RUA", "C) GamStop", "D) Oasis"], correct: 0, lesson: "Online Exclusions: BetGuard supports multi-operator online player protection in regulated Canadian markets." }
+                { q: "In Ontario, what is the name of the land-based self-exclusion scheme that covers Casinos?", options: ["A) SENSE", "B) MyPlay Break", "C) Bacta", "D) BetGuard"], correct: 1, lesson: "Canadian Models: MyPlay Break provides land-based casino self-exclusion options in Ontario[cite: 1]." },
+                { q: "What is the name of Ontario's national online self-exclusion scheme?", options: ["A) BetGuard", "B) RUA", "C) GamStop", "D) Oasis"], correct: 0, lesson: "Online Exclusions: BetGuard supports multi-operator online player protection in regulated Canadian markets[cite: 1]." }
             ],
             "Brazil": [
-                { q: "Which country introduced a near total ban on gambling advertising, sponsorship, and promotional communications in 2018?", options: ["A) United Kingdom", "B) Italy", "C) Spain", "D) None of the above"], correct: 1, lesson: "Global Advertising Restrictions: Italy enacted strict bans on gambling promotion under the Dignity Decree." },
-                { q: "What is the capital city of Brazil?", options: ["A) Rio de Janeiro", "B) São Paulo", "C) Brasília", "D) Salvador"], correct: 2, lesson: "Geography: Brasília is the federal capital of Brazil." },
-                { q: "What is the name of Brazil's national online self-exclusion scheme?", options: ["A) Spelpaus", "B) Plataforma Centralizada de Autoexclusão", "C) Rofus", "D) RGIAJ"], correct: 1, lesson: "Regulatory Frameworks: Brazil mandates centralised national self-exclusion registries for regulated betting operators." }
+                { q: "Which country introduced a near total ban on gambling advertising, sponsorship, and promotional communications in 2018?", options: ["A) United Kingdom", "B) Italy", "C) Spain", "D) None of the above"], correct: 1, lesson: "Global Advertising Restrictions: Italy enacted strict bans on gambling promotion under the Dignity Decree[cite: 1]." },
+                { q: "What is the capital city of Brazil?", options: ["A) Rio de Janeiro", "B) São Paulo", "C) Brasília", "D) Salvador"], correct: 2, lesson: "Geography: Brasília is the federal capital of Brazil[cite: 1]." },
+                { q: "What is the name of Brazil's national online self-exclusion scheme?", options: ["A) Spelpaus", "B) Plataforma Centralizada de Autoexclusão", "C) Rofus", "D) RGIAJ"], correct: 1, lesson: "Regulatory Frameworks: Brazil mandates centralised national self-exclusion registries for regulated betting operators[cite: 1]." }
             ],
             "United States": [
-                { q: "Which city in Nevada is world-famous for gambling?", options: ["A) Las Vegas", "B) Atlantic City", "C) Macau", "D) Monte Carlo"], correct: 0, lesson: "Entertainment Hubs: Las Vegas is globally renowned for its casino resorts and gaming industry." }
+                { q: "Which city in Nevada is world-famous for gambling?", options: ["A) Las Vegas", "B) Atlantic City", "C) Macau", "D) Monte Carlo"], correct: 0, lesson: "Entertainment Hubs: Las Vegas is globally renowned for its casino resorts and gaming industry[cite: 1]." }
             ],
             "Italy": [
-                { q: "How does land-based casino self-exclusion work in Italy compared to online RUA?", options: ["A) One national register covers all casinos", "B) Players must use individual casino self-exclusion procedures", "C) RUA automatically blocks all physical venues", "D) Regional authorities manage separate lists"], correct: 1, lesson: "Land-Based vs Online: Italian land-based casinos often require venue-specific self-exclusion procedures separate from remote registers." },
-                { q: "What is the name of Italy's national online self-exclusion scheme?", options: ["A) Spelpaus", "B) RUA", "C) GamStop", "D) Oasis"], correct: 1, lesson: "Italian Regulation: RUA (Registro Unico degli Autoesclusi) manages remote gambling self-exclusion via ADM." }
+                { q: "How does land-based casino self-exclusion work in Italy compared to online RUA?", options: ["A) One national register covers all casinos", "B) Players must use individual casino self-exclusion procedures", "C) RUA automatically blocks all physical venues", "D) Regional authorities manage separate lists"], correct: 1, lesson: "Land-Based vs Online: Italian land-based casinos often require venue-specific self-exclusion procedures separate from remote registers[cite: 1]." },
+                { q: "What is the name of Italy's national online self-exclusion scheme?", options: ["A) Spelpaus", "B) RUA", "C) GamStop", "D) Oasis"], correct: 1, lesson: "Italian Regulation: RUA (Registro Unico degli Autoesclusi) manages remote gambling self-exclusion via ADM[cite: 1]." }
             ],
             "Belgium": [
-                { q: "Belgium's EPIS system is an example of which type of self-exclusion model?", options: ["A) Separate exclusion at every venue", "B) National centralised self-exclusion register", "C) Online-only exclusion", "D) Casino-only exclusion"], correct: 1, lesson: "Centralised Protection: EPIS unifies self-exclusion across land-based arcades, casinos, and online platforms in Belgium." },
-                { q: "What is the name of Belgium's national self-exclusion scheme covering both online and land-based gambling?", options: ["A) Rofus", "B) EPIS", "C) Oasis", "D) GamStop"], correct: 1, lesson: "Belgium System: EPIS (Excluded Persons Information System) tracks restricted individuals." }
+                { q: "Belgium's EPIS system is an example of which type of self-exclusion model?", options: ["A) Separate exclusion at every venue", "B) National centralised self-exclusion register", "C) Online-only exclusion", "D) Casino-only exclusion"], correct: 1, lesson: "Centralised Protection: EPIS unifies self-exclusion across land-based arcades, casinos, and online platforms in Belgium[cite: 1]." },
+                { q: "What is the name of Belgium's national self-exclusion scheme covering both online and land-based gambling?", options: ["A) Rofus", "B) EPIS", "C) Oasis", "D) GamStop"], correct: 1, lesson: "Belgium System: EPIS (Excluded Persons Information System) tracks restricted individuals[cite: 1]." }
             ],
             "Germany": [
-                { q: "What is the name of Germany's national self-exclusion scheme covering both online and land-based gambling?", options: ["A) Spelpaus", "B) Oasis", "C) Rofus", "D) GamStop"], correct: 1, lesson: "German Model: OASIS is the nationwide state-operated database connecting land-based and online gaming venues." }
+                { q: "What is the name of Germany's national self-exclusion scheme covering both online and land-based gambling?", options: ["A) Spelpaus", "B) Oasis", "C) Rofus", "D) GamStop"], correct: 1, lesson: "German Model: OASIS is the nationwide state-operated database connecting land-based and online gaming venues[cite: 1]." }
             ],
             "Denmark": [
-                { q: "What is the name of Denmark's national self-exclusion scheme covering both online and land-based gambling?", options: ["A) Rofus", "B) Oasis", "C) GamStop", "D) EPIS"], correct: 0, lesson: "Danish Model: ROFUS is administered by the Danish Gambling Authority (Spillemyndigheden)." }
+                { q: "What is the name of Denmark's national self-exclusion scheme covering both online and land-based gambling?", options: ["A) Rofus", "B) Oasis", "C) GamStop", "D) EPIS"], correct: 0, lesson: "Danish Model: ROFUS is administered by the Danish Gambling Authority (Spillemyndigheden)[cite: 1]." }
             ],
             "Australia": [
-                { q: "What is the capital of Australia?", options: ["A) Melbourne", "B) Sydney", "C) Canberra", "D) Brisbane"], correct: 2, lesson: "Geography: Canberra is the capital city of Australia." },
-                { q: "What is the name of Australia's national online self-exclusion scheme?", options: ["A) Oasis", "B) Rofus", "C) BetStop", "D) SafePlay"], correct: 2, lesson: "Australian Register: BetStop is the National Self-Exclusion Register for interactive wagering." },
-                { q: "What is Australia's 2023 landmark parliamentary gambling inquiry report commonly known as?", options: ["A) The Murphy Report", "B) The Jones Report", "C) The Harris Report", "D) The Australian Gambling Reduction Report"], correct: 0, lesson: "Inquiry Landmark: The Murphy Report called for sweeping advertising bans and consumer protections in Australia." }
+                { q: "What is the capital of Australia?", options: ["A) Melbourne", "B) Sydney", "C) Canberra", "D) Brisbane"], correct: 2, lesson: "Geography: Canberra is the capital city of Australia[cite: 1]." },
+                { q: "What is the name of Australia's national online self-exclusion scheme?", options: ["A) Oasis", "B) Rofus", "C) BetStop", "D) SafePlay"], correct: 2, lesson: "Australian Register: BetStop is the National Self-Exclusion Register for interactive wagering[cite: 1]." },
+                { q: "What is Australia's 2023 landmark parliamentary gambling inquiry report commonly known as?", options: ["A) The Murphy Report", "B) The Jones Report", "C) The Harris Report", "D) The Australian Gambling Reduction Report"], correct: 0, lesson: "Inquiry Landmark: The Murphy Report called for sweeping advertising bans and consumer protections in Australia[cite: 1]." }
             ],
             "Nigeria": [
-                { q: "What is the capital city of Nigeria?", options: ["A) Lagos", "B) Abuja", "C) Kano", "D) Port Harcourt"], correct: 1, lesson: "Geography: Abuja is the designated capital city of Nigeria." }
+                { q: "What is the capital city of Nigeria?", options: ["A) Lagos", "B) Abuja", "C) Kano", "D) Port Harcourt"], correct: 1, lesson: "Geography: Abuja is the designated capital city of Nigeria[cite: 1]." }
             ],
             "Sweden": [
-                { q: "What is the name of Sweden's centralized national self-exclusion system?", options: ["A) Spelpaus", "B) ROFUS", "C) BetStop", "D) EPIS"], correct: 0, lesson: "Swedish Model: Spelpaus allows instant nationwide self-exclusion across all licensed gaming operators." }
+                { q: "What is the name of Sweden's centralized national self-exclusion system?", options: ["A) Spelpaus", "B) ROFUS", "C) BetStop", "D) EPIS"], correct: 0, lesson: "Swedish Model: Spelpaus allows instant nationwide self-exclusion across all licensed gaming operators[cite: 1]." }
             ],
             "France": [
-                { q: "What is the national gambling exclusion register called in France?", options: ["A) Interdictions de Jeux", "B) Oasis", "C) RUA", "D) SENSE"], correct: 0, lesson: "French Regulation: Interdictions de Jeux is administered by the Ministry of Interior to bar individuals from casinos and gaming clubs." }
+                { q: "What is the national gambling exclusion register called in France?", options: ["A) Interdictions de Jeux", "B) Oasis", "C) RUA", "D) SENSE"], correct: 0, lesson: "French Regulation: Interdictions de Jeux is administered by the Ministry of Interior to bar individuals from casinos and gaming clubs[cite: 1]." }
             ],
             "Spain": [
-                { q: "What is the acronym for Spain's national register of gaming access prohibitions?", options: ["A) RGIAJ", "B) RUA", "C) EPIS", "D) OASIS"], correct: 0, lesson: "Spanish Model: RGIAJ (Registro General de Interdicciones de Acceso al Juego) manages statewide self-exclusion." }
+                { q: "What is the acronym for Spain's national register of gaming access prohibitions?", options: ["A) RGIAJ", "B) RUA", "C) EPIS", "D) OASIS"], correct: 0, lesson: "Spanish Model: RGIAJ (Registro General de Interdicciones de Acceso al Juego) manages statewide self-exclusion[cite: 1]." }
             ],
             "Netherlands": [
-                { q: "What is the name of the central register for the exclusion of gaming in the Netherlands?", options: ["A) Cruks", "B) GamStop", "C) ROFUS", "D) Spelpaus"], correct: 0, lesson: "Dutch Model: CRUKS is the mandatory national exclusion register for remote and land-based gaming in the Netherlands." }
+                { q: "What is the name of the central register for the exclusion of gaming in the Netherlands?", options: ["A) Cruks", "B) GamStop", "C) ROFUS", "D) Spelpaus"], correct: 0, lesson: "Dutch Model: CRUKS is the mandatory national exclusion register for remote and land-based gaming in the Netherlands[cite: 1]." }
             ]
         };
 
@@ -2512,8 +2606,14 @@
         const mouseVec = new THREE.Vector2();
 
         let worldCameraAngle = 0; // World rotation angle controlled by Look Pad / Right mouse dragging
+        let knightHeadAimX = 0; // Controlled by 3rd Torch Head look pad
+        let knightHeadAimY = 0;
+
         let activeLookTouchId = null;
+        let activeTorchTouchId = null;
         let lastTouchX = 0;
+        let lastTorchTouchX = 0;
+        let lastTorchTouchY = 0;
 
         const infoBtn = document.getElementById('info-btn');
         const uiModal = document.getElementById('ui-modal');
@@ -2549,7 +2649,7 @@
             keys[k] = false;
         };
 
-        // Mouse handlers: Left drag / normal mouse movement turns head/torso; Right drag rotates world view
+        // Mouse handlers
         let isRightMouseDown = false;
         window.onmousedown = (e) => {
             if (e.button === 2) { // Right click drag for world look
@@ -2573,20 +2673,11 @@
                 }
             }
 
-            let chosenType = '';
+            let chosenType = 'sword_mid_slash';
             if (e.button === 0) {
-                if (knight.activeZone === 1) chosenType = 'shield_high_shove';
-                else if (knight.activeZone === 2) chosenType = 'sword_high_cleave';
-                else if (knight.activeZone === 3) chosenType = 'shield_mid_shove';
-                else if (knight.activeZone === 4) chosenType = 'sword_mid_slash';
-                else if (knight.activeZone === 5) chosenType = 'shield_low_shove';
-                else if (knight.activeZone === 6) chosenType = 'sword_low_slash';
-                else chosenType = 'sword_mid_slash';
+                chosenType = 'sword_mid_slash';
             }
-
-            if (chosenType) {
-                triggerAttack(chosenType);
-            }
+            triggerAttack(chosenType);
         };
 
         window.onmousemove = (e) => {
@@ -2612,7 +2703,7 @@
         };
         window.oncontextmenu = (e) => e.preventDefault();
 
-        // Touch listeners for mobile devices (Look pad in bottom right rotates world view)
+        // Mobile touch controls setup
         if (isMobileDevice) {
             const bindTouchHold = (elemId, keyName) => {
                 const el = document.getElementById(elemId);
@@ -2626,14 +2717,46 @@
             bindTouchHold('btn-left', 'a');
             bindTouchHold('btn-right', 'd');
 
+            // Combat action buttons mapping
+            const bindCombatAction = (btnId, attackType) => {
+                const el = document.getElementById(btnId);
+                if (!el) return;
+                el.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    triggerAttack(attackType);
+                });
+            };
+            bindCombatAction('btn-shield-high', 'shield_high_shove');
+            bindCombatAction('btn-shield-mid', 'shield_mid_shove');
+            bindCombatAction('btn-shield-low', 'shield_low_shove');
+            bindCombatAction('btn-sword-high', 'sword_high_cleave');
+            bindCombatAction('btn-sword-mid', 'sword_mid_slash');
+            bindCombatAction('btn-sword-low', 'sword_low_slash');
+
             window.addEventListener('touchstart', (e) => {
                 for (let i = 0; i < e.targetTouches.length; i++) {
                     const touch = e.targetTouches[i];
-                    // Look pad area (bottom right corner)
-                    if (touch.clientX > window.innerWidth - 180 && touch.clientY > window.innerHeight - 160) {
-                        if (activeLookTouchId === null) {
-                            activeLookTouchId = touch.identifier;
-                            lastTouchX = touch.clientX;
+                    const lookPadEl = document.getElementById('mobile-lookpad');
+                    const torchPadEl = document.getElementById('mobile-torch-lookpad');
+
+                    if (lookPadEl) {
+                        const r = lookPadEl.getBoundingClientRect();
+                        if (touch.clientX >= r.left && touch.clientX <= r.right && touch.clientY >= r.top && touch.clientY <= r.bottom) {
+                            if (activeLookTouchId === null) {
+                                activeLookTouchId = touch.identifier;
+                                lastTouchX = touch.clientX;
+                            }
+                        }
+                    }
+
+                    if (torchPadEl) {
+                        const r = torchPadEl.getBoundingClientRect();
+                        if (touch.clientX >= r.left && touch.clientX <= r.right && touch.clientY >= r.top && touch.clientY <= r.bottom) {
+                            if (activeTorchTouchId === null) {
+                                activeTorchTouchId = touch.identifier;
+                                lastTorchTouchX = touch.clientX;
+                                lastTorchTouchY = touch.clientY;
+                            }
                         }
                     }
                 }
@@ -2645,7 +2768,15 @@
                     if (touch.identifier === activeLookTouchId) {
                         const dx = touch.clientX - lastTouchX;
                         lastTouchX = touch.clientX;
-                        worldCameraAngle -= dx * 0.008; // Rotate world view smoothly
+                        worldCameraAngle -= dx * 0.008; // World view rotation
+                    }
+                    if (touch.identifier === activeTorchTouchId) {
+                        const dx = touch.clientX - lastTorchTouchX;
+                        const dy = touch.clientY - lastTorchTouchY;
+                        lastTorchTouchX = touch.clientX;
+                        lastTorchTouchY = touch.clientY;
+                        knightHeadAimX -= dx * 0.01;
+                        knightHeadAimY -= dy * 0.01;
                     }
                 }
             }, { passive: false });
@@ -2654,6 +2785,9 @@
                 for (let i = 0; i < e.changedTouches.length; i++) {
                     if (e.changedTouches[i].identifier === activeLookTouchId) {
                         activeLookTouchId = null;
+                    }
+                    if (e.changedTouches[i].identifier === activeTorchTouchId) {
+                        activeTorchTouchId = null;
                     }
                 }
             };
@@ -3115,16 +3249,8 @@
             return false;
         }
 
-        function toScreenXY(worldVec) {
-            const v = worldVec.clone().project(camera);
-            return {
-                x: (v.x * 0.5 + 0.5) * window.innerWidth,
-                y: (-(v.y * 0.5) + 0.5) * window.innerHeight
-            };
-        }
-
         function calculateSector() {
-            return 4; // Default mid-right slash zone
+            return 4;
         }
 
         function triggerAttack(type) {
@@ -3135,9 +3261,13 @@
         }
 
         function applyDirectionalRigging(zone, delta) {
-            // Mouse tracking: calculate head/torso turn based on cursor position on the screen
             let normX = (mouse.x / window.innerWidth) * 2 - 1;
             let normY = -((mouse.y / window.innerHeight) * 2 - 1);
+
+            if (isMobileDevice) {
+                normX = knightHeadAimX;
+                normY = knightHeadAimY;
+            }
 
             let tHeadRot = new THREE.Euler(-normY * 0.4, -normX * 0.7, 0);
             let tSwordRot = knight.defaultSwordRot.clone();
@@ -3147,18 +3277,20 @@
 
             let lerpSpeed = knight.isAttacking ? 0.85 : 0.45;
 
-            if (knight.isAttacking && knight.attackType === 'sword_mid_slash') {
+            if (knight.isAttacking) {
                 knight.attackProgress += delta * 4.0;
                 const p = Math.min(1.0, knight.attackProgress);
-                const stepDelta = Math.cos(p * Math.PI) * 0.10;
-                knight.group.position.x -= Math.sin(knight.angle) * stepDelta;
-                knight.group.position.z -= Math.cos(knight.angle) * stepDelta;
 
-                const slashX = THREE.MathUtils.lerp(1.9, -0.8, p);
-                const slashZ = -0.6 - Math.sin(p * Math.PI) * 3.8;
-                tSwordPos.set(slashX, 0.6, slashZ);
-                tSwordRot.set(-0.3, -0.6 + p * 1.4, -Math.PI / 2.3);
-                tShieldPos.set(-1.3, 0.3, 0.0); tShieldRot.set(0.1, 0.4, 0.0);
+                if (knight.attackType.includes('shield')) {
+                    tShieldPos.set(-1.4, 0.6, -1.2);
+                    tShieldRot.set(0, 0.5, 0.2);
+                } else {
+                    const slashX = THREE.MathUtils.lerp(1.9, -0.8, p);
+                    const slashZ = -0.6 - Math.sin(p * Math.PI) * 3.8;
+                    tSwordPos.set(slashX, 0.6, slashZ);
+                    tSwordRot.set(-0.3, -0.6 + p * 1.4, -Math.PI / 2.3);
+                }
+
                 lerpSpeed = 1.0;
                 if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
             } else {
@@ -3531,7 +3663,6 @@
                     const targetHeight = isInStudio ? 4.5 : 4.2;
                     const lookHeight = 2.2;
 
-                    // Camera position rotates around the knight using worldCameraAngle
                     const combinedAngle = knight.angle + worldCameraAngle;
                     const targetCamX = knight.group.position.x + Math.sin(combinedAngle) * targetDist;
                     const targetCamZ = knight.group.position.z + Math.cos(combinedAngle) * targetDist;
