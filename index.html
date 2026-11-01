@@ -288,7 +288,7 @@
 
         #mobile-lookpad {
             position: absolute;
-            bottom: 150px;
+            bottom: 30px;
             right: 20px;
             width: 140px;
             height: 120px;
@@ -362,9 +362,8 @@
         • <b>A / D</b>: Steer / Rotate Knight<br>
         • <b>F</b>: Toggle Head Mounted Torch 🔦<br>
         • <b>E</b>: Call Lift<br>
-        • <b>Mouse Cursor</b>: Aim Head & Flashlight Beam (Pitch & Yaw)<br>
-        • <b>Mouse Left-Click</b>: Slash / Strike / Spin Portal Reels / Click Podium & Studio Touch Screens & Trivia Answers<br>
-        • <b>Mouse Right-Click</b>: Thrust / Parry<br>
+        • <b>Mouse Cursor / Lookpad</b>: Aim Head & Flashlight Beam (Pitch & Yaw)<br>
+        • <b>Click / Tap</b>: Slash / Strike / Spin Portal Reels / Click Podium & Studio Touch Screens & Trivia Answers<br>
     </div>
 
     <div id="speedometer">
@@ -376,10 +375,15 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
+        // Properly define mobile device detector
         const isMobileDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || /Mobi|Android/i.test(navigator.userAgent);
         if (isMobileDevice) {
             const mobileControlsEl = document.getElementById('mobile-controls');
             if (mobileControlsEl) mobileControlsEl.style.display = 'block';
+            
+            // Hide the speedometer/floor status box on mobile so it doesn't overlap controls or lookpad
+            const speedEl = document.getElementById('speedometer');
+            if (speedEl) speedEl.style.display = 'none';
         }
 
         let selectedGameMode = 'solo';
@@ -1266,7 +1270,7 @@
         ];
 
         let playerSelectedAnswer = null;
-        let triviaAnswerStatus = ""; 
+        let triviaAnswerStatus = "";
         let showCorrectAnswerReveal = false;
         let answerLockedIn = false;
 
@@ -1446,9 +1450,9 @@
                     let optY = 85 + (idx * 46);
 
                     if (showCorrectAnswerReveal && idx === currentQ.correct) {
-                        qBoardCtx.fillStyle = '#00b894'; 
+                        qBoardCtx.fillStyle = '#00b894';
                     } else if (playerSelectedAnswer === idx) {
-                        qBoardCtx.fillStyle = '#0984e3'; 
+                        qBoardCtx.fillStyle = '#0984e3';
                     } else if (!triviaTimerActive && triviaAnswerStatus === "") {
                         qBoardCtx.fillStyle = '#332b45';
                     } else {
@@ -1491,15 +1495,15 @@
         renderStageQuestionBoard();
 
         const qBoardGeo = new THREE.PlaneGeometry(8.0, 6.0);
-        const qBoardMat = new THREE.MeshBasicMaterial({ 
-            map: qBoardTex, 
-            side: THREE.DoubleSide 
+        const qBoardMat = new THREE.MeshBasicMaterial({
+            map: qBoardTex,
+            side: THREE.DoubleSide
         });
 
         const qBoardMesh = new THREE.Mesh(qBoardGeo, qBoardMat);
         qBoardMesh.name = "mainStudioScreen";
         qBoardMesh.position.set(0.0, 6.5, -4.5);
-        qBoardMesh.rotation.y = Math.PI; 
+        qBoardMesh.rotation.y = Math.PI;
         goodyStageRoot.add(qBoardMesh);
 
         const podiumCanvas1 = document.createElement('canvas'); podiumCanvas1.width = 256; podiumCanvas1.height = 160;
@@ -1879,6 +1883,7 @@
                 wall.reelStates[i] = "SPINNING";
                 wall.stopTimes[i] = now + 0.40 + (i * 0.25);
             }
+            wall.pendingSuccess = true; // Automatically unlocks after spin!
 
             playElevatorPing();
         }
@@ -2143,7 +2148,7 @@
             cabinet.position.set(pos.x, 8, pos.z);
             cabinet.rotation.y = pos.rot;
             scene.add(cabinet);
-            arcadeMachines.push({ isMainPlayerScreen: false, targetX: pos.x + (pos.x > 0 ? -4.5 : 4.5), targetZ: pos.z, rotationFacing: pos.rot + Math.PI });
+            arcadeMachines.unshift({ isMainPlayerScreen: false, targetX: pos.x + (pos.x > 0 ? -4.5 : 4.5), targetZ: pos.z, rotationFacing: pos.rot + Math.PI });
         });
         arcadeMachines.unshift({ isMainPlayerScreen: true, targetX: 0, targetZ: 7.2, rotationFacing: Math.PI });
 
@@ -2557,6 +2562,7 @@
         };
         window.oncontextmenu = (e) => e.preventDefault();
 
+        // Touch listeners for mobile devices
         if (isMobileDevice) {
             const bindTouchHold = (elemId, keyName) => {
                 const el = document.getElementById(elemId);
@@ -3122,7 +3128,7 @@
             if (!knight || !gameRunning) return;
             if (checkObjectClick(e)) return;
 
-            if (e.button === 0 && playerCurrentFloor === "BASEMENT" && undergroundGroup.visible) {
+            if (playerCurrentFloor === "BASEMENT" && undergroundGroup.visible) {
                 const pPos = knight.group.position;
                 for (let w of reelWalls) {
                     let dist = (w.axis === 'z')
@@ -3486,7 +3492,7 @@
                     triviaCountdownSeconds -= delta;
                     if (triviaCountdownSeconds <= 0) {
                         triviaCountdownSeconds = 0;
-                        selectTriviaAnswer(99); 
+                        selectTriviaAnswer(99);
                     }
                 }
             }
@@ -3704,7 +3710,6 @@
 
                     knight.torso.position.y = 1.5 - arc * 0.3;
                     knight.upperRig.rotation.x = -arc * 0.2;
-                    document.getElementById('speedometer').innerHTML = `Floor: ${playerCurrentFloor}<br>Status: ${attackLabel}<br>Zone: <span class="sector-tag">${ZONE_NAMES[zone]}</span>`;
                 } else if (Math.abs(knight.speed) > 0.02) {
                     knight.ticker += isActuallyInsideCar ? 0.11 : 0.18;
                     const wave = Math.sin(knight.ticker);
@@ -3714,18 +3719,12 @@
                     knight.torso.position.y = 1.5 + Math.abs(THREE.MathUtils.mapLinear(wave, -1, 1, 0, 0.22));
                     knight.upperRig.rotation.x = wave * 0.04;
                     knight.upperRig.rotation.y = -wave * 0.03;
-
-                    const statusStr = knight.isAttacking ? attackLabel : "Running";
-                    document.getElementById('speedometer').innerHTML = `Floor: ${playerCurrentFloor}<br>Status: ${statusStr}<br>Zone: <span class="sector-tag">${ZONE_NAMES[zone]}</span>`;
                 } else {
                     knight.leftLeg.rotation.x *= 0.8;
                     knight.rightLeg.rotation.x *= 0.8;
                     knight.upperRig.rotation.x *= 0.8;
                     knight.upperRig.rotation.y *= 0.8;
                     knight.torso.position.y = 1.5;
-
-                    const statusStr = knight.isAttacking ? attackLabel : "Idle";
-                    document.getElementById('speedometer').innerHTML = `Floor: ${playerCurrentFloor}<br>Status: ${statusStr}<br>Zone: <span class="sector-tag">${ZONE_NAMES[zone]}</span>`;
                 }
 
                 applyDirectionalRigging(zone, delta);
@@ -3989,7 +3988,7 @@
         }
 
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight; 
+            camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
