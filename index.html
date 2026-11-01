@@ -259,8 +259,8 @@
             position: absolute;
             bottom: 30px;
             left: 30px;
-            width: 140px;
-            height: 140px;
+            width: 150px;
+            height: 150px;
             pointer-events: auto;
         }
         .dpad-btn {
@@ -281,10 +281,11 @@
             background: #ff0055;
             color: #fff;
         }
-        #btn-up { top: 0; left: 45px; width: 50px; height: 45px; }
-        #btn-down { bottom: 0; left: 45px; width: 50px; height: 45px; }
-        #btn-left { top: 45px; left: 0; width: 45px; height: 50px; }
-        #btn-right { top: 45px; right: 0; width: 45px; height: 50px; }
+        #btn-up { top: 0; left: 50px; width: 50px; height: 45px; }
+        #btn-down { bottom: 0; left: 50px; width: 50px; height: 45px; }
+        #btn-left { top: 50px; left: 0; width: 45px; height: 50px; }
+        #btn-right { top: 50px; right: 0; width: 45px; height: 50px; }
+        #btn-action { top: 50px; left: 50px; width: 50px; height: 50px; border-radius: 50%; font-size: 14px; background: rgba(0, 240, 255, 0.2); }
 
         #mobile-lookpad {
             position: absolute;
@@ -327,6 +328,7 @@
             <div class="dpad-btn" id="btn-down">▼</div>
             <div class="dpad-btn" id="btn-left">◀</div>
             <div class="dpad-btn" id="btn-right">▶</div>
+            <div class="dpad-btn" id="btn-action" title="Interact / Lift">E</div>
         </div>
         <div id="mobile-lookpad">
             <div>👆 WORLD LOOK PAD</div>
@@ -376,14 +378,12 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        const isMobileDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || /Mobi|Android/i.test(navigator.userAgent);
-        if (isMobileDevice) {
-            const mobileControlsEl = document.getElementById('mobile-controls');
-            if (mobileControlsEl) mobileControlsEl.style.display = 'block';
-           
-            const speedEl = document.getElementById('speedometer');
-            if (speedEl) speedEl.style.display = 'none';
-        }
+        // Always display mobile controls if requested or detected
+        const mobileControlsEl = document.getElementById('mobile-controls');
+        if (mobileControlsEl) mobileControlsEl.style.display = 'block';
+       
+        const speedEl = document.getElementById('speedometer');
+        if (speedEl) speedEl.style.display = 'none';
 
         let selectedGameMode = 'solo';
         let studioGameActive = false;
@@ -2612,7 +2612,7 @@
         };
         window.oncontextmenu = (e) => e.preventDefault();
 
-        // Touch listeners for mobile devices (Look pad in bottom right rotates world view)
+        // Improved Universal Mobile / Touch Controls Support for D-Pad, Look Pad, Action Button, and Screen Interaction
         if (isMobileDevice) {
             const bindTouchHold = (elemId, keyName) => {
                 const el = document.getElementById(elemId);
@@ -2626,6 +2626,14 @@
             bindTouchHold('btn-left', 'a');
             bindTouchHold('btn-right', 'd');
 
+            const btnAction = document.getElementById('btn-action');
+            if (btnAction) {
+                btnAction.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    handleInteractionKey();
+                });
+            }
+
             window.addEventListener('touchstart', (e) => {
                 for (let i = 0; i < e.targetTouches.length; i++) {
                     const touch = e.targetTouches[i];
@@ -2635,6 +2643,11 @@
                             activeLookTouchId = touch.identifier;
                             lastTouchX = touch.clientX;
                         }
+                    } else if (touch.clientY < window.innerHeight - 180 || touch.clientX > 180) {
+                        // Allow screen tapping for UI/objects / attacks
+                        mouse.x = touch.clientX;
+                        mouse.y = touch.clientY;
+                        checkObjectClick({ clientX: touch.clientX, clientY: touch.clientY });
                     }
                 }
             }, { passive: false });
@@ -3115,14 +3128,6 @@
             return false;
         }
 
-        function toScreenXY(worldVec) {
-            const v = worldVec.clone().project(camera);
-            return {
-                x: (v.x * 0.5 + 0.5) * window.innerWidth,
-                y: (-(v.y * 0.5) + 0.5) * window.innerHeight
-            };
-        }
-
         function calculateSector() {
             return 4; // Default mid-right slash zone
         }
@@ -3135,7 +3140,6 @@
         }
 
         function applyDirectionalRigging(zone, delta) {
-            // Mouse tracking: calculate head/torso turn based on cursor position on the screen
             let normX = (mouse.x / window.innerWidth) * 2 - 1;
             let normY = -((mouse.y / window.innerHeight) * 2 - 1);
 
@@ -3531,7 +3535,6 @@
                     const targetHeight = isInStudio ? 4.5 : 4.2;
                     const lookHeight = 2.2;
 
-                    // Camera position rotates around the knight using worldCameraAngle
                     const combinedAngle = knight.angle + worldCameraAngle;
                     const targetCamX = knight.group.position.x + Math.sin(combinedAngle) * targetDist;
                     const targetCamZ = knight.group.position.z + Math.cos(combinedAngle) * targetDist;
