@@ -99,7 +99,7 @@
         }
         #speedometer {
             position: absolute;
-            bottom: 20px;
+            bottom: 120px;
             right: 20px;
             color: #00f0ff;
             background: rgba(14, 10, 24, 0.9);
@@ -245,69 +245,91 @@
             color: #111;
         }
 
+        /* Dedicated Bottom Mobile Control Panel */
         #mobile-controls {
             position: absolute;
-            top: 0;
+            bottom: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            pointer-events: none;
+            height: 110px;
+            background: rgba(5, 3, 10, 0.85);
+            border-top: 2px solid #ff0055;
+            backdrop-filter: blur(6px);
+            pointer-events: auto;
             z-index: 120;
             display: none;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 10px;
         }
         #dpad-container {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            width: 150px;
-            height: 150px;
-            pointer-events: auto;
+            position: relative;
+            width: 130px;
+            height: 90px;
         }
         .dpad-btn {
             position: absolute;
-            background: rgba(14, 10, 24, 0.85);
+            background: rgba(14, 10, 24, 0.9);
             border: 2px solid #ff0055;
             color: #00f0ff;
-            font-size: 22px;
+            font-size: 18px;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(255,0,85,0.3);
+            box-shadow: 0 0 8px rgba(255,0,85,0.3);
         }
         .dpad-btn:active {
             background: #ff0055;
             color: #fff;
         }
-        #btn-up { top: 0; left: 50px; width: 50px; height: 45px; }
-        #btn-down { bottom: 0; left: 50px; width: 50px; height: 45px; }
-        #btn-left { top: 50px; left: 0; width: 45px; height: 50px; }
-        #btn-right { top: 50px; right: 0; width: 45px; height: 50px; }
-        #btn-action { top: 50px; left: 50px; width: 50px; height: 50px; border-radius: 50%; font-size: 14px; background: rgba(0, 240, 255, 0.2); }
+        #btn-up { top: 0; left: 40px; width: 45px; height: 40px; }
+        #btn-down { bottom: 0; left: 40px; width: 45px; height: 40px; }
+        #btn-left { top: 25px; left: 0; width: 40px; height: 40px; }
+        #btn-right { top: 25px; right: 0; width: 40px; height: 40px; }
 
         #mobile-lookpad {
-            position: absolute;
-            bottom: 30px;
-            right: 20px;
-            width: 140px;
-            height: 120px;
-            background: rgba(14, 10, 24, 0.85);
+            position: relative;
+            width: 130px;
+            height: 90px;
+            background: rgba(14, 10, 24, 0.9);
             border: 2px solid #ff0055;
-            border-radius: 8px;
+            border-radius: 6px;
             color: #00f0ff;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             text-align: center;
-            pointer-events: auto;
-            box-shadow: 0 0 10px rgba(255,0,85,0.3);
-            padding: 6px;
-            line-height: 1.3;
+            box-shadow: 0 0 8px rgba(255,0,85,0.3);
+            padding: 4px;
+            line-height: 1.2;
+            cursor: ew-resize;
+        }
+        
+        .mobile-action-btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        .mob-action-btn {
+            background: rgba(14, 10, 24, 0.9);
+            border: 2px solid #00f0ff;
+            color: #00f0ff;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(0,240,255,0.3);
+        }
+        .mob-action-btn:active {
+            background: #00f0ff;
+            color: #05030a;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -322,17 +344,21 @@
 
     <div id="info-btn" title="Toggle Instructions">i</div>
 
+    <!-- Dedicated Bottom Mobile Control Panel -->
     <div id="mobile-controls">
         <div id="dpad-container">
             <div class="dpad-btn" id="btn-up">▲</div>
             <div class="dpad-btn" id="btn-down">▼</div>
             <div class="dpad-btn" id="btn-left">◀</div>
             <div class="dpad-btn" id="btn-right">▶</div>
-            <div class="dpad-btn" id="btn-action" title="Interact / Lift">E</div>
         </div>
         <div id="mobile-lookpad">
-            <div>👆 WORLD LOOK PAD</div>
-            <div style="font-size:9px; color:#ffda66; margin-top:2px;">Swipe to rotate camera/world view</div>
+            <div>👁️ HEAD / LOOK</div>
+            <div style="font-size:8px; color:#ffda66; margin-top:2px;">Drag left/right (Rubber-band return)</div>
+        </div>
+        <div class="mobile-action-btn-group">
+            <button class="mob-action-btn" id="btn-mob-torch">🔦 TORCH</button>
+            <button class="mob-action-btn" id="btn-mob-interact">⚙️ LIFT</button>
         </div>
     </div>
 
@@ -364,8 +390,7 @@
         • <b>A / D</b>: Steer / Rotate Knight<br>
         • <b>F</b>: Toggle Head Mounted Torch 🔦<br>
         • <b>E</b>: Call Lift<br>
-        • <b>Look Pad (Bottom Right)</b>: Rotate World View / Camera Angle<br>
-        • <b>Mouse / Screen Drag</b>: Turn Knight's Head & Torso<br>
+        • <b>Look Pad (Bottom Panel)</b>: Natural head rotation with rubber-band spring return<br>
         • <b>Click / Tap</b>: Slash / Strike / Spin Portal Reels / Click Podium & Studio Touch Screens & Trivia Answers<br>
     </div>
 
@@ -378,12 +403,14 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        // Always display mobile controls if requested or detected
-        const mobileControlsEl = document.getElementById('mobile-controls');
-        if (mobileControlsEl) mobileControlsEl.style.display = 'block';
-       
-        const speedEl = document.getElementById('speedometer');
-        if (speedEl) speedEl.style.display = 'none';
+        const isMobileDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || /Mobi|Android/i.test(navigator.userAgent);
+        if (isMobileDevice) {
+            const mobileControlsEl = document.getElementById('mobile-controls');
+            if (mobileControlsEl) mobileControlsEl.style.display = 'flex';
+           
+            const speedEl = document.getElementById('speedometer');
+            if (speedEl) speedEl.style.display = 'none';
+        }
 
         let selectedGameMode = 'solo';
         let studioGameActive = false;
@@ -2511,7 +2538,8 @@
         const raycaster = new THREE.Raycaster();
         const mouseVec = new THREE.Vector2();
 
-        let worldCameraAngle = 0; // World rotation angle controlled by Look Pad / Right mouse dragging
+        let worldCameraAngle = 0; // Camera world view rotation angle
+        let headLookOffset = 0;   // Natural head turn offset with rubber-band spring return
         let activeLookTouchId = null;
         let lastTouchX = 0;
 
@@ -2549,14 +2577,8 @@
             keys[k] = false;
         };
 
-        // Mouse handlers: Left drag / normal mouse movement turns head/torso; Right drag rotates world view
-        let isRightMouseDown = false;
+        // Desktop mouse tracking for head movement / action
         window.onmousedown = (e) => {
-            if (e.button === 2) { // Right click drag for world look
-                isRightMouseDown = true;
-                lastTouchX = e.clientX;
-                return;
-            }
             if (!knight || !gameRunning) return;
             if (checkObjectClick(e)) return;
 
@@ -2575,13 +2597,7 @@
 
             let chosenType = '';
             if (e.button === 0) {
-                if (knight.activeZone === 1) chosenType = 'shield_high_shove';
-                else if (knight.activeZone === 2) chosenType = 'sword_high_cleave';
-                else if (knight.activeZone === 3) chosenType = 'shield_mid_shove';
-                else if (knight.activeZone === 4) chosenType = 'sword_mid_slash';
-                else if (knight.activeZone === 5) chosenType = 'shield_low_shove';
-                else if (knight.activeZone === 6) chosenType = 'sword_low_slash';
-                else chosenType = 'sword_mid_slash';
+                chosenType = 'sword_mid_slash';
             }
 
             if (chosenType) {
@@ -2592,27 +2608,18 @@
         window.onmousemove = (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
-            if (isRightMouseDown) {
-                const dx = e.clientX - lastTouchX;
-                lastTouchX = e.clientX;
-                worldCameraAngle -= dx * 0.008;
-            }
-        };
-
-        window.onmouseup = (e) => {
-            if (e.button === 2) {
-                isRightMouseDown = false;
-            }
+            // Desktop mouse X maps to head look offset naturally
+            let normX = (e.clientX / window.innerWidth) * 2 - 1;
+            headLookOffset = -normX * 1.0;
         };
 
         window.onmouseleave = () => {
             mouse.x = window.innerWidth / 2;
             mouse.y = window.innerHeight / 2;
-            isRightMouseDown = false;
         };
         window.oncontextmenu = (e) => e.preventDefault();
 
-        // Improved Universal Mobile / Touch Controls Support for D-Pad, Look Pad, Action Button, and Screen Interaction
+        // Touch listeners for bottom mobile control panel
         if (isMobileDevice) {
             const bindTouchHold = (elemId, keyName) => {
                 const el = document.getElementById(elemId);
@@ -2626,52 +2633,48 @@
             bindTouchHold('btn-left', 'a');
             bindTouchHold('btn-right', 'd');
 
-            const btnAction = document.getElementById('btn-action');
-            if (btnAction) {
-                btnAction.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    handleInteractionKey();
-                });
+            const btnMobTorch = document.getElementById('btn-mob-torch');
+            if (btnMobTorch) {
+                btnMobTorch.addEventListener('touchstart', (e) => { e.preventDefault(); toggleTorch(); });
+            }
+            const btnMobInteract = document.getElementById('btn-mob-interact');
+            if (btnMobInteract) {
+                btnMobInteract.addEventListener('touchstart', (e) => { e.preventDefault(); handleInteractionKey(); });
             }
 
-            window.addEventListener('touchstart', (e) => {
-                for (let i = 0; i < e.targetTouches.length; i++) {
-                    const touch = e.targetTouches[i];
-                    // Look pad area (bottom right corner)
-                    if (touch.clientX > window.innerWidth - 180 && touch.clientY > window.innerHeight - 160) {
-                        if (activeLookTouchId === null) {
-                            activeLookTouchId = touch.identifier;
-                            lastTouchX = touch.clientX;
+            const lookpadEl = document.getElementById('mobile-lookpad');
+            if (lookpadEl) {
+                lookpadEl.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    if (e.targetTouches.length > 0) {
+                        activeLookTouchId = e.targetTouches[0].identifier;
+                        lastTouchX = e.targetTouches[0].clientX;
+                    }
+                }, { passive: false });
+
+                lookpadEl.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    for (let i = 0; i < e.targetTouches.length; i++) {
+                        const t = e.targetTouches[i];
+                        if (t.identifier === activeLookTouchId) {
+                            const dx = t.clientX - lastTouchX;
+                            lastTouchX = t.clientX;
+                            headLookOffset -= dx * 0.015;
+                            headLookOffset = Math.max(-1.3, Math.min(1.3, headLookOffset));
                         }
-                    } else if (touch.clientY < window.innerHeight - 180 || touch.clientX > 180) {
-                        // Allow screen tapping for UI/objects / attacks
-                        mouse.x = touch.clientX;
-                        mouse.y = touch.clientY;
-                        checkObjectClick({ clientX: touch.clientX, clientY: touch.clientY });
                     }
-                }
-            }, { passive: false });
+                }, { passive: false });
 
-            window.addEventListener('touchmove', (e) => {
-                for (let i = 0; i < e.targetTouches.length; i++) {
-                    const touch = e.targetTouches[i];
-                    if (touch.identifier === activeLookTouchId) {
-                        const dx = touch.clientX - lastTouchX;
-                        lastTouchX = touch.clientX;
-                        worldCameraAngle -= dx * 0.008; // Rotate world view smoothly
+                const endLookpad = (e) => {
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        if (e.changedTouches[i].identifier === activeLookTouchId) {
+                            activeLookTouchId = null;
+                        }
                     }
-                }
-            }, { passive: false });
-
-            const endTouchLook = (e) => {
-                for (let i = 0; i < e.changedTouches.length; i++) {
-                    if (e.changedTouches[i].identifier === activeLookTouchId) {
-                        activeLookTouchId = null;
-                    }
-                }
-            };
-            window.addEventListener('touchend', endTouchLook);
-            window.addEventListener('touchcancel', endTouchLook);
+                };
+                lookpadEl.addEventListener('touchend', endLookpad);
+                lookpadEl.addEventListener('touchcancel', endLookpad);
+            }
         }
 
         function handleInteractionKey() {
@@ -3129,7 +3132,7 @@
         }
 
         function calculateSector() {
-            return 4; // Default mid-right slash zone
+            return 4;
         }
 
         function triggerAttack(type) {
@@ -3140,10 +3143,16 @@
         }
 
         function applyDirectionalRigging(zone, delta) {
-            let normX = (mouse.x / window.innerWidth) * 2 - 1;
-            let normY = -((mouse.y / window.innerHeight) * 2 - 1);
+            // Natural head turn offset with rubber-band spring return
+            if (activeLookTouchId === null && !isMobileDevice) {
+                // Desktop: spring head back towards center if mouse stationary
+                headLookOffset *= 0.92;
+            } else if (activeLookTouchId === null && isMobileDevice) {
+                // Mobile: rubber-band spring return to center
+                headLookOffset *= 0.88;
+            }
 
-            let tHeadRot = new THREE.Euler(-normY * 0.4, -normX * 0.7, 0);
+            let tHeadRot = new THREE.Euler(0, headLookOffset, 0);
             let tSwordRot = knight.defaultSwordRot.clone();
             let tSwordPos = knight.defaultSwordPos.clone();
             let tShieldRot = knight.defaultShieldRot.clone();
@@ -3535,9 +3544,9 @@
                     const targetHeight = isInStudio ? 4.5 : 4.2;
                     const lookHeight = 2.2;
 
-                    const combinedAngle = knight.angle + worldCameraAngle;
-                    const targetCamX = knight.group.position.x + Math.sin(combinedAngle) * targetDist;
-                    const targetCamZ = knight.group.position.z + Math.cos(combinedAngle) * targetDist;
+                    // Camera behind knight following knight's facing angle
+                    const targetCamX = knight.group.position.x + Math.sin(knight.angle) * targetDist;
+                    const targetCamZ = knight.group.position.z + Math.cos(knight.angle) * targetDist;
                     const targetCamY = knight.group.position.y + targetHeight;
 
                     camera.position.x += (targetCamX - camera.position.x) * 0.16;
