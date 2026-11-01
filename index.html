@@ -114,7 +114,6 @@
             z-index: 10;
         }
         .sector-tag { color: #ffff00; font-weight: bold; }
-        .stat-tag { color: #ff00ff; font-weight: bold; }
 
         #startScreen {
             position: absolute;
@@ -245,7 +244,7 @@
             color: #111;
         }
 
-        /* Enhanced Mobile Command Deck (Raised Higher) */
+        /* Mobile Module Control Console */
         #mobile-controls {
             position: absolute;
             top: 0;
@@ -258,15 +257,15 @@
         }
         #mobile-deck-console {
             position: absolute;
-            bottom: 45px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            width: 92%;
-            max-width: 650px;
-            background: rgba(14, 10, 24, 0.90);
+            width: 96%;
+            max-width: 720px;
+            background: rgba(14, 10, 24, 0.92);
             border: 2px solid #ff0055;
             border-radius: 14px;
-            padding: 10px 14px;
+            padding: 10px 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -275,18 +274,19 @@
             backdrop-filter: blur(6px);
         }
 
-        /* D-Pad on Console Left */
+        /* Standard Movement D-Pad on Left */
         #dpad-container {
             position: relative;
-            width: 120px;
-            height: 120px;
+            width: 110px;
+            height: 110px;
+            flex-shrink: 0;
         }
         .dpad-btn {
             position: absolute;
             background: rgba(26, 18, 48, 0.9);
             border: 2px solid #00f0ff;
             color: #00f0ff;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             display: flex;
             align-items: center;
@@ -299,35 +299,53 @@
             background: #00f0ff;
             color: #05030a;
         }
-        #btn-up { top: 0; left: 38px; width: 44px; height: 38px; }
-        #btn-down { bottom: 0; left: 38px; width: 44px; height: 38px; }
-        #btn-left { top: 38px; left: 0; width: 38px; height: 44px; }
-        #btn-right { top: 38px; right: 0; width: 38px; height: 44px; }
+        #btn-up { top: 0; left: 35px; width: 40px; height: 35px; }
+        #btn-down { bottom: 0; left: 35px; width: 40px; height: 35px; }
+        #btn-left { top: 35px; left: 0; width: 35px; height: 40px; }
+        #btn-right { top: 35px; right: 0; width: 35px; height: 40px; }
 
-        /* Centralized 3rd Look Pad (Torch Head & View) */
-        #mobile-torch-lookpad {
-            width: 120px;
-            height: 100px;
-            background: rgba(26, 18, 48, 0.85);
-            border: 2px solid #39ff14;
-            border-radius: 8px;
-            color: #39ff14;
+        /* Combat & Torch Control Panel Modules in Center/Right */
+        .combat-module-group {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: bold;
-            text-align: center;
-            box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
-            padding: 4px;
-            line-height: 1.3;
+            gap: 4px;
+            flex: 1;
+            margin: 0 6px;
         }
+        .module-row {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+        }
+        .module-btn {
+            background: rgba(26, 18, 48, 0.9);
+            border: 2px solid #00f0ff;
+            color: #00f0ff;
+            padding: 6px 8px;
+            font-size: 9px;
+            font-family: monospace;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+            text-transform: uppercase;
+        }
+        .module-btn:active, .module-btn:hover {
+            background: #00f0ff;
+            color: #05030a;
+        }
+        .shield-mod-btn { border-color: #39ff14; color: #39ff14; box-shadow: 0 0 8px rgba(57, 255, 20, 0.2); }
+        .shield-mod-btn:active, .shield-mod-btn:hover { background: #39ff14; color: #05030a; }
+        
+        .torch-mod-btn { border-color: #ffda66; color: #ffda66; box-shadow: 0 0 8px rgba(255, 218, 102, 0.2); }
+        .torch-mod-btn:active, .torch-mod-btn:hover { background: #ffda66; color: #05030a; }
 
-        /* Right Look Pad on Console */
+        /* World Camera Look Pad */
         #mobile-lookpad {
-            width: 130px;
-            height: 100px;
+            width: 100px;
+            height: 90px;
             background: rgba(26, 18, 48, 0.85);
             border: 2px solid #ff0055;
             border-radius: 8px;
@@ -336,51 +354,14 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: bold;
             text-align: center;
             box-shadow: 0 0 10px rgba(255,0,85,0.3);
-            padding: 4px;
-            line-height: 1.3;
+            padding: 2px;
+            line-height: 1.2;
+            flex-shrink: 0;
         }
-
-        /* Top Left & Right Dedicated Combat Overlay Zones */
-        #mobile-combat-overlay {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            display: flex;
-            justify-content: space-between;
-            pointer-events: none;
-            z-index: 125;
-        }
-        .combat-zone-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            pointer-events: auto;
-        }
-        .combat-action-btn {
-            background: rgba(14, 10, 24, 0.85);
-            border: 2px solid #00f0ff;
-            color: #00f0ff;
-            padding: 8px 12px;
-            font-size: 11px;
-            font-family: monospace;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
-            text-transform: uppercase;
-            transition: all 0.1s ease;
-        }
-        .combat-action-btn:active, .combat-action-btn:hover {
-            background: #00f0ff;
-            color: #05030a;
-        }
-        .shield-btn { border-color: #39ff14; color: #39ff14; box-shadow: 0 0 10px rgba(57, 255, 20, 0.2); }
-        .shield-btn:active, .shield-btn:hover { background: #39ff14; color: #05030a; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -395,35 +376,40 @@
     <div id="info-btn" title="Toggle Instructions">i</div>
 
     <div id="mobile-controls">
-        <!-- Top left and right combat action panels -->
-        <div id="mobile-combat-overlay">
-            <div class="combat-zone-group">
-                <button class="combat-action-btn shield-btn" id="btn-shield-high">🛡️ High Shield Bash</button>
-                <button class="combat-action-btn shield-btn" id="btn-shield-mid">🛡️ Mid Shield Bash</button>
-                <button class="combat-action-btn shield-btn" id="btn-shield-low">🛡️ Low Shield Bash</button>
-            </div>
-            <div class="combat-zone-group">
-                <button class="combat-action-btn" id="btn-sword-high">⚔️ Top Right Cleave</button>
-                <button class="combat-action-btn" id="btn-sword-mid">⚔️ Mid Right Slash</button>
-                <button class="combat-action-btn" id="btn-sword-low">⚔️ Low Right Slash</button>
-            </div>
-        </div>
-
-        <!-- Raised Bottom Command Console Deck -->
+        <!-- Raised Bottom Command Console Deck with Built-In Module Buttons -->
         <div id="mobile-deck-console">
+            <!-- Standard Movement D-Pad -->
             <div id="dpad-container">
                 <div class="dpad-btn" id="btn-up">▲</div>
                 <div class="dpad-btn" id="btn-down">▼</div>
                 <div class="dpad-btn" id="btn-left">◀</div>
                 <div class="dpad-btn" id="btn-right">▶</div>
             </div>
-            <div id="mobile-torch-lookpad">
-                <div>🔦 TORCH HEAD</div>
-                <div style="font-size:8px; color:#39ff14; margin-top:2px;">Swipe to aim helmet & torch</div>
+
+            <!-- Built-In Control Module Panel for Shield, Sword & Torch -->
+            <div class="combat-module-group">
+                <div class="module-row">
+                    <button class="module-btn shield-mod-btn" id="btn-mod-sh-high">🛡️ High Bash</button>
+                    <button class="module-btn shield-mod-btn" id="btn-mod-sh-mid">🛡️ Mid Bash</button>
+                    <button class="module-btn shield-mod-btn" id="btn-mod-sh-low">🛡️ Low Bash</button>
+                </div>
+                <div class="module-row">
+                    <button class="module-btn" id="btn-mod-sw-high">⚔️ Top Cleave</button>
+                    <button class="module-btn" id="btn-mod-sw-mid">⚔️ Mid Slash</button>
+                    <button class="module-btn" id="btn-mod-sw-low">⚔️ Low Slash</button>
+                </div>
+                <div class="module-row">
+                    <button class="module-btn torch-mod-btn" id="btn-mod-torch-up">🔦 Torch ▲</button>
+                    <button class="module-btn torch-mod-btn" id="btn-mod-torch-down">🔦 Torch ▼</button>
+                    <button class="module-btn torch-mod-btn" id="btn-mod-torch-left">🔦 Torch ◀</button>
+                    <button class="module-btn torch-mod-btn" id="btn-mod-torch-right">🔦 Torch ▶</button>
+                </div>
             </div>
+
+            <!-- World Camera Look Pad -->
             <div id="mobile-lookpad">
                 <div>👆 WORLD LOOK</div>
-                <div style="font-size:8px; color:#ffda66; margin-top:2px;">Swipe to rotate camera view</div>
+                <div style="font-size:7px; color:#ffda66; margin-top:2px;">Swipe to rotate camera</div>
             </div>
         </div>
     </div>
@@ -456,9 +442,8 @@
         • <b>A / D</b>: Steer / Rotate Knight<br>
         • <b>F</b>: Toggle Head Mounted Torch 🔦<br>
         • <b>E</b>: Call Lift<br>
-        • <b>Torch Head Pad (Center)</b>: Aim Knight's Helmet & Spotlight<br>
-        • <b>World Look Pad (Right)</b>: Rotate Camera / World View<br>
-        • <b>Top Combat Buttons</b>: Dedicated Shield Bashes & Sword Slashes<br>
+        • <b>Module Buttons (Bottom Panel)</b>: Shield bashes, sword slashes, and torch aiming vector buttons.<br>
+        • <b>World Look Pad (Right)</b>: Swipe to rotate camera view.<br>
     </div>
 
     <div id="speedometer">
@@ -2605,15 +2590,12 @@
         const raycaster = new THREE.Raycaster();
         const mouseVec = new THREE.Vector2();
 
-        let worldCameraAngle = 0; // World rotation angle controlled by Look Pad / Right mouse dragging
-        let knightHeadAimX = 0; // Controlled by 3rd Torch Head look pad
+        let worldCameraAngle = 0;
+        let knightHeadAimX = 0;
         let knightHeadAimY = 0;
 
         let activeLookTouchId = null;
-        let activeTorchTouchId = null;
         let lastTouchX = 0;
-        let lastTorchTouchX = 0;
-        let lastTorchTouchY = 0;
 
         const infoBtn = document.getElementById('info-btn');
         const uiModal = document.getElementById('ui-modal');
@@ -2649,10 +2631,9 @@
             keys[k] = false;
         };
 
-        // Mouse handlers
         let isRightMouseDown = false;
         window.onmousedown = (e) => {
-            if (e.button === 2) { // Right click drag for world look
+            if (e.button === 2) {
                 isRightMouseDown = true;
                 lastTouchX = e.clientX;
                 return;
@@ -2673,11 +2654,7 @@
                 }
             }
 
-            let chosenType = 'sword_mid_slash';
-            if (e.button === 0) {
-                chosenType = 'sword_mid_slash';
-            }
-            triggerAttack(chosenType);
+            triggerAttack('sword_mid_slash');
         };
 
         window.onmousemove = (e) => {
@@ -2717,7 +2694,6 @@
             bindTouchHold('btn-left', 'a');
             bindTouchHold('btn-right', 'd');
 
-            // Combat action buttons mapping
             const bindCombatAction = (btnId, attackType) => {
                 const el = document.getElementById(btnId);
                 if (!el) return;
@@ -2726,18 +2702,31 @@
                     triggerAttack(attackType);
                 });
             };
-            bindCombatAction('btn-shield-high', 'shield_high_shove');
-            bindCombatAction('btn-shield-mid', 'shield_mid_shove');
-            bindCombatAction('btn-shield-low', 'shield_low_shove');
-            bindCombatAction('btn-sword-high', 'sword_high_cleave');
-            bindCombatAction('btn-sword-mid', 'sword_mid_slash');
-            bindCombatAction('btn-sword-low', 'sword_low_slash');
+            bindCombatAction('btn-mod-sh-high', 'shield_high_shove');
+            bindCombatAction('btn-mod-sh-mid', 'shield_mid_shove');
+            bindCombatAction('btn-mod-sh-low', 'shield_low_shove');
+            bindCombatAction('btn-mod-sw-high', 'sword_high_cleave');
+            bindCombatAction('btn-mod-sw-mid', 'sword_mid_slash');
+            bindCombatAction('btn-mod-sw-low', 'sword_low_slash');
+
+            const bindTorchAction = (btnId, dx, dy) => {
+                const el = document.getElementById(btnId);
+                if (!el) return;
+                el.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    knightHeadAimX += dx;
+                    knightHeadAimY += dy;
+                });
+            };
+            bindTorchAction('btn-mod-torch-up', 0, 0.2);
+            bindTorchAction('btn-mod-torch-down', 0, -0.2);
+            bindTorchAction('btn-mod-torch-left', 0.2, 0);
+            bindTorchAction('btn-mod-torch-right', -0.2, 0);
 
             window.addEventListener('touchstart', (e) => {
                 for (let i = 0; i < e.targetTouches.length; i++) {
                     const touch = e.targetTouches[i];
                     const lookPadEl = document.getElementById('mobile-lookpad');
-                    const torchPadEl = document.getElementById('mobile-torch-lookpad');
 
                     if (lookPadEl) {
                         const r = lookPadEl.getBoundingClientRect();
@@ -2745,17 +2734,6 @@
                             if (activeLookTouchId === null) {
                                 activeLookTouchId = touch.identifier;
                                 lastTouchX = touch.clientX;
-                            }
-                        }
-                    }
-
-                    if (torchPadEl) {
-                        const r = torchPadEl.getBoundingClientRect();
-                        if (touch.clientX >= r.left && touch.clientX <= r.right && touch.clientY >= r.top && touch.clientY <= r.bottom) {
-                            if (activeTorchTouchId === null) {
-                                activeTorchTouchId = touch.identifier;
-                                lastTorchTouchX = touch.clientX;
-                                lastTorchTouchY = touch.clientY;
                             }
                         }
                     }
@@ -2768,15 +2746,7 @@
                     if (touch.identifier === activeLookTouchId) {
                         const dx = touch.clientX - lastTouchX;
                         lastTouchX = touch.clientX;
-                        worldCameraAngle -= dx * 0.008; // World view rotation
-                    }
-                    if (touch.identifier === activeTorchTouchId) {
-                        const dx = touch.clientX - lastTorchTouchX;
-                        const dy = touch.clientY - lastTorchTouchY;
-                        lastTorchTouchX = touch.clientX;
-                        lastTorchTouchY = touch.clientY;
-                        knightHeadAimX -= dx * 0.01;
-                        knightHeadAimY -= dy * 0.01;
+                        worldCameraAngle -= dx * 0.008;
                     }
                 }
             }, { passive: false });
@@ -2785,9 +2755,6 @@
                 for (let i = 0; i < e.changedTouches.length; i++) {
                     if (e.changedTouches[i].identifier === activeLookTouchId) {
                         activeLookTouchId = null;
-                    }
-                    if (e.changedTouches[i].identifier === activeTorchTouchId) {
-                        activeTorchTouchId = null;
                     }
                 }
             };
