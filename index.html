@@ -15,6 +15,22 @@
             padding: 0;
             touch-action: none;
         }
+        /* Mobile Collapsed Chat */
+.chat-minimized #ctrl-chat-box, 
+.chat-minimized .ctrl-chat-input-row {
+    display: none !important;
+}
+#chat-toggle-btn {
+    display: none;
+    background: #ff0055;
+    border: none;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+}
         body, html {
             width: 100%;
             height: 100%;
@@ -384,6 +400,27 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
+        // Auto-minimize chat on mobile devices
+if (isMobileDevice) {
+    const overlay = document.getElementById('contestant-controller-overlay');
+    if (overlay) {
+        overlay.classList.add('chat-minimized');
+        const toggleBtn = document.getElementById('chat-toggle-btn');
+        if (toggleBtn) toggleBtn.style.display = 'inline-block';
+    }
+}
+
+function toggleMobileChat() {
+    const overlay = document.getElementById('contestant-controller-overlay');
+    const toggleBtn = document.getElementById('chat-toggle-btn');
+    if (overlay.classList.contains('chat-minimized')) {
+        overlay.classList.remove('chat-minimized');
+        toggleBtn.textContent = '❌ HIDE';
+    } else {
+        overlay.classList.add('chat-minimized');
+        toggleBtn.textContent = '💬 CHAT';
+    }
+}
         const isMobileDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || /Mobi|Android/i.test(navigator.userAgent);
         if (isMobileDevice) {
             const mobileControlsEl = document.getElementById('mobile-controls');
@@ -441,7 +478,8 @@
         function updateStudioLighting(power) {
             studioPower = power;
         }
-
+studioLightCenter.intensity = power ? 3.5 : 0.0;
+studioLightWarm.intensity = power ? 3.0 : 0.0;
         function enterStudioAutomatically() {
             if (!studioGameActive) {
                 selectedGameMode = 'solo';
@@ -1066,11 +1104,19 @@
         const studioCenterZ = gateZ - 200.0;
 
         const studioFloorMat = new THREE.MeshStandardMaterial({
-            color: '#120b22',
-            roughness: 0.7,
-            metalness: 0.3,
-            side: THREE.DoubleSide
-        });
+    color: '#1a0508', // Rich dark red background
+    roughness: 0.5,
+    metalness: 0.4,
+    side: THREE.DoubleSide
+});
+        for (let i = 0; i < arms; i++) {
+    spCtx.fillStyle = (i % 2 === 0) ? '#ff0000' : '#ffffff'; // Red and White!
+    spCtx.beginPath();
+    spCtx.moveTo(0, 0);
+    spCtx.arc(0, 0, 350, (i * Math.PI * 2) / arms, ((i + 1) * Math.PI * 2) / arms);
+    spCtx.closePath();
+    spCtx.fill();
+}
         const studioFloor = new THREE.Mesh(
             new THREE.BoxGeometry(studioWidth, 1.0, studioLength),
             studioFloorMat
@@ -1808,11 +1854,11 @@
         studioPerimeterLine.position.set(-35.0, finalLandingY + 0.02, studioCenterZ);
         studioGroup.add(studioPerimeterLine);
 
-        const studioLightCenter = new THREE.PointLight('#00f0ff', 3.0, 140);
-        studioLightCenter.position.set(-35.0, finalLandingY + 18.0, studioCenterZ);
-        const studioLightWarm = new THREE.PointLight('#ff0055', 2.5, 120);
-        studioLightWarm.position.set(-35.0, finalLandingY + 16.0, studioCenterZ - 30.0);
-        studioGroup.add(studioLightCenter, studioLightWarm);
+        const studioLightCenter = new THREE.PointLight('#ff0000', 0.0, 140); // Starts OFF (0 intensity)
+studioLightCenter.position.set(-35.0, finalLandingY + 18.0, studioCenterZ);
+const studioLightWarm = new THREE.PointLight('#ffffff', 0.0, 120); // Starts OFF (0 intensity)
+studioLightWarm.position.set(-35.0, finalLandingY + 16.0, studioCenterZ - 30.0);
+studioGroup.add(studioLightCenter, studioLightWarm);
 
         function renderWallReelCanvas(wall, delta) {
             const ctx = wall.ctx;
