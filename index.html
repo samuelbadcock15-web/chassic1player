@@ -3581,8 +3581,14 @@ targetHeadYaw = Math.max(LIMIT_RIGHT, Math.min(LIMIT_LEFT, targetHeadYaw));
                 const insideLiftFootprint = (knight.group.position.x > -40.5 && knight.group.position.x < -29.5 && knight.group.position.z > -50.5 && knight.group.position.z < -39.5);
                 const isActuallyInsideCar = insideLiftFootprint && Math.abs(knight.group.position.y - currentLiftY) < 1.8;
 
-                const currentMaxSpeed = isActuallyInsideCar ? 0.38 : 0.70;
-                const currentAccel = isActuallyInsideCar ? 0.05 : 0.08;
+                // Check if player is down in the tunnels/underground
+let isInTunnels = (playerCurrentFloor === "BASEMENT" && undergroundGroup.visible);
+
+// Boost speed on mobile only while inside the bottom tunnels
+let mobileTunnelSpeedBonus = (isMobileDevice && isInTunnels) ? 1.45 : 1.0;
+
+const currentMaxSpeed = (isActuallyInsideCar ? 0.38 : 0.70) * mobileTunnelSpeedBonus;
+const currentAccel = isActuallyInsideCar ? 0.05 : 0.08;
 
                 const isMovingForward = (keys['w'] || keys['arrowup']);
                 const isMovingBackward = (keys['s'] || keys['arrowdown']);
