@@ -2609,11 +2609,12 @@
                         lastTouchY = touch.clientY;
 
                         // Head look / aim with strict limits
+// Head look / aim with custom limits
 touchLookYaw -= dx * 0.008;
-touchLookYaw = Math.max(-0.8, Math.min(0.8, touchLookYaw)); // Limit Left / Right
+touchLookYaw = Math.max(2, Math.min(2, touchLookYaw)); // Wider Left / Right
 
 touchLookPitch -= dy * 0.008;
-touchLookPitch = Math.max(-0.5, Math.min(0.4, touchLookPitch)); // Limit Down / Up
+touchLookPitch = Math.max(-0.2, Math.min(0.2, touchLookPitch)); // Tighter Down / Up
 
                         // Swipe left/right auto-steer integration with D-pad highlighting
                         const btnLeftEl = document.getElementById('btn-left');
