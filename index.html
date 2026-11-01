@@ -257,8 +257,8 @@
         }
         #dpad-container {
             position: absolute;
-            bottom: 30px;
-            left: 30px;
+            bottom: 20px;
+            left: 20px;
             width: 140px;
             height: 140px;
             pointer-events: auto;
@@ -276,10 +276,12 @@
             border-radius: 8px;
             cursor: pointer;
             box-shadow: 0 0 10px rgba(255,0,85,0.3);
+            transition: background 0.1s, color 0.1s, border-color 0.1s;
         }
-        .dpad-btn:active {
+        .dpad-btn:active, .dpad-btn.active-press {
             background: #ff0055;
             color: #fff;
+            border-color: #39ff14;
         }
         #btn-up { top: 0; left: 45px; width: 50px; height: 45px; }
         #btn-down { bottom: 0; left: 45px; width: 50px; height: 45px; }
@@ -288,10 +290,10 @@
 
         #mobile-lookpad {
             position: absolute;
-            bottom: 30px;
+            bottom: 20px;
             right: 20px;
-            width: 140px;
-            height: 120px;
+            width: 150px;
+            height: 110px;
             background: rgba(14, 10, 24, 0.85);
             border: 2px solid #ff0055;
             border-radius: 8px;
@@ -330,7 +332,7 @@
         </div>
         <div id="mobile-lookpad">
             <div>👆 LOOK PAD</div>
-            <div style="font-size:9px; color:#ffda66; margin-top:2px;">Swipe to look round / aim</div>
+            <div style="font-size:9px; color:#ffda66; margin-top:2px;">Swipe to look / aim</div>
         </div>
     </div>
 
@@ -353,8 +355,14 @@
 
     <div id="ui-modal">
         <div class="modal-header">
-            <span>KNIGHT COMBAT CONTROLS</span>
+            <span>KNIGHT COMBAT & STATUS</span>
             <span class="close-btn" id="modal-close">&times;</span>
+        </div>
+        <hr>
+        <div id="mobile-status-info" style="margin-bottom: 10px; font-size: 13px; line-height: 1.4;">
+            Floor: <span class="stat-tag" id="modal-floor">GROUND FLOOR</span><br>
+            Status: <span class="stat-tag" id="modal-status">Idle</span><br>
+            Zone: <span id="modal-zone" class="sector-tag">Neutral</span>
         </div>
         <hr>
         <b>Controls:</b><br>
@@ -362,8 +370,9 @@
         • <b>A / D</b>: Steer / Rotate Knight<br>
         • <b>F</b>: Toggle Head Mounted Torch 🔦<br>
         • <b>E</b>: Call Lift<br>
-        • <b>Mouse Cursor / Lookpad</b>: Aim Head & Flashlight Beam (Pitch & Yaw)<br>
-        • <b>Click / Tap</b>: Slash / Strike / Spin Portal Reels / Click Podium & Studio Touch Screens & Trivia Answers<br>
+        • <b>Mouse / Screen Swipe</b>: Aim Head & Flashlight (Pitch & Yaw)<br>
+        • <b>Screen Swipe Left / Right</b>: Auto-steers Left/Right D-pad<br>
+        • <b>Tap Knight / Screen</b>: Slash / Strike / Spin Portal Reels / Trivia Answers<br>
     </div>
 
     <div id="speedometer">
@@ -375,13 +384,11 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        // Properly define mobile device detector
         const isMobileDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || /Mobi|Android/i.test(navigator.userAgent);
         if (isMobileDevice) {
             const mobileControlsEl = document.getElementById('mobile-controls');
             if (mobileControlsEl) mobileControlsEl.style.display = 'block';
-            
-            // Hide the speedometer/floor status box on mobile so it doesn't overlap controls or lookpad
+
             const speedEl = document.getElementById('speedometer');
             if (speedEl) speedEl.style.display = 'none';
         }
@@ -1883,7 +1890,7 @@
                 wall.reelStates[i] = "SPINNING";
                 wall.stopTimes[i] = now + 0.40 + (i * 0.25);
             }
-            wall.pendingSuccess = true; // Automatically unlocks after spin!
+            wall.pendingSuccess = true;
 
             playElevatorPing();
         }
@@ -2562,14 +2569,16 @@
         };
         window.oncontextmenu = (e) => e.preventDefault();
 
-        // Touch listeners for mobile devices
+        // Mobile controls with swipe-to-turn and auto-highlight dpad
         if (isMobileDevice) {
             const bindTouchHold = (elemId, keyName) => {
                 const el = document.getElementById(elemId);
                 if (!el) return;
-                el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; });
-                el.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
-                el.addEventListener('touchcancel', (e) => { e.preventDefault(); keys[keyName] = false; });
+                const activate = (e) => { e.preventDefault(); keys[keyName] = true; el.classList.add('active-press'); };
+                const deactivate = (e) => { e.preventDefault(); keys[keyName] = false; el.classList.remove('active-press'); };
+                el.addEventListener('touchstart', activate);
+                el.addEventListener('touchend', deactivate);
+                el.addEventListener('touchcancel', deactivate);
             };
             bindTouchHold('btn-up', 'w');
             bindTouchHold('btn-down', 's');
@@ -2579,7 +2588,8 @@
             window.addEventListener('touchstart', (e) => {
                 for (let i = 0; i < e.targetTouches.length; i++) {
                     const touch = e.targetTouches[i];
-                    if (touch.clientX > 180 && touch.clientY < window.innerHeight - 140) {
+                    // If touch is not on the dpad area (bottom-left)
+                    if (!(touch.clientX < 180 && touch.clientY > window.innerHeight - 180)) {
                         if (activeLookTouchId === null) {
                             activeLookTouchId = touch.identifier;
                             lastTouchX = touch.clientX;
@@ -2598,9 +2608,26 @@
                         lastTouchX = touch.clientX;
                         lastTouchY = touch.clientY;
 
+                        // Head look / aim
                         touchLookYaw -= dx * 0.008;
                         touchLookPitch -= dy * 0.008;
                         touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
+
+                        // Swipe left/right auto-steer integration with D-pad highlighting
+                        const btnLeftEl = document.getElementById('btn-left');
+                        const btnRightEl = document.getElementById('btn-right');
+
+                        if (dx < -3) {
+                            keys['a'] = true;
+                            keys['d'] = false;
+                            if(btnLeftEl) btnLeftEl.classList.add('active-press');
+                            if(btnRightEl) btnRightEl.classList.remove('active-press');
+                        } else if (dx > 3) {
+                            keys['d'] = true;
+                            keys['a'] = false;
+                            if(btnRightEl) btnRightEl.classList.add('active-press');
+                            if(btnLeftEl) btnLeftEl.classList.remove('active-press');
+                        }
                     }
                 }
             }, { passive: false });
@@ -2609,6 +2636,12 @@
                 for (let i = 0; i < e.changedTouches.length; i++) {
                     if (e.changedTouches[i].identifier === activeLookTouchId) {
                         activeLookTouchId = null;
+                        keys['a'] = false;
+                        keys['d'] = false;
+                        const btnLeftEl = document.getElementById('btn-left');
+                        const btnRightEl = document.getElementById('btn-right');
+                        if(btnLeftEl) btnLeftEl.classList.remove('active-press');
+                        if(btnRightEl) btnRightEl.classList.remove('active-press');
                     }
                 }
             };
@@ -3500,6 +3533,18 @@
             renderStageQuestionBoard();
             renderPodium1Screen();
 
+            // Update modal & speedometer info
+            let currentZoneName = ZONE_NAMES[knight ? knight.activeZone : 0];
+            const zoneDisplayEl = document.getElementById('zone-display');
+            if (zoneDisplayEl) zoneDisplayEl.textContent = currentZoneName;
+            
+            const modalFloorEl = document.getElementById('modal-floor');
+            const modalStatusEl = document.getElementById('modal-status');
+            const modalZoneEl = document.getElementById('modal-zone');
+            if (modalFloorEl) modalFloorEl.textContent = playerCurrentFloor;
+            if (modalStatusEl) modalStatusEl.textContent = knight && knight.isAttacking ? 'Attacking' : (Math.abs(knight.speed) > 0.01 ? 'Moving' : 'Idle');
+            if (modalZoneEl) modalZoneEl.textContent = currentZoneName;
+
             if (knight && knight.group.position.z < gateZ && !studioGameActive) {
                 enterStudioAutomatically();
             }
@@ -3682,15 +3727,6 @@
 
                 const zone = calculateSector();
                 knight.activeZone = zone;
-
-                let attackLabel = "";
-                if (knight.isAttacking) {
-                    if (knight.attackType.includes('punch')) attackLabel = "Shield Punch 🛡️";
-                    else if (knight.attackType.includes('shove')) attackLabel = "Heavy Shield Shove 💥";
-                    else if (knight.attackType.includes('guard')) attackLabel = "Low Leg Shield Parry 🛡️";
-                    else if (knight.attackType.includes('thrust')) attackLabel = "Sword Thrust 🗡️";
-                    else if (knight.attackType.includes('slash') || knight.attackType.includes('cleave')) attackLabel = "Sword Cleave Slash ⚔️";
-                }
 
                 const isHeavyStepAttack = knight.isAttacking && (knight.attackType.includes('shove') || knight.attackType.includes('slash') || knight.attackType.includes('cleave'));
 
