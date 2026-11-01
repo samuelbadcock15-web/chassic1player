@@ -3604,8 +3604,14 @@ const currentAccel = isActuallyInsideCar ? 0.05 : 0.08;
                     if (knight.speed < 0) knight.speed = Math.min(0, knight.speed + knight.decel);
                 }
 
-                if (isTurningLeft) knight.angle += 0.045;
-                if (isTurningRight) knight.angle -= 0.045;
+                // Check if player is inside the Game Show studio zone
+let isInGameShowArea = knight.group.position.z < gateZ;
+
+// Boost turning speed on mobile only while inside the game show area
+let turnSpeed = (isMobileDevice && isInGameShowArea) ? 0.085 : 0.045;
+
+if (isTurningLeft) knight.angle += turnSpeed;
+if (isTurningRight) knight.angle -= turnSpeed;
                 knight.group.rotation.y = knight.angle;
 
                 let nextPos = knight.group.position.clone();
