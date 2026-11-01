@@ -2662,8 +2662,11 @@
                         touchLookPitch -= dy * 0.008;
                         touchLookPitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, touchLookPitch));
 
-                        touchLookYaw -= dx * 0.008;
-                        touchLookYaw = Math.max(-MAX_YAW, Math.min(MAX_YAW, touchLookYaw));
+                       // Make mobile swipe look much faster and snappier
+let swipeSpeedMultiplier = isMobileDevice ? 0.022 : 0.008;
+
+touchLookYaw -= dx * swipeSpeedMultiplier;
+touchLookPitch -= dy * swipeSpeedMultiplier;
 
                         const btnLeftEl = document.getElementById('btn-left');
                         const btnRightEl = document.getElementById('btn-right');
@@ -3627,11 +3630,17 @@
 
                 // Mobile tunnel movement speed booster
                 let isInTunnels = (playerCurrentFloor === "BASEMENT" && undergroundGroup.visible);
-                let mobileTunnelSpeedBonus = (isMobileDevice && isInTunnels) ? 1.45 : 1.0;
+                // Give mobile a general speed boost everywhere so it doesn't feel like crawling
+let mobileOverallSpeed = isMobileDevice ? 1.85 : 1.0;
+let mobileTunnelSpeedBonus = (isMobileDevice && isInTunnels) ? 2.2 : mobileOverallSpeed;
 
-                const currentMaxSpeed = (isActuallyInsideCar ? 0.38 : 0.70) * mobileTunnelSpeedBonus;
-                const currentAccel = isActuallyInsideCar ? 0.05 : 0.08;
+const currentMaxSpeed = (isActuallyInsideCar ? 0.38 : 0.70) * mobileTunnelSpeedBonus;
+const currentAccel = isActuallyInsideCar ? 0.05 : (isMobileDevice ? 0.15 : 0.08); // Snappier acceleration on mobile
+                // Make turning super snappy on mobile D-pad / swipe
+let turnSpeed = (isMobileDevice && isInGameShowArea) ? 0.12 : (isMobileDevice ? 0.09 : 0.045);
 
+if (isTurningLeft) knight.angle += turnSpeed;
+if (isTurningRight) knight.angle -= turnSpeed;
                 const isMovingForward = (keys['w'] || keys['arrowup']);
                 const isMovingBackward = (keys['s'] || keys['arrowdown']);
                 const isTurningLeft = (keys['a'] || keys['arrowleft']);
