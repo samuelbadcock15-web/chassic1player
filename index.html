@@ -2599,23 +2599,24 @@
                 }
             }, { passive: false });
 
-            window.addEventListener('touchmove', (e) => {
+window.addEventListener('touchmove', (e) => {
     for (let i = 0; i < e.targetTouches.length; i++) {
         const touch = e.targetTouches[i];
-        // If touch is on the right-side look pad area
+        
+        // Check if this touch is on the right-side look pad area (e.g. right half of the screen)
         if (touch.identifier === activeLookTouchId) {
             const dx = touch.clientX - lastTouchX;
             const dy = touch.clientY - lastTouchY;
             lastTouchX = touch.clientX;
             lastTouchY = touch.clientY;
 
-            // EXCLUSIVELY update head pitch and yaw (aim / flashlight only)
+            // EXCLUSIVELY rotate the knight's head, visor, and flashlight aim
             touchLookYaw -= dx * 0.008;
             touchLookPitch -= dy * 0.008;
             touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
 
-            // NOTE: Automatic steering triggers (keys['a'] and keys['d']) 
-            // have been completely removed here so body movement is unaffected!
+            // NOTE: We intentionally removed keys['a'] and keys['d'] modifications here 
+            // so the look pad no longer interferes with or steers the knight's body.
         }
     }
 }, { passive: false });
