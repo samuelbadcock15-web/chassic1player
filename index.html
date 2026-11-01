@@ -15,22 +15,6 @@
             padding: 0;
             touch-action: none;
         }
-        /* Mobile Collapsed Chat */
-.chat-minimized #ctrl-chat-box, 
-.chat-minimized .ctrl-chat-input-row {
-    display: none !important;
-}
-#chat-toggle-btn {
-    display: none;
-    background: #ff0055;
-    border: none;
-    color: #fff;
-    font-size: 0.7rem;
-    font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 4px;
-    cursor: pointer;
-}
         body, html {
             width: 100%;
             height: 100%;
@@ -326,6 +310,23 @@
             padding: 6px;
             line-height: 1.3;
         }
+
+        /* Mobile Minimized Chat Styles */
+        .chat-minimized #ctrl-chat-box, 
+        .chat-minimized .ctrl-chat-input-row {
+            display: none !important;
+        }
+        #chat-toggle-btn {
+            display: none;
+            background: #ff0055;
+            border: none;
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: bold;
+            padding: 3px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -355,7 +356,10 @@
     <div id="contestant-controller-overlay">
         <div class="controller-header">
             <span>PODIUM 1: SOLO TERMINAL</span>
-            <span id="ctrl-timer-badge" style="color: #39ff14;">20:00</span>
+            <div>
+                <button id="chat-toggle-btn" onclick="toggleMobileChat()">💬 CHAT</button>
+                <span id="ctrl-timer-badge" style="color: #39ff14; margin-left: 6px;">20:00</span>
+            </div>
         </div>
         <div id="ctrl-status-msg" style="color: #39ff14; font-family: monospace; margin-bottom: 6px;">Ready for studio linkage...</div>
         <button class="ctrl-btn" id="btn-ctrl-roll" disabled>🎲 ROLL DICE (LOCKED)</button>
@@ -400,27 +404,6 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        // Auto-minimize chat on mobile devices
-if (isMobileDevice) {
-    const overlay = document.getElementById('contestant-controller-overlay');
-    if (overlay) {
-        overlay.classList.add('chat-minimized');
-        const toggleBtn = document.getElementById('chat-toggle-btn');
-        if (toggleBtn) toggleBtn.style.display = 'inline-block';
-    }
-}
-
-function toggleMobileChat() {
-    const overlay = document.getElementById('contestant-controller-overlay');
-    const toggleBtn = document.getElementById('chat-toggle-btn');
-    if (overlay.classList.contains('chat-minimized')) {
-        overlay.classList.remove('chat-minimized');
-        toggleBtn.textContent = '❌ HIDE';
-    } else {
-        overlay.classList.add('chat-minimized');
-        toggleBtn.textContent = '💬 CHAT';
-    }
-}
         const isMobileDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || /Mobi|Android/i.test(navigator.userAgent);
         if (isMobileDevice) {
             const mobileControlsEl = document.getElementById('mobile-controls');
@@ -428,6 +411,26 @@ function toggleMobileChat() {
 
             const speedEl = document.getElementById('speedometer');
             if (speedEl) speedEl.style.display = 'none';
+
+            // Auto-minimize chat on mobile
+            const overlay = document.getElementById('contestant-controller-overlay');
+            if (overlay) {
+                overlay.classList.add('chat-minimized');
+                const toggleBtn = document.getElementById('chat-toggle-btn');
+                if (toggleBtn) toggleBtn.style.display = 'inline-block';
+            }
+        }
+
+        function toggleMobileChat() {
+            const overlay = document.getElementById('contestant-controller-overlay');
+            const toggleBtn = document.getElementById('chat-toggle-btn');
+            if (overlay.classList.contains('chat-minimized')) {
+                overlay.classList.remove('chat-minimized');
+                toggleBtn.textContent = '❌ HIDE';
+            } else {
+                overlay.classList.add('chat-minimized');
+                toggleBtn.textContent = '💬 CHAT';
+            }
         }
 
         let selectedGameMode = 'solo';
@@ -475,11 +478,16 @@ function toggleMobileChat() {
             "Welcome back to the hot seat! Next time try rolling the dice instead of sprinting!"
         ];
 
+        let studioLightCenterObj, studioLightWarmObj;
+
         function updateStudioLighting(power) {
             studioPower = power;
+            if (studioLightCenterObj && studioLightWarmObj) {
+                studioLightCenterObj.intensity = power ? 3.5 : 0.0;
+                studioLightWarmObj.intensity = power ? 3.0 : 0.0;
+            }
         }
-studioLightCenter.intensity = power ? 3.5 : 0.0;
-studioLightWarm.intensity = power ? 3.0 : 0.0;
+
         function enterStudioAutomatically() {
             if (!studioGameActive) {
                 selectedGameMode = 'solo';
@@ -1103,20 +1111,13 @@ studioLightWarm.intensity = power ? 3.0 : 0.0;
         const studioHeight = 24.0;
         const studioCenterZ = gateZ - 200.0;
 
+        // Clean Red and White game show style floor
         const studioFloorMat = new THREE.MeshStandardMaterial({
-    color: '#1a0508', // Rich dark red background
-    roughness: 0.5,
-    metalness: 0.4,
-    side: THREE.DoubleSide
-});
-        for (let i = 0; i < arms; i++) {
-    spCtx.fillStyle = (i % 2 === 0) ? '#ff0000' : '#ffffff'; // Red and White!
-    spCtx.beginPath();
-    spCtx.moveTo(0, 0);
-    spCtx.arc(0, 0, 350, (i * Math.PI * 2) / arms, ((i + 1) * Math.PI * 2) / arms);
-    spCtx.closePath();
-    spCtx.fill();
-}
+            color: '#2a080d',
+            roughness: 0.5,
+            metalness: 0.3,
+            side: THREE.DoubleSide
+        });
         const studioFloor = new THREE.Mesh(
             new THREE.BoxGeometry(studioWidth, 1.0, studioLength),
             studioFloorMat
@@ -1215,7 +1216,7 @@ studioLightWarm.intensity = power ? 3.0 : 0.0;
             spCtx.rotate(time * 0.4);
             const arms = 12;
             for (let i = 0; i < arms; i++) {
-                spCtx.fillStyle = (i % 2 === 0) ? '#ff0055' : '#00f0ff';
+                spCtx.fillStyle = (i % 2 === 0) ? '#ff0000' : '#ffffff'; // Red & White Game Show Carpet
                 spCtx.beginPath();
                 spCtx.moveTo(0, 0);
                 spCtx.arc(0, 0, 350, (i * Math.PI * 2) / arms, ((i + 1) * Math.PI * 2) / arms);
@@ -1854,11 +1855,12 @@ studioLightWarm.intensity = power ? 3.0 : 0.0;
         studioPerimeterLine.position.set(-35.0, finalLandingY + 0.02, studioCenterZ);
         studioGroup.add(studioPerimeterLine);
 
-        const studioLightCenter = new THREE.PointLight('#ff0000', 0.0, 140); // Starts OFF (0 intensity)
-studioLightCenter.position.set(-35.0, finalLandingY + 18.0, studioCenterZ);
-const studioLightWarm = new THREE.PointLight('#ffffff', 0.0, 120); // Starts OFF (0 intensity)
-studioLightWarm.position.set(-35.0, finalLandingY + 16.0, studioCenterZ - 30.0);
-studioGroup.add(studioLightCenter, studioLightWarm);
+        // Lights start OFF (intensity 0.0) until the studio power activates
+        studioLightCenterObj = new THREE.PointLight('#ff0055', 0.0, 140);
+        studioLightCenterObj.position.set(-35.0, finalLandingY + 18.0, studioCenterZ);
+        studioLightWarmObj = new THREE.PointLight('#ffffff', 0.0, 120);
+        studioLightWarmObj.position.set(-35.0, finalLandingY + 16.0, studioCenterZ - 30.0);
+        studioGroup.add(studioLightCenterObj, studioLightWarmObj);
 
         function renderWallReelCanvas(wall, delta) {
             const ctx = wall.ctx;
@@ -2356,13 +2358,13 @@ studioGroup.add(studioLightCenter, studioLightWarm);
             headPivot.add(visor);
 
             const torchLight = new THREE.SpotLight('#ff0033', 18.0, 180, Math.PI / 5.5, 0.3, 1.0);
-torchLight.position.set(0, 2.2, -0.6); // Positioned near chest/neck height
-torso.add(torchLight);                // <--- Attached to torso (body) instead of head!
+            torchLight.position.set(0, 2.2, -0.6);
+            torso.add(torchLight);
 
-const torchTarget = new THREE.Object3D();
-torchTarget.position.set(0, 2.2, -25.6); // Points strictly forward relative to body
-torso.add(torchTarget);
-torchLight.target = torchTarget;
+            const torchTarget = new THREE.Object3D();
+            torchTarget.position.set(0, 2.2, -25.6);
+            torso.add(torchTarget);
+            torchLight.target = torchTarget;
 
             const legGeom = new THREE.CylinderGeometry(0.2, 0.2, 3);
             legGeom.translate(0, -1.5, 0);
@@ -2634,7 +2636,6 @@ torchLight.target = torchTarget;
             window.addEventListener('touchstart', (e) => {
                 for (let i = 0; i < e.targetTouches.length; i++) {
                     const touch = e.targetTouches[i];
-                    // If touch is not on the dpad area (bottom-left)
                     if (!(touch.clientX < 180 && touch.clientY > window.innerHeight - 180)) {
                         if (activeLookTouchId === null) {
                             activeLookTouchId = touch.identifier;
@@ -2654,18 +2655,16 @@ torchLight.target = torchTarget;
                         lastTouchX = touch.clientX;
                         lastTouchY = touch.clientY;
 
-                        // Head look / aim
-                        const MAX_PITCH = 0.6;   // Max look up/down (~35 degrees)
-const MAX_YAW = 1.0;     // Max look left/right (~57 degrees)
+                        // Restrict head look range: less up/down, more left/right
+                        const MAX_PITCH = 0.2;   
+                        const MAX_YAW = 1.3;     
 
-// For mouse/touch look calculations:
-touchLookPitch -= dy * 0.008;
-touchLookPitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, touchLookPitch));
+                        touchLookPitch -= dy * 0.008;
+                        touchLookPitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, touchLookPitch));
 
-touchLookYaw -= dx * 0.008;
-touchLookYaw = Math.max(-MAX_YAW, Math.min(MAX_YAW, touchLookYaw));
+                        touchLookYaw -= dx * 0.008;
+                        touchLookYaw = Math.max(-MAX_YAW, Math.min(MAX_YAW, touchLookYaw));
 
-                        // Swipe left/right auto-steer integration with D-pad highlighting
                         const btnLeftEl = document.getElementById('btn-left');
                         const btnRightEl = document.getElementById('btn-right');
 
@@ -3255,16 +3254,16 @@ touchLookYaw = Math.max(-MAX_YAW, Math.min(MAX_YAW, touchLookYaw));
             const normY = (mouse.y / window.innerHeight) * 2 - 1;
 
             let targetHeadPitch = (-normY * 0.75) + touchLookPitch;
-let targetHeadYaw = (-normX * 0.95) + touchLookYaw;
+            let targetHeadYaw = (-normX * 0.95) + touchLookYaw;
 
-// STRICT HEAD LIMITS (adjust numbers to taste)
-const LIMIT_UP = 0.4;     // Maximum head tilt UP
-const LIMIT_DOWN = -0.5;  // Maximum head tilt DOWN
-const LIMIT_LEFT = 0.8;   // Maximum head turn LEFT
-const LIMIT_RIGHT = -0.8; // Maximum head turn RIGHT
+            // Restrict head range: less up/down movement, wider left/right range
+            const LIMIT_UP = 0.2;     
+            const LIMIT_DOWN = -0.2;  
+            const LIMIT_LEFT = 1.3;   
+            const LIMIT_RIGHT = -1.3; 
 
-targetHeadPitch = Math.max(LIMIT_DOWN, Math.min(LIMIT_UP, targetHeadPitch));
-targetHeadYaw = Math.max(LIMIT_RIGHT, Math.min(LIMIT_LEFT, targetHeadYaw));
+            targetHeadPitch = Math.max(LIMIT_DOWN, Math.min(LIMIT_UP, targetHeadPitch));
+            targetHeadYaw = Math.max(LIMIT_RIGHT, Math.min(LIMIT_LEFT, targetHeadYaw));
             const targetHeadRoll = -normX * normY * 0.15;
 
             const tHeadRot = new THREE.Euler(targetHeadPitch, targetHeadYaw, targetHeadRoll);
@@ -3594,7 +3593,6 @@ targetHeadYaw = Math.max(LIMIT_RIGHT, Math.min(LIMIT_LEFT, targetHeadYaw));
             renderStageQuestionBoard();
             renderPodium1Screen();
 
-            // Update modal & speedometer info
             let currentZoneName = ZONE_NAMES[knight ? knight.activeZone : 0];
             const zoneDisplayEl = document.getElementById('zone-display');
             if (zoneDisplayEl) zoneDisplayEl.textContent = currentZoneName;
@@ -3627,14 +3625,12 @@ targetHeadYaw = Math.max(LIMIT_RIGHT, Math.min(LIMIT_LEFT, targetHeadYaw));
                 const insideLiftFootprint = (knight.group.position.x > -40.5 && knight.group.position.x < -29.5 && knight.group.position.z > -50.5 && knight.group.position.z < -39.5);
                 const isActuallyInsideCar = insideLiftFootprint && Math.abs(knight.group.position.y - currentLiftY) < 1.8;
 
-                // Check if player is down in the tunnels/underground
-let isInTunnels = (playerCurrentFloor === "BASEMENT" && undergroundGroup.visible);
+                // Mobile tunnel movement speed booster
+                let isInTunnels = (playerCurrentFloor === "BASEMENT" && undergroundGroup.visible);
+                let mobileTunnelSpeedBonus = (isMobileDevice && isInTunnels) ? 1.45 : 1.0;
 
-// Boost speed on mobile only while inside the bottom tunnels
-let mobileTunnelSpeedBonus = (isMobileDevice && isInTunnels) ? 1.45 : 1.0;
-
-const currentMaxSpeed = (isActuallyInsideCar ? 0.38 : 0.70) * mobileTunnelSpeedBonus;
-const currentAccel = isActuallyInsideCar ? 0.05 : 0.08;
+                const currentMaxSpeed = (isActuallyInsideCar ? 0.38 : 0.70) * mobileTunnelSpeedBonus;
+                const currentAccel = isActuallyInsideCar ? 0.05 : 0.08;
 
                 const isMovingForward = (keys['w'] || keys['arrowup']);
                 const isMovingBackward = (keys['s'] || keys['arrowdown']);
@@ -3650,14 +3646,12 @@ const currentAccel = isActuallyInsideCar ? 0.05 : 0.08;
                     if (knight.speed < 0) knight.speed = Math.min(0, knight.speed + knight.decel);
                 }
 
-                // Check if player is inside the Game Show studio zone
-let isInGameShowArea = knight.group.position.z < gateZ;
+                // Mobile game show area turning speed booster
+                let isInGameShowArea = knight.group.position.z < gateZ;
+                let turnSpeed = (isMobileDevice && isInGameShowArea) ? 0.085 : 0.045;
 
-// Boost turning speed on mobile only while inside the game show area
-let turnSpeed = (isMobileDevice && isInGameShowArea) ? 0.085 : 0.045;
-
-if (isTurningLeft) knight.angle += turnSpeed;
-if (isTurningRight) knight.angle -= turnSpeed;
+                if (isTurningLeft) knight.angle += turnSpeed;
+                if (isTurningRight) knight.angle -= turnSpeed;
                 knight.group.rotation.y = knight.angle;
 
                 let nextPos = knight.group.position.clone();
