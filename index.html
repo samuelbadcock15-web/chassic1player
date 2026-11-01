@@ -2614,20 +2614,20 @@
                         touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
 
                         // Swipe left/right auto-steer integration with D-pad highlighting
-                        const btnLeftEl = document.getElementById('btn-left');
-                        const btnRightEl = document.getElementById('btn-right');
+const btnLeftEl = document.getElementById('btn-left');
+const btnRightEl = document.getElementById('btn-right');
 
-                        if (dx < -3) {
-                            keys['a'] = true;
-                            keys['d'] = false;
-                            if(btnLeftEl) btnLeftEl.classList.add('active-press');
-                            if(btnRightEl) btnRightEl.classList.remove('active-press');
-                        } else if (dx > 3) {
-                            keys['d'] = true;
-                            keys['a'] = false;
-                            if(btnRightEl) btnRightEl.classList.add('active-press');
-                            if(btnLeftEl) btnLeftEl.classList.remove('active-press');
-                        }
+if (dx < -3) {
+    keys['a'] = true;
+    keys['d'] = false;
+    if(btnLeftEl) btnLeftEl.classList.add('active-press');
+    if(btnRightEl) btnRightEl.classList.remove('active-press');
+} else if (dx > 3) {
+    keys['d'] = true;
+    keys['a'] = false;
+    if(btnRightEl) btnRightEl.classList.add('active-press');
+    if(btnLeftEl) btnLeftEl.classList.remove('active-press');
+}
                     }
                 }
             }, { passive: false });
@@ -3203,9 +3203,11 @@
             const normY = (mouse.y / window.innerHeight) * 2 - 1;
 
             const targetHeadPitch = (-normY * 0.75) + touchLookPitch;
-            const targetHeadYaw = (-normX * 0.95) + touchLookYaw;
-            const targetHeadRoll = -normX * normY * 0.15;
-
+// Remove touchLookYaw or keep it purely bound to cursor/aim vector, 
+// ensuring A/D turning does NOT alter the head's world rotation:
+const targetHeadYaw = (-normX * 0.95); 
+const targetHeadRoll = -normX * normY * 0.15;
+            
             const tHeadRot = new THREE.Euler(targetHeadPitch, targetHeadYaw, targetHeadRoll);
             let tSwordRot = knight.defaultSwordRot.clone();
             let tSwordPos = knight.defaultSwordPos.clone();
@@ -3784,8 +3786,8 @@
                     const targetHeight = isInStudio ? 4.5 : 4.2;
                     const lookHeight = 2.2;
 
-                    const targetCamX = knight.group.position.x + Math.sin(knight.angle) * targetDist;
-                    const targetCamZ = knight.group.position.z + Math.cos(knight.angle) * targetDist;
+                   const targetCamX = knight.group.position.x + Math.sin(knight.angle) * targetDist;
+const targetCamZ = knight.group.position.z + Math.cos(knight.angle) * targetDist;
                     const targetCamY = knight.group.position.y + targetHeight;
 
                     camera.position.x += (targetCamX - camera.position.x) * 0.16;
