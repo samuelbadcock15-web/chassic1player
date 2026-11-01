@@ -2226,7 +2226,20 @@
 
             updateSpiralCarpetTexture(time);
             updateStartTileTexture(time);
+            
+// --- MANUAL ADDITION: PATROL ANIMATION & CAMERA SHAKE ---
+        if (giantGroup) {
+            let patrolCycle = Math.sin(time * 0.8) * 35.0; 
+            giantGroup.position.x = -35.0 + patrolCycle;
+            giantGroup.rotation.y = (Math.cos(time * 0.8) > 0) ? Math.PI / 2 : -Math.PI / 2;
 
+            // Shake camera slightly when he walks past the windows close to you
+            if (Math.abs(patrolCycle) > 30 && camera) {
+                camera.position.x += (Math.random() - 0.5) * 0.08;
+                camera.position.y += (Math.random() - 0.5) * 0.08;
+            }
+        }
+            
             // --- ANIMATE GIANT CUSTODIAN (BIG MAN) & CAMERA SHAKE ---
             if (giantGroup) {
                 let patrolCycle = Math.sin(time * 0.8) * 35.0; 
