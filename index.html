@@ -5563,179 +5563,95 @@
 
 
         function handlePodiumScreenClick(podiumId, uv) {
-
             if (studioPoweredDown) return;
-
+            
+            // Only trigger force continue if we are actually away from the podium
             if (playerAwayFromPodium) {
-
                 forceContinueGameShow();
-
                 return;
-
             }
-
+            
             if (lockedOutTimer > 0) return;
 
-
-
             let screenX = uv.x * 256;
-
             let screenY = (1.0 - uv.y) * 160;
 
-
-
             if (podiumId === 1) {
-
-                if (screenY >= 60 && screenY <= 105 && screenX >= 15 && screenX <= 241) {
-
-                    forceContinueGameShow();
-
-                    return;
-
-                }
-
                 if (showHostState === 'WAITING_FOR_HOST') {
-
                     if (screenX >= 20 && screenX <= 236 && screenY >= 45 && screenY <= 130) {
-
                         startShowInteractiveFlow();
-
                         return;
-
                     }
-
                 } else if (showHostState === 'DICE_ROLL') {
-
                     if (diceFlickering && screenX >= 20 && screenX <= 236 && screenY >= 45 && screenY <= 130) {
-
                         triggerDiceRollAction();
-
                         return;
-
                     }
-
                 } else if (showHostState === 'TRIVIA') {
-
                     if (triviaTimerActive && !answerLockedIn && screenY >= 52 && screenY <= 100) {
-
                         const ansLabels = ["A", "B", "C", "D"];
-
                         ansLabels.forEach((ansLbl, aIdx) => {
-
                             let ax = 18 + (aIdx * 56);
-
                             if (screenX >= ax && screenX <= ax + 48) {
-
                                 selectTriviaAnswer(aIdx);
-
                             }
-
                         });
-
                     }
-
                 }
-
             }
-
         }
-
 
 
         function handleMainStudioScreenClick(uv) {
-
             if (studioPoweredDown) {
-
                 studioPoweredDown = false;
-
                 powerOffCountdown = 10.0;
-
                 showHostState = 'WAITING_FOR_HOST';
-
                 playElevatorPing();
-
                 let restartSpeech = "Power restored! Welcome back to the Goody Tonight Show. Click to start.";
-
                 if ('speechSynthesis' in window) {
-
                     window.speechSynthesis.cancel();
-
                     window.speechSynthesis.speak(new SpeechSynthesisUtterance(restartSpeech));
-
                 }
-
                 renderStageQuestionBoard();
-
                 renderPodium1Screen();
-
                 return;
-
             }
 
-
-
+            // Only trigger if player was actually away
             if (playerAwayFromPodium) {
-
                 forceContinueGameShow();
-
                 return;
-
             }
-
             if (lockedOutTimer > 0) return;
 
-
-
             let screenX = uv.x * 512;
-
             let screenY = (1.0 - uv.y) * 384;
 
-
-
             if (showHostState === 'WAITING_FOR_HOST') {
-
                 if (screenX >= 50 && screenX <= 462 && screenY >= 140 && screenY <= 260) {
-
                     startShowInteractiveFlow();
-
                     return;
-
                 }
-
             } else if (showHostState === 'DICE_ROLL') {
-
                 if (diceFlickering && screenX >= 50 && screenX <= 462 && screenY >= 100 && screenY <= 280) {
-
                     triggerDiceRollAction();
-
                     return;
-
                 }
-
             } else if (showHostState === 'TRIVIA') {
-
                 if (triviaTimerActive && !answerLockedIn) {
-
-                    const currentQ = getCurrentTriviaQuestionObject();
-
+                    let countryEntry = COUNTRIES_LIST[currentTriviaCountryIndex];
+                    let pool = COUNTRY_QUESTIONS[countryEntry.poolKey];
+                    let currentQ = pool[currentTriviaQuestionInPoolIndex];
                     currentQ.options.forEach((opt, idx) => {
-
                         let optY = 85 + (idx * 46);
-
                         if (screenX >= 20 && screenX <= 492 && screenY >= optY && screenY <= optY + 38) {
-
                             selectTriviaAnswer(idx);
-
                         }
-
                     });
-
                 }
-
             }
-
         }
-
 
 
         function startShowInteractiveFlow() {
