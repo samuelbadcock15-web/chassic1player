@@ -2521,12 +2521,55 @@
 
         let touchLookPitch = 0.35;
         let touchLookYaw = 0;
-        let activeLookTouchId = null;   // For the bottom-right look pad (head only)
-        let activeBodyTouchId = null;   // For the main screen (body only)
+        let activeLookTouchId = null;
         let lastTouchX = 0;
         let lastTouchY = 0;
-        let lastBodyTouchX = 0;
 
+        const infoBtn = document.getElementById('info-btn');
+        const uiModal = document.getElementById('ui-modal');
+        const modalClose = document.getElementById('modal-close');
+        infoBtn.onclick = () => uiModal.classList.toggle('open');
+        modalClose.onclick = () => uiModal.classList.remove('open');
+
+        const startScreen = document.getElementById('startScreen');
+        const startBtn = document.getElementById('startBtn');
+
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                startScreen.style.display = 'none';
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn("Audio Context blocked or unsupported", e);
+                }
+                gameRunning = true;
+                clock.start();
+                gameLoop();
+            });
+        }
+
+        window.onkeydown = (e) => {
+            let k = e.key.toLowerCase();
+            keys[k] = true;
+            if (k === 'f') toggleTorch();
+            if (k === 'e') handleInteractionKey();
+        };
+        window.onkeyup = (e) => {
+            let k = e.key.toLowerCase();
+            keys[k] = false;
+        };
+
+        window.onmousemove = (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        };
+        window.onmouseleave = () => {
+            mouse.x = window.innerWidth / 2;
+            mouse.y = window.innerHeight / 2;
+        };
+        window.oncontextmenu = (e) => e.preventDefault();
+
+        // Mobile controls with swipe-to-turn and auto-highlight dpad
         if (isMobileDevice) {
             const bindTouchHold = (elemId, keyName) => {
                 const el = document.getElementById(elemId);
@@ -2545,28 +2588,12 @@
             window.addEventListener('touchstart', (e) => {
                 for (let i = 0; i < e.targetTouches.length; i++) {
                     const touch = e.targetTouches[i];
-                    
-                    // Check if touch is inside the Look Pad element (bottom-right)
-                    const lookPadEl = document.getElementById('mobile-lookpad');
-                    const lookPadRect = lookPadEl ? lookPadEl.getBoundingClientRect() : null;
-                    
-                    const isInsideLookPad = lookPadRect && 
-                        touch.clientX >= lookPadRect.left && touch.clientX <= lookPadRect.right &&
-                        touch.clientY >= lookPadRect.top && touch.clientY <= lookPadRect.bottom;
-
-                    if (isInsideLookPad) {
+                    // If touch is not on the dpad area (bottom-left)
+                    if (!(touch.clientX < 180 && touch.clientY > window.innerHeight - 180)) {
                         if (activeLookTouchId === null) {
                             activeLookTouchId = touch.identifier;
                             lastTouchX = touch.clientX;
                             lastTouchY = touch.clientY;
-                        }
-                    } else {
-                        // Any touch outside the look pad and D-pad controls the body rotation
-                        if (!(touch.clientX < 180 && touch.clientY > window.innerHeight - 180)) {
-                            if (activeBodyTouchId === null) {
-                                activeBodyTouchId = touch.identifier;
-                                lastBodyTouchX = touch.clientX;
-                            }
                         }
                     }
                 }
@@ -2575,29 +2602,31 @@
             window.addEventListener('touchmove', (e) => {
                 for (let i = 0; i < e.targetTouches.length; i++) {
                     const touch = e.targetTouches[i];
-
-                    // 1. Look Pad Touch -> Moves HEAD ONLY
                     if (touch.identifier === activeLookTouchId) {
                         const dx = touch.clientX - lastTouchX;
                         const dy = touch.clientY - lastTouchY;
                         lastTouchX = touch.clientX;
                         lastTouchY = touch.clientY;
 
+                        // Head look / aim
                         touchLookYaw -= dx * 0.008;
-                        touchLookYaw = Math.max(-1.3, Math.min(1.3, touchLookYaw)); // Clamped left/right
-
                         touchLookPitch -= dy * 0.008;
-                        touchLookPitch = Math.max(-0.8, Math.min(0.8, touchLookPitch)); // Clamped up/down
-                    }
+                        touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
 
-                    // 2. Main Screen Swipe -> Rotates KNIGHT'S BODY ONLY
-                    if (touch.identifier === activeBodyTouchId) {
-                        const dx = touch.clientX - lastBodyTouchX;
-                        lastBodyTouchX = touch.clientX;
+                        // Swipe left/right auto-steer integration with D-pad highlighting
+                        const btnLeftEl = document.getElementById('btn-left');
+                        const btnRightEl = document.getElementById('btn-right');
 
-                        // Rotate body angle directly based on swipe distance
-                        if (knight) {
-                            knight.angle -= dx * 0.012;
+                        if (dx < -3) {
+                            keys['a'] = true;
+                            keys['d'] = false;
+                            if(btnLeftEl) btnLeftEl.classList.add('active-press');
+                            if(btnRightEl) btnRightEl.classList.remove('active-press');
+                        } else if (dx > 3) {
+                            keys['d'] = true;
+                            keys['a'] = false;
+                            if(btnRightEl) btnRightEl.classList.add('active-press');
+                            if(btnLeftEl) btnLeftEl.classList.remove('active-press');
                         }
                     }
                 }
@@ -2607,9 +2636,12 @@
                 for (let i = 0; i < e.changedTouches.length; i++) {
                     if (e.changedTouches[i].identifier === activeLookTouchId) {
                         activeLookTouchId = null;
-                    }
-                    if (e.changedTouches[i].identifier === activeBodyTouchId) {
-                        activeBodyTouchId = null;
+                        keys['a'] = false;
+                        keys['d'] = false;
+                        const btnLeftEl = document.getElementById('btn-left');
+                        const btnRightEl = document.getElementById('btn-right');
+                        if(btnLeftEl) btnLeftEl.classList.remove('active-press');
+                        if(btnRightEl) btnRightEl.classList.remove('active-press');
                     }
                 }
             };
