@@ -2585,55 +2585,66 @@
             bindTouchHold('btn-left', 'a');
             bindTouchHold('btn-right', 'd');
 
-            window.addEventListener('touchstart', (e) => {
-                for (let i = 0; i < e.targetTouches.length; i++) {
-                    const touch = e.targetTouches[i];
-                    // If touch is not on the dpad area (bottom-left)
-                    if (!(touch.clientX < 180 && touch.clientY > window.innerHeight - 180)) {
-                        if (activeLookTouchId === null) {
-                            activeLookTouchId = touch.identifier;
-                            lastTouchX = touch.clientX;
-                            lastTouchY = touch.clientY;
-                        }
-                    }
-                }
-            }, { passive: false });
+let headTouchId = null;
+let cameraTouchId = null;
+let lastTouchX = 0;
+let lastTouchY = 0;
 
-window.addEventListener('touchmove', (e) => {
-    for (let i = 0; i < e.targetTouches.length; i++) {
-        const touch = e.targetTouches[i];
+window.addEventListener('touchstart', (e) => {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const touch = e.changedTouches[i];
+        const target = document.elementFromPoint(touch.clientX, touch.clientY);
         
-        // Check if this touch is on the right-side look pad area (e.g. right half of the screen)
-        if (touch.identifier === activeLookTouchId) {
-            const dx = touch.clientX - lastTouchX;
-            const dy = touch.clientY - lastTouchY;
-            lastTouchX = touch.clientX;
-            lastTouchY = touch.clientY;
-
-            // EXCLUSIVELY rotate the knight's head, visor, and flashlight aim
-            touchLookYaw -= dx * 0.008;
-            touchLookPitch -= dy * 0.008;
-            touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
-
-            // NOTE: We intentionally removed keys['a'] and keys['d'] modifications here 
-            // so the look pad no longer interferes with or steers the knight's body.
+        // Check if touch is specifically on the bottom-right look pad element
+        if (target && (target.id === 'mobile-lookpad' || target.closest('#mobile-lookpad'))) {
+            if (headTouchId === null) {
+                headTouchId = touch.identifier;
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
+            }
+        } else {
+            // General screen drag (right half of screen) for normal body/camera turning
+            if (cameraTouchId === null && touch.clientX > window.innerWidth * 0.3) {
+                cameraTouchId = touch.identifier;
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
+            }
         }
     }
 }, { passive: false });
 
-            const endTouchLook = (e) => {
-                for (let i = 0; i < e.changedTouches.length; i++) {
-                    if (e.changedTouches[i].identifier === activeLookTouchId) {
-                        activeLookTouchId = null;
-                        keys['a'] = false;
-                        keys['d'] = false;
-                        const btnLeftEl = document.getElementById('btn-left');
-                        const btnRightEl = document.getElementById('btn-right');
-                        if(btnLeftEl) btnLeftEl.classList.remove('active-press');
-                        if(btnRightEl) btnRightEl.classList.remove('active-press');
-                    }
-                }
-            };
+window.addEventListener('touchmove', (e) => {
+    for (let i = 0; i < e.targetTouches.length; i++) {
+        const touch = e.targetTouches[i];
+        const dx = touch.clientX - lastTouchX;
+        const dy = touch.clientY - lastTouchY;
+        
+        if (touch.identifier === headTouchId) {
+            // 1. BOTTOM-RIGHT LOOK PAD: Turns the knight's head and flashlight ONLY
+            touchLookYaw -= dx * 0.008;
+            touchLookPitch -= dy * 0.008;
+            touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
+        } 
+        else if (touch.identifier === cameraTouchId) {
+            // 2. MAIN SCREEN: Restores normal camera and body turning
+            // (Replace 'playerYaw' or camera rotation variable with your game's actual rotation property)
+            if (typeof playerYaw !== 'undefined') {
+                playerYaw -= dx * 0.005;
+            }
+        }
+        
+        lastTouchX = touch.clientX;
+        lastTouchY = touch.clientY;
+    }
+}, { passive: false });
+
+window.addEventListener('touchend', (e) => {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const touch = e.changedTouches[i];
+        if (touch.identifier === headTouchId) headTouchId = null;
+        if (touch.identifier === cameraTouchId) cameraTouchId = null;
+    }
+});
             window.addEventListener('touchend', endTouchLook);
             window.addEventListener('touchcancel', endTouchLook);
         }
