@@ -1,2329 +1,4579 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
     <title>Chassis World : Knight VR with Goody Tonight Show Studio (1-Player)</title>
+
     <style>
+
         :root {
+
             --danger-red: #FF0000;
+
             --orb-cyan: #00f2ff;
+
         }
+
         * {
+
             box-sizing: border-box;
+
             margin: 0;
+
             padding: 0;
+
             touch-action: none;
+
         }
+
         body, html {
+
             width: 100%;
+
             height: 100%;
+
             overflow: hidden;
+
             background-color: #05030a;
+
             font-family: 'Courier New', monospace;
+
             user-select: none;
+
         }
+
         #gameCanvas {
+
             display: block;
+
             width: 100%;
+
             height: 100%;
+
         }
+
         #info-btn {
+
             position: absolute;
+
             top: 15px;
+
             left: 15px;
+
             width: 38px;
+
             height: 38px;
+
             border-radius: 50%;
+
             background: rgba(14, 10, 24, 0.9);
+
             border: 2px solid #ff0055;
+
             color: #00f0ff;
+
             font-size: 20px;
+
             font-weight: bold;
+
             font-family: 'Georgia', serif;
+
             font-style: italic;
+
             display: flex;
+
             align-items: center;
+
             justify-content: center;
+
             cursor: pointer;
+
             z-index: 110;
+
             box-shadow: 0 0 12px rgba(255, 0, 85, 0.4);
+
             transition: all 0.2s ease;
+
         }
+
         #info-btn:hover {
+
             background: #ff0055;
+
             color: #05030a;
+
             transform: scale(1.08);
+
         }
+
         #ui-modal {
+
             position: absolute;
+
             top: 65px;
+
             left: 15px;
+
             color: #00f0ff;
+
             background: rgba(14, 10, 24, 0.95);
+
             padding: 16px;
+
             border: 2px solid #ff0055;
+
             border-radius: 8px;
+
             z-index: 100;
+
             max-width: 340px;
+
             pointer-events: auto;
+
             box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+
             backdrop-filter: blur(4px);
+
             display: none;
+
         }
+
         #ui-modal.open {
+
             display: block;
+
         }
+
         .modal-header {
+
             display: flex;
+
             justify-content: space-between;
+
             align-items: center;
+
             font-weight: bold;
+
             color: #ff0055;
+
             font-size: 15px;
+
             letter-spacing: 1px;
+
         }
+
         .close-btn {
+
             cursor: pointer;
+
             font-size: 18px;
+
             color: #00f0ff;
+
             padding: 0 4px;
+
         }
+
         .close-btn:hover {
+
             color: #ff0055;
+
         }
+
         hr {
+
             border: 0;
+
             border-top: 1px solid rgba(255, 0, 85, 0.4);
+
             margin: 10px 0;
+
         }
+
         #speedometer {
+
             position: absolute;
+
             bottom: 20px;
+
             right: 20px;
+
             color: #00f0ff;
+
             background: rgba(14, 10, 24, 0.9);
+
             padding: 10px 20px;
+
             font-size: 14px;
+
             border: 2px solid #ff0055;
+
             border-radius: 6px;
+
             font-weight: bold;
+
             line-height: 1.4;
+
             box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
+
             backdrop-filter: blur(4px);
+
             z-index: 10;
+
         }
+
         .sector-tag { color: #ffff00; font-weight: bold; }
+
         .stat-tag { color: #ff00ff; font-weight: bold; }
 
+
+
         #startScreen {
+
             position: absolute;
+
             top: 0; left: 0; width: 100%; height: 100%;
+
             background: radial-gradient(circle, #2b1c4d 0%, #05030a 100%);
+
             display: flex;
+
             flex-direction: column;
+
             justify-content: center;
+
             align-items: center;
+
             z-index: 200;
+
             cursor: default;
+
         }
+
         .start-title {
+
             color: #ff0055;
+
             font-size: 32px;
+
             font-weight: bold;
+
             letter-spacing: 4px;
+
             margin-bottom: 10px;
+
             text-shadow: 0 0 15px rgba(255, 0, 85, 0.8);
+
             text-align: center;
+
         }
+
         .start-subtitle {
+
             color: #00f0ff;
+
             font-size: 14px;
+
             margin-bottom: 40px;
+
             letter-spacing: 2px;
+
             text-align: center;
+
         }
+
         .start-btn {
+
             background: transparent;
+
             color: #00f0ff;
+
             border: 2px solid #00f0ff;
+
             padding: 16px 40px;
+
             font-size: 18px;
+
             font-family: monospace;
+
             font-weight: bold;
+
             cursor: pointer;
+
             border-radius: 4px;
+
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+
             transition: all 0.2s ease;
+
         }
+
         .start-btn:hover {
+
             background: #00f0ff;
+
             color: #020106;
+
             box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
+
         }
+
+
 
         #contestant-controller-overlay {
+
             position: absolute;
+
             top: 15px;
+
             right: 20px;
+
             width: 320px;
+
             background: rgba(13, 5, 26, 0.95);
+
             border: 2px solid #0984e3;
+
             border-radius: 12px;
+
             padding: 12px;
+
             z-index: 150;
+
             box-shadow: 0 0 20px rgba(9, 132, 227, 0.4);
+
             backdrop-filter: blur(6px);
+
             display: none;
+
             color: #fff;
+
             font-size: 0.8rem;
+
         }
+
         .controller-header {
+
             display: flex;
+
             justify-content: space-between;
+
             align-items: center;
+
             font-weight: bold;
+
             color: #ffda66;
+
             margin-bottom: 8px;
+
             font-family: monospace;
+
             font-size: 0.85rem;
+
             border-bottom: 1px solid rgba(255,255,255,0.1);
+
             padding-bottom: 4px;
+
         }
+
         .ctrl-btn {
+
             width: 100%;
+
             padding: 8px;
+
             background: linear-gradient(180deg, #0984e3, #0652dd);
+
             border: none;
+
             border-radius: 6px;
+
             color: #fff;
+
             font-weight: 900;
+
             font-family: monospace;
+
             cursor: pointer;
+
             text-transform: uppercase;
+
             margin-top: 6px;
+
         }
+
         .ctrl-btn:hover { background: #00a8ff; }
+
         .ctrl-btn:disabled { background: #555; color: #aaa; cursor: not-allowed; }
 
+
+
         #ctrl-chat-box {
+
             margin-top: 8px;
+
             background: #080313;
+
             border: 1px solid #a29bfe;
+
             border-radius: 6px;
+
             height: 90px;
+
             overflow-y: auto;
+
             padding: 4px;
+
             display: flex;
+
             flex-direction: column;
+
             gap: 3px;
+
             font-size: 0.72rem;
+
         }
+
         .ctrl-chat-input-row {
+
             display: flex;
+
             gap: 4px;
+
             margin-top: 4px;
+
         }
+
         .ctrl-input {
+
             flex: 1;
+
             background: #080313;
+
             border: 1px solid #a29bfe;
+
             border-radius: 4px;
+
             color: #fff;
+
             padding: 4px 6px;
+
             font-size: 0.72rem;
+
             outline: none;
+
         }
+
         .ctrl-send-btn {
+
             background: #d4af37;
+
             border: none;
+
             border-radius: 4px;
+
             font-weight: bold;
+
             padding: 0 8px;
+
             font-size: 0.68rem;
+
             cursor: pointer;
+
             color: #111;
+
         }
+
+
 
         #mobile-controls {
+
             position: absolute;
+
             top: 0;
+
             left: 0;
+
             width: 100%;
+
             height: 100%;
+
             pointer-events: none;
+
             z-index: 120;
+
             display: none;
+
         }
+
         #dpad-container {
+
             position: absolute;
+
             bottom: 20px;
+
             left: 20px;
+
             width: 140px;
+
             height: 140px;
+
             pointer-events: auto;
+
         }
+
         .dpad-btn {
+
             position: absolute;
+
             background: rgba(14, 10, 24, 0.85);
+
             border: 2px solid #ff0055;
+
             color: #00f0ff;
+
             font-size: 22px;
+
             font-weight: bold;
+
             display: flex;
+
             align-items: center;
+
             justify-content: center;
+
             border-radius: 8px;
+
             cursor: pointer;
+
             box-shadow: 0 0 10px rgba(255,0,85,0.3);
+
             transition: background 0.1s, color 0.1s, border-color 0.1s;
+
         }
+
         .dpad-btn:active, .dpad-btn.active-press {
+
             background: #ff0055;
+
             color: #fff;
+
             border-color: #39ff14;
+
         }
+
         #btn-up { top: 0; left: 45px; width: 50px; height: 45px; }
+
         #btn-down { bottom: 0; left: 45px; width: 50px; height: 45px; }
+
         #btn-left { top: 45px; left: 0; width: 45px; height: 50px; }
+
         #btn-right { top: 45px; right: 0; width: 45px; height: 50px; }
 
+
+
         #mobile-lookpad {
+
             position: absolute;
+
             bottom: 20px;
+
             right: 20px;
+
             width: 150px;
+
             height: 110px;
+
             background: rgba(14, 10, 24, 0.85);
+
             border: 2px solid #ff0055;
+
             border-radius: 8px;
+
             color: #00f0ff;
+
             display: flex;
+
             flex-direction: column;
+
             align-items: center;
+
             justify-content: center;
+
             font-size: 11px;
+
             font-weight: bold;
+
             text-align: center;
+
             pointer-events: auto;
+
             box-shadow: 0 0 10px rgba(255,0,85,0.3);
+
             padding: 6px;
+
             line-height: 1.3;
+
         }
+
+
 
         /* Mobile Minimized Chat Styles */
+
         .chat-minimized #ctrl-chat-box, 
+
         .chat-minimized .ctrl-chat-input-row {
+
             display: none !important;
+
         }
+
         #chat-toggle-btn {
+
             display: none;
+
             background: #ff0055;
+
             border: none;
+
             color: #fff;
+
             font-size: 0.65rem;
+
             font-weight: bold;
+
             padding: 3px 6px;
+
             border-radius: 4px;
+
             cursor: pointer;
+
         }
+
     </style>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
 </head>
+
 <body>
 
+
+
     <div id="startScreen">
+
         <div class="start-title">CHASSIS WORLD : KNIGHT VR</div>
+
         <div class="start-subtitle">BASEMENT, GATES OF HECK & GOODY TONIGHT SHOW STUDIO (1-PLAYER INTEGRATED) + GIANT OUTSIDE CUSTODIAN</div>
+
         <button class="start-btn" id="startBtn">START MISSION</button>
+
     </div>
+
+
 
     <div id="info-btn" title="Toggle Instructions">i</div>
 
+
+
     <div id="mobile-controls">
+
         <div id="dpad-container">
+
             <div class="dpad-btn" id="btn-up">▲</div>
+
             <div class="dpad-btn" id="btn-down">▼</div>
+
             <div class="dpad-btn" id="btn-left">◀</div>
+
             <div class="dpad-btn" id="btn-right">▶</div>
+
         </div>
+
         <div id="mobile-lookpad">
+
             <div>👆 LOOK PAD</div>
+
             <div style="font-size:9px; color:#ffda66; margin-top:2px;">Swipe to look / aim</div>
+
         </div>
+
     </div>
+
+
 
     <div id="contestant-controller-overlay">
+
         <div class="controller-header">
+
             <span>PODIUM 1: SOLO TERMINAL</span>
+
             <div>
+
                 <button id="chat-toggle-btn" onclick="toggleMobileChat()">💬 CHAT</button>
+
                 <span id="ctrl-timer-badge" style="color: #39ff14; margin-left: 6px;">20:00</span>
+
             </div>
+
         </div>
+
         <div id="ctrl-status-msg" style="color: #39ff14; font-family: monospace; margin-bottom: 6px;">Ready for studio linkage...</div>
+
         <button class="ctrl-btn" id="btn-ctrl-roll" disabled>🎲 ROLL DICE (LOCKED)</button>
+
         <button class="ctrl-btn" id="btn-ctrl-continue" style="display:none; background: linear-gradient(180deg, #00b894, #00cec9); color: #05030a;" onclick="forceContinueGameShow()">▶ FORCE CONTINUE (RESUME SHOW)</button>
+
         <div id="ctrl-chat-box">
+
             <div style="color: #888; font-style: italic;">Studio broadcast connection active...</div>
+
         </div>
+
         <div class="ctrl-chat-input-row">
+
             <input type="text" id="ctrl-chat-input" class="ctrl-input" maxlength="100" placeholder="Studio chat / dice roll..." autocomplete="off" />
+
             <button class="ctrl-send-btn" id="btn-ctrl-send">SEND</button>
+
         </div>
+
     </div>
+
+
 
     <div id="ui-modal">
+
         <div class="modal-header">
+
             <span>KNIGHT COMBAT & STATUS</span>
+
             <span class="close-btn" id="modal-close">&times;</span>
+
         </div>
+
         <hr>
+
         <div id="mobile-status-info" style="margin-bottom: 10px; font-size: 13px; line-height: 1.4;">
+
             Floor: <span class="stat-tag" id="modal-floor">GROUND FLOOR</span><br>
+
             Status: <span class="stat-tag" id="modal-status">Idle</span><br>
+
             Zone: <span id="modal-zone" class="sector-tag">Neutral</span>
+
         </div>
+
         <hr>
+
         <b>Controls:</b><br>
+
         • <b>W / S</b>: Move Forward / Backward<br>
+
         • <b>A / D</b>: Steer / Rotate Knight<br>
+
         • <b>F</b>: Toggle Head Mounted Torch 🔦<br>
+
         • <b>E</b>: Call Lift<br>
+
         • <b>Mouse / Screen Swipe</b>: Aim Head & Flashlight (Pitch & Yaw)<br>
+
         • <b>Screen Swipe Left / Right</b>: Auto-steers Left/Right D-pad<br>
+
         • <b>Tap Knight / Screen</b>: Slash / Strike / Spin Portal Reels / Trivia Answers<br>
+
     </div>
 
+
+
     <div id="speedometer">
+
         Floor: GROUND FLOOR<br>
+
         Status: Idle<br>
+
         Zone: <span id="zone-display" class="sector-tag">Neutral</span>
+
     </div>
+
+
 
     <canvas id="gameCanvas"></canvas>
 
+
+
     <script>
+
         const isMobileDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || /Mobi|Android/i.test(navigator.userAgent);
+
         if (isMobileDevice) {
+
             const mobileControlsEl = document.getElementById('mobile-controls');
+
             if (mobileControlsEl) mobileControlsEl.style.display = 'block';
 
+
+
             const speedEl = document.getElementById('speedometer');
+
             if (speedEl) speedEl.style.display = 'none';
 
+
+
             // Auto-minimize chat on mobile
+
             const overlay = document.getElementById('contestant-controller-overlay');
+
             if (overlay) {
+
                 overlay.classList.add('chat-minimized');
+
                 const toggleBtn = document.getElementById('chat-toggle-btn');
+
                 if (toggleBtn) toggleBtn.style.display = 'inline-block';
+
             }
+
         }
+
+
 
         function toggleMobileChat() {
+
             const overlay = document.getElementById('contestant-controller-overlay');
+
             const toggleBtn = document.getElementById('chat-toggle-btn');
+
             if (overlay.classList.contains('chat-minimized')) {
+
                 overlay.classList.remove('chat-minimized');
+
                 toggleBtn.textContent = '❌ HIDE';
+
             } else {
+
                 overlay.classList.add('chat-minimized');
+
                 toggleBtn.textContent = '💬 CHAT';
+
             }
+
         }
+
+
 
         let selectedGameMode = 'solo';
-        let giantGroup = null; // Global reference for the Big Man
+
         let studioGameActive = false;
+
         let showGameStarted = false;
+
         let studioPower = false;
+
         let showClockSeconds = 20 * 60;
+
         let soloGameLockedIn = false;
+
         let rollCountdownSeconds = 10.0;
 
+
+
         let showHostState = 'WAITING_FOR_HOST';
+
         let diceFlickering = false;
+
         let diceVal1 = 1;
+
         let visitedCountryName = "Start Zone";
+
         let counterPositionIndex = 0;
+
         let gameWon = false;
 
+
+
         let triviaCountdownSeconds = 30.0;
+
         let triviaTimerActive = false;
+
         let pendingQuestionTrigger = false;
 
+
+
         let isHopping = false;
+
         let hopProgress = 1.0;
+
         let hopDuration = 0.35;
+
         let hopStartIndex = 0;
+
         let hopTargetIndex = 0;
 
+
+
         let playerAwayFromPodium = false;
+
         let awayCountdownTimer = 0.0;
+
         let powerOffCountdown = 10.0;
+
         let studioPoweredDown = false;
+
         let lockedOutTimer = 0.0;
+
         let returnJokeIndex = 0;
 
+
+
         let giantGroup = null; // Global reference for the Big Man (Custodian)
+
         let studioLightCenterObj, studioLightWarmObj;
 
+
+
         const RETURN_JOKES = [
+
             "Look who decided our prize wasn't running away fast enough!",
+
             "You can't run away that easy, our self-exclusion rules track further than your legs!",
+
             "Thought you could dodge the trivia by sprinting to the buffet? Nice try!",
+
             "Welcome back! Were you checking if Great Britain moved closer while you walked?",
+
             "Ah, back from your cardio session! The dice missed you almost as much as your wrong answers.",
+
             "That's dedication to the walk of shame right there. Welcome back!",
+
             "Running from the host won't save you from the self-exclusion questions!",
+
             "Glad you returned! The studio doors were locked anyway, you can't escape Goody!",
+
             "Back so soon? Did you run out of energy or just realized Goody sees everything?",
+
             "Welcome back to the hot seat! Next time try rolling the dice instead of sprinting!"
+
         ];
 
+
+
         function updateStudioLighting(power) {
+
             studioPower = power;
+
             if (studioLightCenterObj && studioLightWarmObj) {
+
                 studioLightCenterObj.intensity = power ? 3.5 : 0.0;
+
                 studioLightWarmObj.intensity = power ? 3.0 : 0.0;
+
             }
+
         }
 
+
+
         function enterStudioAutomatically() {
+
             if (!studioGameActive) {
+
                 selectedGameMode = 'solo';
+
                 studioGameActive = true;
+
                 updateStudioLighting(true);
+
+
 
                 document.getElementById('contestant-controller-overlay').style.display = 'block';
 
+
+
                 let speechText = "Welcome to the Goody Tonight Show! Click Podium 1, the main studio screen, or use your solo terminal to start.";
+
                 if ('speechSynthesis' in window) {
+
                     window.speechSynthesis.speak(new SpeechSynthesisUtterance(speechText));
+
                 }
+
             }
+
         }
 
+
+
         const canvas = document.getElementById('gameCanvas');
+
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+
         renderer.setSize(window.innerWidth, window.innerHeight);
+
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
         renderer.toneMappingExposure = 1.35;
 
+
+
         let scene = new THREE.Scene();
+
         scene.fog = new THREE.FogExp2('#0b0716', 0.0035);
+
+
 
         let camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2000);
 
+
+
         let currentEquippedSwordId = 'sword_tier_0';
+
         let currentEquippedShieldId = 'shield_tier_0';
 
+
+
         let inventory = [
+
             { id: 'sword_tier_0', type: 'sword', tier: 0, name: 'Standard Knight Blade' },
+
             { id: 'shield_tier_0', type: 'shield', tier: 0, name: 'Standard Knight Shield' }
+
         ];
+
+
 
         function createBrilliantEnvMap() {
+
             const size = 128;
+
             const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(size);
+
             const cubeCam = new THREE.CubeCamera(0.1, 10, cubeRenderTarget);
 
+
+
             const envScene = new THREE.Scene();
+
             envScene.background = new THREE.Color(0x0b0716);
 
+
+
             const planeGeo = new THREE.PlaneGeometry(16, 16);
+
             const neonPink = new THREE.MeshBasicMaterial({ color: 0xff0055 });
+
             const neonBlue = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
 
+
+
             const top = new THREE.Mesh(planeGeo, neonBlue);
+
             top.position.y = 5; top.rotation.x = Math.PI / 2;
+
             envScene.add(top);
 
+
+
             const front = new THREE.Mesh(planeGeo, neonPink);
+
             front.position.z = 5; front.rotation.y = Math.PI;
+
             envScene.add(front);
 
+
+
             cubeCam.update(renderer, envScene);
+
             return cubeRenderTarget.texture;
+
         }
+
         const bladeEnvMap = createBrilliantEnvMap();
 
+
+
         const roomAmbient = new THREE.AmbientLight('#2b1f45', 1.0);
+
         scene.add(roomAmbient);
 
+
+
         const overheadLight = new THREE.DirectionalLight('#00f0ff', 0.8);
+
         overheadLight.position.set(0, 50, 20);
+
         scene.add(overheadLight);
 
+
+
         const arcadeFloorGlow = new THREE.PointLight('#00f0ff', 4, 100);
+
         arcadeFloorGlow.position.set(0, 12, 25);
+
         scene.add(arcadeFloorGlow);
 
+
+
         const floorNeonLineMat = new THREE.MeshBasicMaterial({ color: '#ff0077' });
+
         const floorNeonLine = new THREE.Mesh(new THREE.BoxGeometry(200, 0.12, 0.4), floorNeonLineMat);
+
         floorNeonLine.position.set(0, 0.02, 0);
+
         scene.add(floorNeonLine);
 
+
+
         const floorMat = new THREE.MeshStandardMaterial({ color: '#090514', roughness: 0.95, metalness: 0.05, side: THREE.DoubleSide });
+
         const groundFloorGroup = new THREE.Group();
 
+
+
         const gfLeft = new THREE.Mesh(new THREE.PlaneGeometry(59.5, 200), floorMat);
+
         gfLeft.rotation.x = -Math.PI / 2;
+
         gfLeft.position.set(-70.25, -0.05, 0);
 
+
+
         const gfRight = new THREE.Mesh(new THREE.PlaneGeometry(129.5, 200), floorMat);
+
         gfRight.rotation.x = -Math.PI / 2;
+
         gfRight.position.set(34.75, -0.05, 0);
 
+
+
         const gfFront = new THREE.Mesh(new THREE.PlaneGeometry(11, 49.5), floorMat);
+
         gfFront.rotation.x = -Math.PI / 2;
+
         gfFront.position.set(-35, -0.05, -75.25);
 
+
+
         const gfBack = new THREE.Mesh(new THREE.PlaneGeometry(11, 139.5), floorMat);
+
         gfBack.rotation.x = -Math.PI / 2;
+
         gfBack.position.set(-35, -0.05, 30.25);
 
+
+
         groundFloorGroup.add(gfLeft, gfRight, gfFront, gfBack);
+
         scene.add(groundFloorGroup);
 
+
+
         let partitionDoorState = "CLOSED";
+
         let partitionDoorAngle = 0;
 
+
+
         const wallGroup = new THREE.Group();
+
         wallGroup.position.set(0, 0, 0);
+
         scene.add(wallGroup);
 
+
+
         const frameMat = new THREE.MeshStandardMaterial({ color: '#00f0ff', emissive: '#00f0ff', emissiveIntensity: 0.5, metalness: 0.2, roughness: 0.8 });
+
         const leftPost = new THREE.Mesh(new THREE.BoxGeometry(0.3, 6.4, 0.6), frameMat);
+
         leftPost.position.set(-2.15, 3.2, 0);
+
         const rightPost = new THREE.Mesh(new THREE.BoxGeometry(0.3, 6.4, 0.6), frameMat);
+
         rightPost.position.set(2.15, 3.2, 0);
+
         const topLintel = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.3, 0.6), frameMat);
+
         topLintel.position.set(0, 6.3, 0);
+
         wallGroup.add(leftPost, rightPost, topLintel);
 
+
+
         const wallHeight = 7.0;
+
         const wallMat = new THREE.MeshStandardMaterial({ color: '#130a24', roughness: 0.95, metalness: 0.05 });
+
         const leftWallPart = new THREE.Mesh(new THREE.BoxGeometry(95, wallHeight, 1.2), wallMat);
+
         leftWallPart.position.set(-49.5, wallHeight / 2, 0);
+
         const rightWallPart = new THREE.Mesh(new THREE.BoxGeometry(95, wallHeight, 1.2), wallMat);
+
         rightWallPart.position.set(49.5, wallHeight / 2, 0);
+
         wallGroup.add(leftWallPart, rightWallPart);
 
+
+
         const floor1Mat = new THREE.MeshStandardMaterial({ color: '#1a1033', roughness: 0.95, metalness: 0.05, side: THREE.DoubleSide });
+
         const floor1Group = new THREE.Group();
+
         const f1Left = new THREE.Mesh(new THREE.BoxGeometry(59.5, 0.6, 50), floor1Mat);
+
         f1Left.position.set(-70.25, 6.9, -25);
+
         const f1Right = new THREE.Mesh(new THREE.BoxGeometry(130.5, 0.6, 50), floor1Mat);
+
         f1Right.position.set(34.75, 6.9, -25);
+
         const f1Front = new THREE.Mesh(new THREE.BoxGeometry(11, 0.6, 39.5), floor1Mat);
+
         f1Front.position.set(-35, 6.9, -19.75);
+
         const f1Back = new THREE.Mesh(new THREE.BoxGeometry(11, 0.6, 49.5), floor1Mat);
+
         f1Back.position.set(-35, 6.9, -75.25);
+
         floor1Group.add(f1Left, f1Right, f1Front, f1Back);
+
         scene.add(floor1Group);
 
+
+
         const basementY = -14;
+
         const basementMat = new THREE.MeshStandardMaterial({ color: '#110a24', roughness: 0.95, metalness: 0.05, side: THREE.DoubleSide });
+
         const basementGroup = new THREE.Group();
+
         const bLeft = new THREE.Mesh(new THREE.PlaneGeometry(59.5, 200), basementMat);
+
         bLeft.rotation.x = -Math.PI / 2;
+
         bLeft.position.set(-70.25, basementY, 0);
 
+
+
         const bRight = new THREE.Mesh(new THREE.PlaneGeometry(129.5, 200), basementMat);
+
         bRight.rotation.x = -Math.PI / 2;
+
         bRight.position.set(34.75, basementY, 0);
 
+
+
         const bFront = new THREE.Mesh(new THREE.PlaneGeometry(11, 49.5), basementMat);
+
         bFront.rotation.x = -Math.PI / 2;
+
         bFront.position.set(-35, basementY, -75.25);
 
+
+
         const bBack = new THREE.Mesh(new THREE.PlaneGeometry(11, 139.5), basementMat);
+
         bBack.rotation.x = -Math.PI / 2;
+
         bBack.position.set(-35, basementY, 30.25);
 
+
+
         basementGroup.add(bLeft, bRight, bFront, bBack);
+
         scene.add(basementGroup);
 
+
+
         const ironMat = new THREE.MeshStandardMaterial({ color: '#2c3540', roughness: 0.6, metalness: 0.4 });
+
         const emissiveGreen = new THREE.MeshBasicMaterial({ color: '#39ff14' });
+
         const emissiveBlue = new THREE.MeshBasicMaterial({ color: '#00f0ff' });
+
         const emissiveRed = new THREE.MeshBasicMaterial({ color: '#ff3333' });
+
         let movingParts = [];
 
+
+
         function createStationLabel(text, x, y, z) {
+
             const canvasLbl = document.createElement('canvas');
+
             canvasLbl.width = 256; canvasLbl.height = 64;
+
             const ctx = canvasLbl.getContext('2d');
+
             ctx.fillStyle = '#0a0d14'; ctx.fillRect(0, 0, 256, 64);
+
             ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 4; ctx.strokeRect(2, 2, 252, 60);
+
             ctx.font = 'bold 20px monospace'; ctx.fillStyle = '#39ff14'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
             ctx.fillText(text, 128, 32);
 
+
+
             const tex = new THREE.CanvasTexture(canvasLbl);
+
             const mesh = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }));
+
             mesh.position.set(x, basementY + y, z);
+
             mesh.rotation.y = Math.PI;
+
             scene.add(mesh);
+
             return mesh;
+
         }
+
+
 
         const stationBA = new THREE.Group();
+
         stationBA.position.set(15, basementY, -35);
+
         const funnelLeft = new THREE.Mesh(new THREE.BoxGeometry(1, 4, 6), ironMat);
+
         funnelLeft.position.set(-2, 2, 0); funnelLeft.rotation.y = 0.3;
+
         const funnelRight = new THREE.Mesh(new THREE.BoxGeometry(1, 4, 6), ironMat);
+
         funnelRight.position.set(2, 2, 0); funnelRight.rotation.y = -0.3;
+
         stationBA.add(funnelLeft, funnelRight);
+
         scene.add(stationBA);
+
         createStationLabel("BASE: INLET GUIDE", 15, 4.5, -35);
 
+
+
         const stationBB = new THREE.Group();
+
         stationBB.position.set(-15, basementY, -30);
+
         for(let i=0; i<3; i++) {
+
             const roller = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 4, 16), ironMat);
+
             roller.position.set(0, 1.5, -2 + (i*2));
+
             roller.rotation.x = Math.PI/2;
+
             stationBB.add(roller);
+
             movingParts.push({ obj: roller, type: 'spin', speed: 3 });
+
         }
+
         scene.add(stationBB);
+
         createStationLabel("BASE: ROLLERS", -15, 4.5, -30);
 
+
+
         const stationBC = new THREE.Group();
+
         stationBC.position.set(25, basementY, -5);
+
         const trackBase = new THREE.Mesh(new THREE.BoxGeometry(6, 0.5, 4), ironMat);
+
         trackBase.position.y = 0.25;
+
         const pusher = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 3), new THREE.MeshStandardMaterial({color: '#4f5d73', roughness: 0.8}));
+
         pusher.position.set(-2, 1.25, 0);
+
         stationBC.add(trackBase, pusher);
+
         scene.add(stationBC);
+
         movingParts.push({ obj: pusher, type: 'oscillate', speed: 4, range: 1.5, axis: 'x', base: -2 });
+
         createStationLabel("BASE: ALIGNMENT", 25, 4.5, -5);
 
+
+
         const stationBD = new THREE.Group();
+
         stationBD.position.set(10, basementY, 15);
+
         const scannerArch = new THREE.Mesh(new THREE.BoxGeometry(1, 5, 6), ironMat);
+
         scannerArch.position.set(0, 2.5, 0);
+
         const laserLine = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.1, 5.8), emissiveBlue);
+
         laserLine.position.set(0, 4.5, 0);
+
         stationBD.add(scannerArch, laserLine);
+
         scene.add(stationBD);
+
         movingParts.push({ obj: laserLine, type: 'oscillate', speed: 2.5, range: 4.0, axis: 'y', base: 2.5 });
+
         createStationLabel("BASE: SCANNER", 10, 5.5, 15);
 
+
+
         const stationBE = new THREE.Group();
+
         stationBE.position.set(-20, basementY, 10);
+
         const mainframe = new THREE.Mesh(new THREE.BoxGeometry(4, 5, 4), ironMat);
+
         mainframe.position.y = 2.5;
+
         const indicator = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8, 8), emissiveGreen);
+
         indicator.position.set(0, 5.1, 0);
+
         stationBE.add(mainframe, indicator);
+
         scene.add(stationBE);
+
         movingParts.push({ obj: indicator, type: 'blink', speed: 6 });
+
         createStationLabel("BASE: VALIDATION", -20, 6.0, 10);
 
+
+
         const stationBF = new THREE.Group();
+
         stationBF.position.set(-15, basementY, 30);
+
         const gatePost = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 4, 16), ironMat);
+
         gatePost.position.y = 2;
+
         const gateBlade = new THREE.Mesh(new THREE.BoxGeometry(4, 3, 0.2), ironMat);
+
         gateBlade.position.set(2, 2, 0);
+
         const gateGroup = new THREE.Group();
+
         gateGroup.add(gateBlade);
+
         gateGroup.position.set(0, 0, 0);
+
         stationBF.add(gatePost, gateGroup);
+
         scene.add(stationBF);
+
         movingParts.push({ obj: gateGroup, type: 'gateSwing', speed: 2 });
+
         createStationLabel("BASE: DIVERTER", -15, 4.5, 30);
 
+
+
         const stationBG = new THREE.Group();
+
         stationBG.position.set(20, basementY, 35);
+
         const binWall1 = new THREE.Mesh(new THREE.BoxGeometry(5, 3, 0.5), ironMat); binWall1.position.set(0, 1.5, -2.5);
+
         const binWall2 = new THREE.Mesh(new THREE.BoxGeometry(5, 3, 0.5), ironMat); binWall2.position.set(0, 1.5, 2.5);
+
         const binWall3 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3, 5), ironMat); binWall3.position.set(-2.5, 1.5, 0);
+
         const warningLight = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.5, 16), emissiveRed);
+
         warningLight.position.set(0, 3.2, 0);
+
         stationBG.add(binWall1, binWall2, binWall3, warningLight);
+
         scene.add(stationBG);
+
         movingParts.push({ obj: warningLight, type: 'blink', speed: 4 });
+
         createStationLabel("BASE: REJECT PATH", 20, 4.5, 35);
 
+
+
         const basementPanelCanvas = document.createElement('canvas');
+
         basementPanelCanvas.width = 1024; basementPanelCanvas.height = 512;
+
         const bCtx = basementPanelCanvas.getContext('2d');
+
         const basementPanelTex = new THREE.CanvasTexture(basementPanelCanvas);
+
         const basementPanelMat = new THREE.MeshBasicMaterial({ map: basementPanelTex, transparent: true, opacity: 0.9, side: THREE.DoubleSide });
+
         const basementPanelMesh = new THREE.Mesh(new THREE.PlaneGeometry(24, 12), basementPanelMat);
+
         basementPanelMesh.position.set(0, basementY + 6.0, -18);
+
         basementPanelMesh.rotation.y = Math.PI;
+
         scene.add(basementPanelMesh);
 
+
+
         const FeedSystemData = [
+
             { id: "BA", label: "NOTE INLET GUIDE", status: "ONLINE" },
+
             { id: "BB", label: "TRANSPORT ROLLERS", status: "RUNNING" },
+
             { id: "BC", label: "ALIGNMENT MECHANISM", status: "ENGAGED" },
+
             { id: "BD", label: "SCANNING STATION", status: "ACTIVE" },
+
             { id: "BE", label: "VALIDATION DECISION", status: "PROCESSING" },
+
             { id: "BF", label: "DIVERTER GATE", status: "CLOSED" },
+
             { id: "BG", label: "REJECT PATH", status: "CLEAR" }
+
         ];
 
+
+
         const undergroundGroup = new THREE.Group();
+
         scene.add(undergroundGroup);
 
+
+
         const stepMat = new THREE.MeshStandardMaterial({ color: '#160e29', roughness: 0.85, metalness: 0.2 });
+
         const stepNeonMat = new THREE.MeshBasicMaterial({ color: '#ff0055' });
+
         const numSteps = 16;
+
         const stepDepth = 1.35;
+
         const stepRise = 0.55;
+
         const startStepZ = -39.5;
 
+
+
         for (let i = 0; i < numSteps; i++) {
+
             const stepY = basementY - 0.25 - (i * stepRise);
+
             const stepZ = startStepZ - (i * stepDepth);
+
             const stepMesh = new THREE.Mesh(new THREE.BoxGeometry(5.4, stepRise, stepDepth), stepMat);
+
             stepMesh.position.set(-35.0, stepY, stepZ);
+
             undergroundGroup.add(stepMesh);
 
+
+
             const strip = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.04, 0.08), stepNeonMat);
+
             strip.position.set(-35.0, stepY + stepRise / 2 + 0.02, stepZ + stepDepth / 2 - 0.04);
+
             undergroundGroup.add(strip);
+
         }
 
+
+
         const finalLandingY = basementY - (numSteps * stepRise);
+
         const landingZ = startStepZ - (numSteps * stepDepth);
 
+
+
         const corridorLength = 480.0;
+
         const corridorCenterZ = landingZ - (corridorLength / 2);
+
         const gateZ = landingZ - corridorLength;
 
+
+
         const corridorBed = new THREE.Mesh(new THREE.BoxGeometry(7.0, 0.5, corridorLength), floorMat);
+
         corridorBed.position.set(-35.0, finalLandingY - 0.5, corridorCenterZ);
+
         undergroundGroup.add(corridorBed);
 
+
+
         const waterMat = new THREE.MeshStandardMaterial({
+
             color: '#003344',
+
             roughness: 0.1,
+
             metalness: 0.8,
+
             transparent: true,
+
             opacity: 0.85
+
         });
+
         const corridorWater = new THREE.Mesh(new THREE.PlaneGeometry(6.6, corridorLength - 2.0), waterMat);
+
         corridorWater.rotation.x = -Math.PI / 2;
+
         corridorWater.position.set(-35.0, finalLandingY - 0.15, corridorCenterZ);
+
         undergroundGroup.add(corridorWater);
 
+
+
         const corridorCeiling = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.6, corridorLength), floor1Mat);
+
         corridorCeiling.position.set(-35.0, finalLandingY + 8.5, corridorCenterZ);
+
         undergroundGroup.add(corridorCeiling);
 
+
+
         const PORTAL_SYMBOLS = ["🍒", "💎", "⭐", "🔔", "👑", "🗡️", "🛡️", "🔥", "7️⃣"];
+
         const reelWalls = [];
 
+
+
         function createReelMatrixWall(x, z, axis = 'z', config = {}) {
+
             const pCanvas = document.createElement('canvas');
+
             pCanvas.width = 512;
+
             pCanvas.height = 512;
+
             const pCtx = pCanvas.getContext('2d');
+
             const pTex = new THREE.CanvasTexture(pCanvas);
 
+
+
             const grp = new THREE.Group();
+
             grp.position.set(x, finalLandingY + 4.0, z);
+
             if (axis === 'x') {
+
                 grp.rotation.y = Math.PI / 2;
+
             }
+
             undergroundGroup.add(grp);
 
+
+
             const borderMat = new THREE.MeshBasicMaterial({ color: '#ff0055', transparent: true, opacity: 1.0 });
+
             const borderMesh = new THREE.Mesh(new THREE.BoxGeometry(5.8, 5.8, 0.12), borderMat);
+
+
 
             const screenMat = new THREE.MeshBasicMaterial({ map: pTex, transparent: true, opacity: 1.0 });
 
+
+
             const frontMesh = new THREE.Mesh(new THREE.PlaneGeometry(5.4, 5.4), screenMat);
+
             frontMesh.position.z = 0.07;
 
+
+
             const backMesh = new THREE.Mesh(new THREE.PlaneGeometry(5.4, 5.4), screenMat);
+
             backMesh.position.z = -0.07;
+
             backMesh.rotation.y = Math.PI;
+
+
 
             grp.add(borderMesh, frontMesh, backMesh);
 
+
+
             const wallObj = {
+
                 group: grp,
+
                 borderMesh: borderMesh,
+
                 screenMat: screenMat,
+
                 x: x,
+
                 z: z,
+
                 axis: axis,
+
                 isUnlocked: false,
+
                 reelStates: ["STOPPED", "STOPPED", "STOPPED"],
+
                 offsets: [0, 0, 0],
+
                 stopTimes: [0, 0, 0],
+
                 canvas: pCanvas,
+
                 ctx: pCtx,
+
                 texture: pTex,
+
                 lastResult: null,
+
                 symbols: [
+
                     ["🍒", "💎", "⭐"],
+
                     ["👑", "🗡️", "🔔"],
+
                     ["🛡️", "🔥", "7️⃣"]
+
                 ]
+
             };
 
+
+
             renderWallReelCanvas(wallObj, 0);
+
             reelWalls.push(wallObj);
+
             return wallObj;
+
         }
+
+
 
         const crossroadHalfWidth = 3.5;
+
         const branchWingLength = 120.0;
+
         const westEndX = -35.0 - branchWingLength;
+
         const eastEndX = -35.0 + branchWingLength;
+
         const stoneMat = new THREE.MeshStandardMaterial({ color: '#1a1824', roughness: 0.95, metalness: 0.15 });
 
+
+
         function addWallSeg(x, zStart, zEnd) {
+
             if (zEnd > zStart) { let tmp = zStart; zStart = zEnd; zEnd = tmp; }
+
             const len = Math.abs(zStart - zEnd);
+
             if (len <= 0.05) return;
+
             const midZ = (zStart + zEnd) / 2;
+
             const w = new THREE.Mesh(new THREE.BoxGeometry(0.6, 9.0, len), wallMat);
+
             w.position.set(x, finalLandingY + 4.0, midZ);
+
             undergroundGroup.add(w);
+
         }
+
+
 
         function addBranchWall(zCoord, xStart, xEnd) {
+
             const len = Math.abs(xStart - xEnd);
+
             const midX = (xStart + xEnd) / 2;
+
             const w = new THREE.Mesh(new THREE.BoxGeometry(len, 9.0, 0.6), wallMat);
+
             w.position.set(midX, finalLandingY + 4.0, zCoord);
+
             undergroundGroup.add(w);
+
         }
+
+
 
         const mainWallZs = [];
+
         mainWallZs.push(landingZ);
+
         for (let i = 1; i < 9; i++) {
+
             mainWallZs.push(landingZ - 50.0 - ((i - 1) * 55.0));
+
         }
 
+
+
         for (let idx = 0; idx < mainWallZs.length; idx++) {
+
             createReelMatrixWall(-35.0, mainWallZs[idx], 'z');
+
         }
+
+
 
         const crossroadCenters = [];
 
+
+
         for (let i = 0; i < mainWallZs.length - 1; i++) {
+
             const zCurrentWall = mainWallZs[i];
+
             const zNextWall = mainWallZs[i + 1];
+
             const cZ = (zCurrentWall + zNextWall) / 2.0;
+
             crossroadCenters.push(cZ);
 
+
+
             const cNorthZ = cZ - crossroadHalfWidth;
+
             const cSouthZ = cZ + crossroadHalfWidth;
+
+
 
             const westBed = new THREE.Mesh(new THREE.BoxGeometry(branchWingLength, 0.5, 7.0), floorMat);
+
             westBed.position.set(-35.0 - (branchWingLength / 2), finalLandingY - 0.5, cZ);
+
             const westCeil = new THREE.Mesh(new THREE.BoxGeometry(branchWingLength, 0.6, 7.2), floor1Mat);
+
             westCeil.position.set(-35.0 - (branchWingLength / 2), finalLandingY + 8.5, cZ);
+
             const westWater = new THREE.Mesh(new THREE.PlaneGeometry(branchWingLength - 2.0, 6.6), waterMat);
+
             westWater.rotation.x = -Math.PI / 2;
+
             westWater.position.set(-35.0 - (branchWingLength / 2), finalLandingY - 0.15, cZ);
+
             const westDeadEnd = new THREE.Mesh(new THREE.BoxGeometry(1.2, 9.0, 7.2), stoneMat);
+
             westDeadEnd.position.set(westEndX, finalLandingY + 4.0, cZ);
+
             undergroundGroup.add(westBed, westCeil, westWater, westDeadEnd);
 
+
+
             addBranchWall(cNorthZ, westEndX, -38.5);
+
             addBranchWall(cSouthZ, westEndX, -38.5);
 
+
+
             const eastBed = new THREE.Mesh(new THREE.BoxGeometry(branchWingLength, 0.5, 7.0), floorMat);
+
             eastBed.position.set(-35.0 + (branchWingLength / 2), finalLandingY - 0.5, cZ);
+
             const eastCeil = new THREE.Mesh(new THREE.BoxGeometry(branchWingLength, 0.6, 7.2), floor1Mat);
+
             eastCeil.position.set(-35.0 + (branchWingLength / 2), finalLandingY + 8.5, cZ);
+
             const eastWater = new THREE.Mesh(new THREE.PlaneGeometry(branchWingLength - 2.0, 6.6), waterMat);
+
             eastWater.rotation.x = -Math.PI / 2;
+
             eastWater.position.set(-35.0 + (branchWingLength / 2), finalLandingY - 0.15, cZ);
+
             const eastDeadEnd = new THREE.Mesh(new THREE.BoxGeometry(1.2, 9.0, 7.2), stoneMat);
+
             eastDeadEnd.position.set(eastEndX, finalLandingY + 4.0, cZ);
+
             undergroundGroup.add(eastBed, eastCeil, eastWater, eastDeadEnd);
 
+
+
             addBranchWall(cNorthZ, -31.5, eastEndX);
+
             addBranchWall(cSouthZ, -31.5, eastEndX);
 
+
+
             for (let w = 1; w <= 4; w++) {
+
                 createReelMatrixWall(-35.0 - (w * 25.0), cZ, 'x');
+
                 createReelMatrixWall(-35.0 + (w * 25.0), cZ, 'x');
+
             }
+
         }
+
+
 
         let curZ = landingZ;
+
         for (let cZ of crossroadCenters) {
+
             const cNorthZ = cZ - crossroadHalfWidth;
+
             const cSouthZ = cZ + crossroadHalfWidth;
 
+
+
             addWallSeg(-38.3, curZ, cSouthZ);
+
             addWallSeg(-31.7, curZ, cSouthZ);
 
+
+
             curZ = cNorthZ;
+
         }
+
         addWallSeg(-38.3, curZ, gateZ);
+
         addWallSeg(-31.7, curZ, gateZ);
 
+
+
         for (let cz = landingZ - 20; cz >= gateZ + 20; cz -= 60) {
+
             const glowLight = new THREE.PointLight('#ff0055', 2.0, 35);
+
             glowLight.position.set(-35.0, finalLandingY + 4.5, cz);
+
             undergroundGroup.add(glowLight);
+
         }
+
+
 
         const heckGlow = new THREE.PointLight('#ff2200', 4.5, 35);
+
         heckGlow.position.set(-35.0, finalLandingY + 3.0, gateZ + 1.0);
+
         undergroundGroup.add(heckGlow);
 
+
+
         const leftPillar = new THREE.Mesh(new THREE.BoxGeometry(1.2, 7.2, 1.2), stoneMat);
+
         leftPillar.position.set(-38.0, finalLandingY + 3.6, gateZ);
+
         const rightPillar = new THREE.Mesh(new THREE.BoxGeometry(1.2, 7.2, 1.2), stoneMat);
+
         rightPillar.position.set(-32.0, finalLandingY + 3.6, gateZ);
+
         const archTop = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.8, 1.2), stoneMat);
+
         archTop.position.set(-35.0, finalLandingY + 7.2, gateZ);
+
         undergroundGroup.add(leftPillar, rightPillar, archTop);
 
+
+
         const heckSignCanvas = document.createElement('canvas');
+
         heckSignCanvas.width = 512; heckSignCanvas.height = 128;
+
         const hsCtx = heckSignCanvas.getContext('2d');
+
         hsCtx.fillStyle = '#05020c'; hsCtx.fillRect(0, 0, 512, 128);
+
         hsCtx.strokeStyle = '#ff0033'; hsCtx.lineWidth = 6; hsCtx.strokeRect(4, 4, 504, 120);
+
         hsCtx.font = 'bold 36px monospace'; hsCtx.fillStyle = '#ff0055'; hsCtx.textAlign = 'center'; hsCtx.textBaseline = 'middle';
+
         hsCtx.fillText("WELCOME TO HECK", 256, 64);
+
         const heckSignTex = new THREE.CanvasTexture(heckSignCanvas);
+
         const heckSignMesh = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 1.3), new THREE.MeshBasicMaterial({ map: heckSignTex, side: THREE.DoubleSide }));
+
         heckSignMesh.position.set(-35.0, finalLandingY + 6.4, gateZ + 0.62);
+
         undergroundGroup.add(heckSignMesh);
 
+
+
         function buildGargoyle(x, y, z, rotY) {
+
             const gGroup = new THREE.Group();
+
             gGroup.position.set(x, y, z);
+
             gGroup.rotation.y = rotY;
 
+
+
             const gMat = new THREE.MeshStandardMaterial({ color: '#2a273b', roughness: 0.9, metalness: 0.1 });
+
             const eyeMat = new THREE.MeshBasicMaterial({ color: '#ff0000' });
 
+
+
             const gBody = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.9, 5), gMat);
+
             gBody.rotation.x = 0.4;
+
             gBody.position.y = 0.4;
+
             gGroup.add(gBody);
 
+
+
             const gHead = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.4), gMat);
+
             gHead.position.set(0, 0.85, 0.2);
+
             const hornL = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.3, 4), gMat);
+
             hornL.rotation.x = -0.5; hornL.rotation.z = -0.3; hornL.position.set(-0.16, 1.05, 0.1);
+
             const hornR = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.3, 4), gMat);
+
             hornR.rotation.x = -0.5; hornR.rotation.z = 0.3; hornR.position.set(0.16, 1.05, 0.1);
+
             gGroup.add(gHead, hornL, hornR);
 
+
+
             const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6), eyeMat);
+
             eyeL.position.set(-0.1, 0.9, 0.4);
+
             const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6), eyeMat);
+
             eyeR.position.set(0.1, 0.9, 0.4);
+
             gGroup.add(eyeL, eyeR);
 
+
+
             const wingGeo = new THREE.ConeGeometry(0.5, 0.8, 3);
+
             const wingL = new THREE.Mesh(wingGeo, gMat);
+
             wingL.rotation.set(0.3, 0.4, -1.2); wingL.position.set(-0.45, 0.6, -0.1);
+
             const wingR = new THREE.Mesh(wingGeo, gMat);
+
             wingR.rotation.set(0.3, -0.4, 1.2); wingR.position.set(0.45, 0.6, -0.1);
+
             gGroup.add(wingL, wingR);
 
+
+
             undergroundGroup.add(gGroup);
+
         }
+
         buildGargoyle(-38.0, finalLandingY + 7.2, gateZ, 0.3);
+
         buildGargoyle(-32.0, finalLandingY + 7.2, gateZ, -0.3);
 
+
+
         const gothicIronMat = new THREE.MeshStandardMaterial({ color: '#130f1e', roughness: 0.4, metalness: 0.85 });
+
         const spikeTipMat = new THREE.MeshStandardMaterial({ color: '#ff0055', metalness: 0.9, roughness: 0.2 });
 
+
+
         function buildGothicGateLeaf() {
+
             const leafGroup = new THREE.Group();
+
             const frameH = 5.2;
+
             const width = 2.4;
 
+
+
             const barLeft = new THREE.Mesh(new THREE.BoxGeometry(0.08, frameH, 0.08), gothicIronMat); barLeft.position.y = frameH / 2;
+
             const barRight = new THREE.Mesh(new THREE.BoxGeometry(0.08, frameH, 0.08), gothicIronMat); barRight.position.set(width, frameH / 2, 0);
+
             const railMid = new THREE.Mesh(new THREE.BoxGeometry(width, 0.08, 0.08), gothicIronMat); railMid.position.set(width / 2, frameH * 0.45, 0);
+
             const railLow = new THREE.Mesh(new THREE.BoxGeometry(width, 0.08, 0.08), gothicIronMat); railLow.position.set(width / 2, 0.2, 0);
+
             leafGroup.add(barLeft, barRight, railMid, railLow);
 
+
+
             for (let i = 1; i <= 6; i++) {
+
                 let bx = (width / 7) * i;
+
                 let pickH = frameH - 0.2 + (i % 2 === 0 ? 0.3 : 0);
+
                 const picket = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, pickH, 8), gothicIronMat);
+
                 picket.position.set(bx, pickH / 2, 0);
+
                 const spike = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.35, 6), spikeTipMat);
+
                 spike.position.set(bx, pickH + 0.15, 0);
+
                 leafGroup.add(picket, spike);
+
             }
+
+
 
             const archDeco = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.03, 8, 16, Math.PI), gothicIronMat);
+
             archDeco.position.set(width / 2, frameH * 0.65, 0);
+
             leafGroup.add(archDeco);
 
+
+
             return leafGroup;
+
         }
+
+
 
         const gateLeftPivot = new THREE.Group();
+
         gateLeftPivot.position.set(-37.4, finalLandingY + 0.3, gateZ);
+
         undergroundGroup.add(gateLeftPivot);
+
         const leftGateMesh = buildGothicGateLeaf();
+
         gateLeftPivot.add(leftGateMesh);
 
+
+
         const gateRightPivot = new THREE.Group();
+
         gateRightPivot.position.set(-32.6, finalLandingY + 0.3, gateZ);
+
         undergroundGroup.add(gateRightPivot);
+
         const rightGateMesh = buildGothicGateLeaf();
+
         rightGateMesh.rotation.y = Math.PI;
+
         gateRightPivot.add(rightGateMesh);
 
+
+
         let gateState = "CLOSED";
+
         let gateAngle = 0;
 
+
+
         function updateAutomaticGothicGates() {
+
             if (!knight || playerCurrentFloor !== "BASEMENT" || !undergroundGroup.visible) return;
+
             const pPos = knight.group.position;
+
             const distToGate = Math.abs(pPos.z - gateZ);
+
             const inCorridorX = Math.abs(pPos.x - (-35.0)) < 4.0;
 
+
+
             if (inCorridorX && distToGate < 14.0) {
+
                 if (gateState === "CLOSED" || gateState === "CLOSING") {
+
                     gateState = "OPENING";
+
                     playDoorCreak(true);
+
                 }
+
             } else {
+
                 if (gateState === "OPEN" || gateState === "OPENING") {
+
                     gateState = "CLOSING";
+
                     playDoorCreak(false);
+
                 }
+
             }
+
         }
+
+
 
         const studioGroup = new THREE.Group();
+
         undergroundGroup.add(studioGroup);
 
+
+
         const studioWidth = 160.0;
+
         const studioLength = 160.0;
+
         const studioHeight = 24.0;
+
         const studioCenterZ = gateZ - 200.0;
 
+
+
         const studioFloorMat = new THREE.MeshStandardMaterial({
+
             color: '#2a080d',
+
             roughness: 0.5,
+
             metalness: 0.3,
+
             side: THREE.DoubleSide
+
         });
+
         const studioFloor = new THREE.Mesh(
+
             new THREE.BoxGeometry(studioWidth, 1.0, studioLength),
+
             studioFloorMat
+
         );
+
         studioFloor.position.set(-35.0, finalLandingY - 0.5, studioCenterZ);
+
         studioGroup.add(studioFloor);
 
+
+
         const studioCeiling = new THREE.Mesh(
+
             new THREE.BoxGeometry(studioWidth, 1.0, studioLength),
+
             floor1Mat
+
         );
+
         studioCeiling.position.set(-35.0, finalLandingY + studioHeight, studioCenterZ);
+
         studioGroup.add(studioCeiling);
 
+
+
         const studioNorthWall = new THREE.Mesh(
+
             new THREE.BoxGeometry(studioWidth, studioHeight, 1.2),
+
             wallMat
+
         );
+
         studioNorthWall.position.set(-35.0, finalLandingY + (studioHeight / 2), studioCenterZ - (studioLength / 2));
 
+
+
         const studioWestWall = new THREE.Mesh(
+
             new THREE.BoxGeometry(1.2, studioHeight, studioLength),
+
             wallMat
+
         );
+
         studioWestWall.position.set(-35.0 - (studioWidth / 2), finalLandingY + (studioHeight / 2), studioCenterZ);
 
+
+
         const studioEastWall = new THREE.Mesh(
+
             new THREE.BoxGeometry(1.2, studioHeight, studioLength),
+
             wallMat
+
         );
+
         studioEastWall.position.set(-35.0 + (studioWidth / 2), finalLandingY + (studioHeight / 2), studioCenterZ);
 
+
+
         const studioSouthWall = new THREE.Mesh(
+
             new THREE.BoxGeometry(studioWidth, studioHeight, 1.2),
+
             wallMat
+
         );
+
         studioSouthWall.position.set(-35.0, finalLandingY + (studioHeight / 2), studioCenterZ + (studioLength / 2));
+
         studioGroup.add(
+
             studioNorthWall,
+
             studioWestWall,
+
             studioEastWall,
+
             studioSouthWall
+
         );
+
+
 
         const outsideGroup = new THREE.Group();
+
         studioGroup.add(outsideGroup);
 
+
+
         // --- RESTORED GIANT OUTSIDE CUSTODIAN (BIG MAN) ---
+
         giantGroup = new THREE.Group();
+
         giantGroup.position.set(-35.0, finalLandingY, studioCenterZ + 48.0);
+
         giantGroup.scale.set(3.5, 3.5, 3.5);
+
         outsideGroup.add(giantGroup);
 
+
+
         const overallsMat = new THREE.MeshStandardMaterial({ color: '#1b365d', roughness: 0.7 });
+
         const shirtMat = new THREE.MeshStandardMaterial({ color: '#e67e22', roughness: 0.6 });
+
         const skinMat = new THREE.MeshStandardMaterial({ color: '#f5cd79', roughness: 0.5 });
 
+
+
         const giantBody = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.5, 1.0), overallsMat);
+
         giantBody.position.y = 2.2;
+
         const giantHead = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.1, 1.1), skinMat);
+
         giantHead.position.y = 4.0;
 
+
+
         const goggleMat = new THREE.MeshBasicMaterial({ color: '#00f0ff' });
+
         const goggleL = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.2), goggleMat);
+
         goggleL.position.set(-0.25, 4.1, 0.6);
+
         const goggleR = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.2), goggleMat);
+
         goggleR.position.set(0.25, 4.1, 0.6);
 
+
+
         const giantArmR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.8, 0.4), shirtMat);
+
         giantArmR.position.set(1.1, 2.4, 0.6);
+
         giantArmR.rotation.x = -Math.PI / 4;
 
+
+
         giantGroup.add(giantBody, giantHead, goggleL, goggleR, giantArmR);
+
+
 
         const giantMachineGeo = new THREE.BoxGeometry(6.0, 14.0, 6.0);
+
         const giantMachineMat = new THREE.MeshStandardMaterial({ color: '#2b1055', roughness: 0.4, metalness: 0.6 });
 
+
+
         for (let i = 0; i < 3; i++) {
+
             const gMach = new THREE.Mesh(giantMachineGeo, giantMachineMat);
+
             gMach.position.set(-35.0 + (i * 30.0) - 30.0, finalLandingY + 7.0, studioCenterZ + 65.0);
+
             outsideGroup.add(gMach);
+
         }
-// --- THE GIANT OUTSIDE CUSTODIAN (BIG MAN) ---
-        giantGroup = new THREE.Group();
-        giantGroup.position.set(-35.0, finalLandingY, studioCenterZ + 48.0);
-        giantGroup.scale.set(3.5, 3.5, 3.5);
-        outsideGroup.add(giantGroup);
 
-        const overallsMat = new THREE.MeshStandardMaterial({ color: '#1b365d', roughness: 0.7 });
-        const shirtMat = new THREE.MeshStandardMaterial({ color: '#e67e22', roughness: 0.6 });
-        const skinMat = new THREE.MeshStandardMaterial({ color: '#f5cd79', roughness: 0.5 });
 
-        const giantBody = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.5, 1.0), overallsMat);
-        giantBody.position.y = 2.2;
-        const giantHead = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.1, 1.1), skinMat);
-        giantHead.position.y = 4.0;
 
-        const goggleMat = new THREE.MeshBasicMaterial({ color: '#00f0ff' });
-        const goggleL = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.2), goggleMat);
-        goggleL.position.set(-0.25, 4.1, 0.6);
-        const goggleR = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.2), goggleMat);
-        goggleR.position.set(0.25, 4.1, 0.6);
-
-        const giantArmR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.8, 0.4), shirtMat);
-        giantArmR.position.set(1.1, 2.4, 0.6);
-        giantArmR.rotation.x = -Math.PI / 4;
-
-        giantGroup.add(giantBody, giantHead, goggleL, goggleR, giantArmR);
         const goodyStageRoot = new THREE.Group();
+
         goodyStageRoot.position.set(-35.0, finalLandingY, studioCenterZ - 30.0);
+
         studioGroup.add(goodyStageRoot);
 
+
+
         const spiralCanvas = document.createElement('canvas');
+
         spiralCanvas.width = 512; spiralCanvas.height = 512;
+
         const spCtx = spiralCanvas.getContext('2d');
+
         const spiralTex = new THREE.CanvasTexture(spiralCanvas);
 
+
+
         function updateSpiralCarpetTexture(time) {
+
             spCtx.save();
+
             spCtx.translate(256, 256);
+
             spCtx.rotate(time * 0.4);
+
             const arms = 12;
+
             for (let i = 0; i < arms; i++) {
+
                 spCtx.fillStyle = (i % 2 === 0) ? '#ff0000' : '#ffffff';
+
                 spCtx.beginPath();
+
                 spCtx.moveTo(0, 0);
+
                 spCtx.arc(0, 0, 350, (i * Math.PI * 2) / arms, ((i + 1) * Math.PI * 2) / arms);
+
                 spCtx.closePath();
+
                 spCtx.fill();
+
             }
+
             spCtx.restore();
+
             spCtx.fillStyle = '#120b22';
+
             spCtx.beginPath();
+
             spCtx.arc(256, 256, 90, 0, Math.PI * 2);
+
             spCtx.fill();
+
             spCtx.strokeStyle = '#39ff14';
+
             spCtx.lineWidth = 6;
+
             spCtx.beginPath();
+
             spCtx.arc(256, 256, 90, 0, Math.PI * 2);
+
             spCtx.stroke();
+
             spiralTex.needsUpdate = true;
+
         }
 
+
+
         const feltCarpet = new THREE.Mesh(
+
             new THREE.CylinderGeometry(14.0, 14.0, 0.1, 48),
+
             new THREE.MeshStandardMaterial({ map: spiralTex, roughness: 0.6 })
+
         );
+
         feltCarpet.position.y = 0.05;
+
         goodyStageRoot.add(feltCarpet);
+
+
 
         let currentTriviaIndex = 0;
 
+
+
         const COUNTRY_QUESTIONS = {
+
             "UK": [
+
                 { q: "In the UK, before the 2019 stake reduction, what was the maximum stake per spin on a Fixed-Odds-Betting-Terminal?", options: ["A) £2", "B) £50", "C) £100", "D) £500"], correct: 2, lesson: "FOBT Reform: The maximum stake on UK FOBTs was successfully reduced from £100 to £2 in 2019." },
+
                 { q: "In the UK, before the 2019 stake reduction, what was the maximum amount a person could stake every 20 seconds on a Fixed-Odds-Betting-Terminal?", options: ["A) £2 every 20 seconds", "B) £50 every 20 seconds", "C) £100 every 20 seconds", "D) £500 every 20 seconds"], correct: 2, lesson: "High-Speed Play: Players could previously risk up to £100 every 20 seconds on electronic casino games in betting shops." },
+
                 { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Adult Gaming Centres (Arcades)?", options: ["A) Bingo Association", "B) SENSE", "C) Bacta", "D) Moses"], correct: 2, lesson: "Land-Based Exclusions: Bacta operates the self-exclusion scheme for arcades and low-stake gaming machine premises." },
+
                 { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Casinos?", options: ["A) Bacta", "B) SENSE", "C) Moses", "D) Bingo Association"], correct: 1, lesson: "Land-Based Exclusions: SENSE (Self-Enrollment National Self Exclusion) covers land-based casinos across the UK." },
+
                 { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Bingo Halls?", options: ["A) Bingo Association", "B) SENSE", "C) Bacta", "D) SmartExclusion"], correct: 0, lesson: "Land-Based Exclusions: The Bingo Association provides dedicated self-exclusion registers for licensed bingo halls." },
+
                 { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Service Stations?", options: ["A) Bingo Association", "B) Moses", "C) Bacta", "D) SmartExclusion"], correct: 3, lesson: "Land-Based Exclusions: SmartExclusion covers gaming machines located in motorway service areas and adult venues." },
+
                 { q: "In the UK, what is the name of the land-based self-exclusion scheme that covers Betting Shops (Bookies)?", options: ["A) Bingo Association", "B) SENSE", "C) Bacta", "D) Moses"], correct: 3, lesson: "Land-Based Exclusions: MOSES (Multi-Operator Self Exclusion Scheme) allows self-exclusion from betting shops." },
+
                 { q: "What does the acronym SENSE stand for in the UK's land-based casino self-exclusion scheme?", options: ["A) Self-Enrollment National Self Exclusion", "B) Safe Entry National Security Exclusion", "C) Single Exclusion National Support Exchange", "D) Social Entertainment National Safety Exchange"], correct: 0, lesson: "Terminology: SENSE stands for Self-Enrollment National Self Exclusion for casinos." },
+
                 { q: "In 2025, approximately how many self-excluded people were still able to enter a UK betting shop and gamble?", options: ["A) 668", "B) 3,288", "C) 4,789", "D) 8,700"], correct: 1, lesson: "Compliance Gaps: Studies highlighted thousands of successful breaches by self-excluded individuals entering betting shops." },
+
                 { q: "In which year did the statutory £2 maximum stake on UK FOBTs officially come into force?", options: ["A) 2016", "B) 2017", "C) 2018", "D) 2019"], correct: 3, lesson: "Legislative Milestones: The £2 stake limit on B2 gaming machines became law in April 2019." }
+
             ],
+
             "Canada": [
+
                 { q: "In Ontario, what is the name of the land-based self-exclusion scheme that covers Casinos?", options: ["A) SENSE", "B) MyPlay Break", "C) Bacta", "D) BetGuard"], correct: 1, lesson: "Canadian Models: MyPlay Break provides land-based casino self-exclusion options in Ontario." },
+
                 { q: "What is the name of Ontario's national online self-exclusion scheme?", options: ["A) BetGuard", "B) RUA", "C) GamStop", "D) Oasis"], correct: 0, lesson: "Online Exclusions: BetGuard supports multi-operator online player protection in regulated Canadian markets." }
+
             ],
+
             "Brazil": [
+
                 { q: "Which country introduced a near total ban on gambling advertising, sponsorship, and promotional communications in 2018?", options: ["A) United Kingdom", "B) Italy", "C) Spain", "D) None of the above"], correct: 1, lesson: "Global Advertising Restrictions: Italy enacted strict bans on gambling promotion under the Dignity Decree." },
+
                 { q: "What is the capital city of Brazil?", options: ["A) Rio de Janeiro", "B) São Paulo", "C) Brasília", "D) Salvador"], correct: 2, lesson: "Geography: Brasília is the federal capital of Brazil." },
+
                 { q: "What is the name of Brazil's national online self-exclusion scheme?", options: ["A) Spelpaus", "B) Plataforma Centralizada de Autoexclusão", "C) Rofus", "D) RGIAJ"], correct: 1, lesson: "Regulatory Frameworks: Brazil mandates centralised national self-exclusion registries for regulated betting operators." }
+
             ],
+
             "United States": [
+
                 { q: "Which city in Nevada is world-famous for gambling?", options: ["A) Las Vegas", "B) Atlantic City", "C) Macau", "D) Monte Carlo"], correct: 0, lesson: "Entertainment Hubs: Las Vegas is globally renowned for its casino resorts and gaming industry." }
+
             ],
+
             "Italy": [
+
                 { q: "How does land-based casino self-exclusion work in Italy compared to online RUA?", options: ["A) One national register covers all casinos", "B) Players must use individual casino self-exclusion procedures", "C) RUA automatically blocks all physical venues", "D) Regional authorities manage separate lists"], correct: 1, lesson: "Land-Based vs Online: Italian land-based casinos often require venue-specific self-exclusion procedures separate from remote registers." },
+
                 { q: "What is the name of Italy's national online self-exclusion scheme?", options: ["A) Spelpaus", "B) RUA", "C) GamStop", "D) Oasis"], correct: 1, lesson: "Italian Regulation: RUA (Registro Unico degli Autoesclusi) manages remote gambling self-exclusion via ADM." }
+
             ],
+
             "Belgium": [
+
                 { q: "Belgium's EPIS system is an example of which type of self-exclusion model?", options: ["A) Separate exclusion at every venue", "B) National centralised self-exclusion register", "C) Online-only exclusion", "D) Casino-only exclusion"], correct: 1, lesson: "Centralised Protection: EPIS unifies self-exclusion across land-based arcades, casinos, and online platforms in Belgium." },
+
                 { q: "What is the name of Belgium's national self-exclusion scheme covering both online and land-based gambling?", options: ["A) Rofus", "B) EPIS", "C) Oasis", "D) GamStop"], correct: 1, lesson: "Belgium System: EPIS (Excluded Persons Information System) tracks restricted individuals." }
+
             ],
+
             "Germany": [
+
                 { q: "What is the name of Germany's national self-exclusion scheme covering both online and land-based gambling?", options: ["A) Spelpaus", "B) Oasis", "C) Rofus", "D) GamStop"], correct: 1, lesson: "German Model: OASIS is the nationwide state-operated database connecting land-based and online gaming venues." }
+
             ],
+
             "Denmark": [
+
                 { q: "What is the name of Denmark's national self-exclusion scheme covering both online and land-based gambling?", options: ["A) Rofus", "B) Oasis", "C) GamStop", "D) EPIS"], correct: 0, lesson: "Danish Model: ROFUS is administered by the Danish Gambling Authority (Spillemyndigheden)." }
+
             ],
+
             "Australia": [
+
                 { q: "What is the capital of Australia?", options: ["A) Melbourne", "B) Sydney", "C) Canberra", "D) Brisbane"], correct: 2, lesson: "Geography: Canberra is the capital city of Australia." },
+
                 { q: "What is the name of Australia's national online self-exclusion scheme?", options: ["A) Oasis", "B) Rofus", "C) BetStop", "D) SafePlay"], correct: 2, lesson: "Australian Register: BetStop is the National Self-Exclusion Register for interactive wagering." },
+
                 { q: "What is Australia's 2023 landmark parliamentary gambling inquiry report commonly known as?", options: ["A) The Murphy Report", "B) The Jones Report", "C) The Harris Report", "D) The Australian Gambling Reduction Report"], correct: 0, lesson: "Inquiry Landmark: The Murphy Report called for sweeping advertising bans and consumer protections in Australia." }
+
             ],
+
             "Nigeria": [
+
                 { q: "What is the capital city of Nigeria?", options: ["A) Lagos", "B) Abuja", "C) Kano", "D) Port Harcourt"], correct: 1, lesson: "Geography: Abuja is the designated capital city of Nigeria." }
+
             ],
+
             "Sweden": [
+
                 { q: "What is the name of Sweden's centralized national self-exclusion system?", options: ["A) Spelpaus", "B) ROFUS", "C) BetStop", "D) EPIS"], correct: 0, lesson: "Swedish Model: Spelpaus allows instant nationwide self-exclusion across all licensed gaming operators." }
+
             ],
+
             "France": [
+
                 { q: "What is the national gambling exclusion register called in France?", options: ["A) Interdictions de Jeux", "B) Oasis", "C) RUA", "D) SENSE"], correct: 0, lesson: "French Regulation: Interdictions de Jeux is administered by the Ministry of Interior to bar individuals from casinos and gaming clubs." }
+
             ],
+
             "Spain": [
+
                 { q: "What is the acronym for Spain's national register of gaming access prohibitions?", options: ["A) RGIAJ", "B) RUA", "C) EPIS", "D) OASIS"], correct: 0, lesson: "Spanish Model: RGIAJ (Registro General de Interdicciones de Acceso al Juego) manages statewide self-exclusion." }
+
             ],
+
             "Netherlands": [
+
                 { q: "What is the name of the central register for the exclusion of gaming in the Netherlands?", options: ["A) Cruks", "B) GamStop", "C) ROFUS", "D) Spelpaus"], correct: 0, lesson: "Dutch Model: CRUKS is the mandatory national exclusion register for remote and land-based gaming in the Netherlands." }
+
             ]
+
         };
 
+
+
         const COUNTRIES_LIST = [
+
             { name: "United Kingdom", poolKey: "UK" },
+
             { name: "Canada", poolKey: "Canada" },
+
             { name: "Brazil", poolKey: "Brazil" },
+
             { name: "United States", poolKey: "United States" },
+
             { name: "Italy", poolKey: "Italy" },
+
             { name: "Belgium", poolKey: "Belgium" },
+
             { name: "Germany", poolKey: "Germany" },
+
             { name: "Denmark", poolKey: "Denmark" },
+
             { name: "Australia", poolKey: "Australia" },
+
             { name: "Nigeria", poolKey: "Nigeria" },
+
             { name: "Sweden", poolKey: "Sweden" },
+
             { name: "France", poolKey: "France" },
+
             { name: "Spain", poolKey: "Spain" },
+
             { name: "Netherlands", poolKey: "Netherlands" }
+
         ];
 
+
+
         let playerSelectedAnswer = null;
+
         let triviaAnswerStatus = "";
+
         let showCorrectAnswerReveal = false;
+
         let answerLockedIn = false;
 
+
+
         const showClockCanvas = document.createElement('canvas');
+
         showClockCanvas.width = 256; showClockCanvas.height = 96;
+
         const sClockCtx = showClockCanvas.getContext('2d');
+
         const showClockTex = new THREE.CanvasTexture(showClockCanvas);
 
+
+
         function renderShowClockTexture() {
+
             sClockCtx.fillStyle = '#06020f';
+
             sClockCtx.fillRect(0, 0, 256, 96);
+
             sClockCtx.strokeStyle = '#ff0055';
+
             sClockCtx.lineWidth = 4;
+
             sClockCtx.strokeRect(2, 2, 252, 92);
 
+
+
             let minutes = Math.floor(showClockSeconds / 60);
+
             let seconds = Math.floor(showClockSeconds % 60);
+
             let timeStr = (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
 
+
+
             sClockCtx.fillStyle = '#ff0055';
+
             sClockCtx.font = 'bold 13px monospace';
+
             sClockCtx.textAlign = 'center';
+
             sClockCtx.fillText("GOODY SHOW TIMER", 128, 22);
 
+
+
             sClockCtx.fillStyle = '#ff7675';
+
             sClockCtx.font = 'bold 32px monospace';
+
             sClockCtx.fillText(`⏱ ${timeStr}`, 128, 64);
 
+
+
             showClockTex.needsUpdate = true;
+
             document.getElementById('ctrl-timer-badge').textContent = timeStr;
+
         }
+
         renderShowClockTexture();
 
+
+
         const showClockMesh = new THREE.Mesh(
+
             new THREE.PlaneGeometry(2.8, 1.05),
+
             new THREE.MeshBasicMaterial({ map: showClockTex, side: THREE.DoubleSide })
+
         );
+
         showClockMesh.position.set(5.6, 8.8, -4.5);
+
         showClockMesh.rotation.y = Math.PI;
+
         goodyStageRoot.add(showClockMesh);
 
+
+
         const qBoardCanvas = document.createElement('canvas');
+
         qBoardCanvas.width = 512; qBoardCanvas.height = 384;
+
         const qBoardCtx = qBoardCanvas.getContext('2d');
+
         const qBoardTex = new THREE.CanvasTexture(qBoardCanvas);
 
+
+
         function getCurrentTriviaQuestionObject() {
+
             let countryEntry = COUNTRIES_LIST[currentTriviaCountryIndex];
+
             let pool = COUNTRY_QUESTIONS[countryEntry.poolKey];
+
             return pool[currentTriviaQuestionInPoolIndex];
+
         }
+
+
 
         function renderStageQuestionBoard() {
+
             qBoardCtx.fillStyle = '#120726';
+
             qBoardCtx.fillRect(0, 0, 512, 384);
+
             qBoardCtx.strokeStyle = '#00f0ff';
+
             qBoardCtx.lineWidth = 6;
+
             qBoardCtx.strokeRect(3, 3, 506, 378);
 
+
+
             if (gameWon) {
+
                 qBoardCtx.fillStyle = '#39ff14';
+
                 qBoardCtx.font = 'bold 28px monospace';
+
                 qBoardCtx.textAlign = 'center';
+
                 qBoardCtx.fillText("CONGRATULATIONS!", 256, 140);
+
                 qBoardCtx.fillStyle = '#ffffff';
+
                 qBoardCtx.font = 'bold 18px monospace';
+
                 qBoardCtx.fillText("YOU REACHED UNITED KINGDOM & WON!", 256, 200);
+
                 qBoardCtx.fillStyle = '#ffda66';
+
                 qBoardCtx.font = '14px monospace';
+
                 qBoardCtx.fillText("Self-Exclusion Reform Champion!", 256, 250);
+
                 qBoardTex.needsUpdate = true;
+
                 return;
+
             }
+
+
 
             if (studioPoweredDown) {
+
                 qBoardCtx.fillStyle = '#ff3366';
+
                 qBoardCtx.font = 'bold 24px monospace';
+
                 qBoardCtx.textAlign = 'center';
+
                 qBoardCtx.fillText("STUDIO POWERS POWERED DOWN", 256, 150);
+
                 qBoardCtx.fillStyle = '#ffda66';
+
                 qBoardCtx.font = '16px monospace';
+
                 qBoardCtx.fillText(`RESTARTING IN ${Math.ceil(powerOffCountdown)}s...`, 256, 210);
+
                 qBoardCtx.fillStyle = '#ffffff';
+
                 qBoardCtx.font = '12px monospace';
+
                 qBoardCtx.fillText("Click Force Continue or return to podium to resume.", 256, 260);
+
                 qBoardTex.needsUpdate = true;
+
                 return;
+
             }
+
+
 
             if (playerAwayFromPodium) {
+
                 qBoardCtx.fillStyle = '#ff3366';
+
                 qBoardCtx.font = 'bold 22px monospace';
+
                 qBoardCtx.textAlign = 'center';
+
                 qBoardCtx.fillText("GAME PAUSED: RUN AWAY DETECTED!", 256, 110);
 
+
+
                 qBoardCtx.fillStyle = '#ffda66';
+
                 qBoardCtx.font = 'bold 15px monospace';
+
                 qBoardCtx.fillText(`"${RETURN_JOKES[returnJokeIndex]}"`, 256, 155);
 
+
+
                 qBoardCtx.fillStyle = '#00ff66';
+
                 qBoardCtx.font = 'bold 16px monospace';
+
                 qBoardCtx.fillText(">>> CLICK FORCE CONTINUE TO RESUME <<<", 256, 220);
 
+
+
                 qBoardCtx.fillStyle = '#888888';
+
                 qBoardCtx.font = '12px monospace';
+
                 qBoardCtx.fillText(`(Or walk back to Podium 1)`, 256, 260);
 
+
+
                 qBoardTex.needsUpdate = true;
+
                 return;
+
             }
+
+
 
             if (showHostState === 'WAITING_FOR_HOST') {
+
                 qBoardCtx.fillStyle = '#ffda66';
+
                 qBoardCtx.font = 'bold 26px monospace';
+
                 qBoardCtx.textAlign = 'center';
+
                 qBoardCtx.fillText("WAITING FOR CONTESTANT", 256, 172);
 
+
+
                 qBoardCtx.fillStyle = '#00ff66';
+
                 qBoardCtx.font = 'bold 16px monospace';
+
                 qBoardCtx.fillText(">>> TOUCH THIS SCREEN TO START <<<", 256, 230);
 
+
+
             } else if (showHostState === 'INTRO') {
+
                 qBoardCtx.fillStyle = '#ffda66';
+
                 qBoardCtx.font = 'bold 20px monospace';
+
                 qBoardCtx.textAlign = 'center';
+
                 qBoardCtx.fillText("WELCOME TO THE GOODY TONIGHT SHOW!", 256, 150);
+
                 qBoardCtx.fillStyle = '#ffffff';
+
                 qBoardCtx.font = '16px monospace';
+
                 qBoardCtx.fillText("Now, let's meet tonight's contestant.", 256, 210);
 
+
+
             } else if (showHostState === 'DICE_ROLL') {
+
                 qBoardCtx.fillStyle = '#ffda66';
+
                 qBoardCtx.font = 'bold 18px monospace';
+
                 qBoardCtx.textAlign = 'center';
+
                 qBoardCtx.fillText("CONTESTANT 1: ROLL FOR YOUR NEXT DESTINATION!", 256, 75);
 
+
+
                 qBoardCtx.fillStyle = '#ff3366';
+
                 qBoardCtx.font = 'bold 16px monospace';
+
                 qBoardCtx.fillText(`YOU HAVE ${Math.ceil(rollCountdownSeconds)} SECONDS TO ROLL!`, 256, 115);
 
+
+
                 qBoardCtx.fillStyle = '#ffffff';
+
                 qBoardCtx.font = '16px monospace';
+
                 qBoardCtx.fillText(diceFlickering ? "🎲 ROLLING DICE... 🎲" : `DICE ROLL RESULT: ${diceVal1}`, 256, 190);
 
+
+
                 qBoardCtx.fillStyle = '#00ff66';
+
                 qBoardCtx.font = 'bold 14px monospace';
+
                 qBoardCtx.fillText(">>> TOUCH SCREEN OR PODIUM TO ROLL <<<", 256, 260);
 
+
+
             } else if (showHostState === 'VISITING_COUNTRY') {
+
                 qBoardCtx.fillStyle = '#ffda66';
+
                 qBoardCtx.font = 'bold 22px monospace';
+
                 qBoardCtx.textAlign = 'center';
+
                 qBoardCtx.fillText("TRAVELING TO JURISDICTION:", 256, 140);
+
                 qBoardCtx.fillStyle = '#00ff66';
+
                 qBoardCtx.font = 'bold 26px monospace';
+
                 qBoardCtx.fillText(`🌍 ${visitedCountryName.toUpperCase()} 🌍`, 256, 220);
 
+
+
             } else if (showHostState === 'TRIVIA') {
+
                 const currentQ = getCurrentTriviaQuestionObject();
 
+
+
                 qBoardCtx.fillStyle = '#ffda66';
+
                 qBoardCtx.font = 'bold 14px monospace';
+
                 qBoardCtx.textAlign = 'left';
+
                 qBoardCtx.fillText(`JURISDICTION: ${visitedCountryName.toUpperCase()}`, 20, 25);
 
+
+
                 qBoardCtx.fillStyle = '#ff3366';
+
                 qBoardCtx.font = 'bold 13px monospace';
+
                 qBoardCtx.textAlign = 'right';
+
                 qBoardCtx.fillText(`⏱ TIMER: ${Math.ceil(triviaCountdownSeconds)}s`, 492, 25);
 
+
+
                 qBoardCtx.fillStyle = '#ffffff';
+
                 qBoardCtx.font = '13px sans-serif';
+
                 qBoardCtx.textAlign = 'left';
+
                 qBoardCtx.fillText(currentQ.q, 20, 55);
 
+
+
                 currentQ.options.forEach((opt, idx) => {
+
                     let optY = 85 + (idx * 46);
 
+
+
                     if (showCorrectAnswerReveal && idx === currentQ.correct) {
+
                         qBoardCtx.fillStyle = '#00b894';
+
                     } else if (playerSelectedAnswer === idx) {
+
                         qBoardCtx.fillStyle = '#0984e3';
+
                     } else if (!triviaTimerActive && triviaAnswerStatus === "") {
+
                         qBoardCtx.fillStyle = '#332b45';
+
                     } else {
+
                         qBoardCtx.fillStyle = '#220f3d';
+
                     }
+
+
 
                     qBoardCtx.strokeStyle = '#00f0ff';
+
                     qBoardCtx.lineWidth = 2;
+
                     qBoardCtx.fillRect(20, optY, 472, 38);
+
                     qBoardCtx.strokeRect(20, optY, 472, 38);
 
+
+
                     qBoardCtx.fillStyle = (!triviaTimerActive && triviaAnswerStatus === "" && !showCorrectAnswerReveal) ? '#777' : '#ffffff';
+
                     qBoardCtx.font = 'bold 12px sans-serif';
+
                     qBoardCtx.fillText(opt, 32, optY + 24);
+
                 });
+
+
 
                 if (!triviaTimerActive && triviaAnswerStatus === "") {
+
                     qBoardCtx.fillStyle = '#ffda66';
+
                     qBoardCtx.font = 'bold 13px monospace';
+
                     qBoardCtx.textAlign = 'center';
+
                     qBoardCtx.fillText("HOST IS READING QUESTION... STAND BY", 256, 285);
+
                 }
+
+
 
                 if (triviaAnswerStatus !== "") {
+
                     qBoardCtx.fillStyle = triviaAnswerStatus === "CORRECT!" ? '#55efc4' : '#ff7675';
+
                     qBoardCtx.font = 'bold 15px monospace';
+
                     qBoardCtx.textAlign = 'center';
+
                     qBoardCtx.fillText(triviaAnswerStatus, 256, 285);
 
+
+
                     if (currentQ.lesson) {
+
                         qBoardCtx.fillStyle = '#ffda66';
+
                         qBoardCtx.font = '10px sans-serif';
+
                         qBoardCtx.fillText(currentQ.lesson, 256, 325);
+
                     }
+
                 }
+
             }
+
+
 
             qBoardTex.needsUpdate = true;
+
         }
+
         renderStageQuestionBoard();
 
+
+
         const qBoardGeo = new THREE.PlaneGeometry(8.0, 6.0);
+
         const qBoardMat = new THREE.MeshBasicMaterial({
+
             map: qBoardTex,
+
             side: THREE.DoubleSide
+
         });
 
+
+
         const qBoardMesh = new THREE.Mesh(qBoardGeo, qBoardMat);
+
         qBoardMesh.name = "mainStudioScreen";
+
         qBoardMesh.position.set(0.0, 6.5, -4.5);
+
         qBoardMesh.rotation.y = Math.PI;
+
         goodyStageRoot.add(qBoardMesh);
 
+
+
         const podiumCanvas1 = document.createElement('canvas'); podiumCanvas1.width = 256; podiumCanvas1.height = 160;
+
         const p1Ctx = podiumCanvas1.getContext('2d');
+
         const podiumTex1 = new THREE.CanvasTexture(podiumCanvas1);
 
+
+
         function renderPodium1Screen() {
+
             p1Ctx.fillStyle = '#0a0514';
+
             p1Ctx.fillRect(0, 0, 256, 160);
+
             p1Ctx.strokeStyle = '#00f0ff';
+
             p1Ctx.lineWidth = 4;
+
             p1Ctx.strokeRect(4, 4, 248, 152);
 
+
+
             p1Ctx.fillStyle = '#ff0055';
+
             p1Ctx.font = 'bold 12px monospace';
+
             p1Ctx.textAlign = 'center';
+
             p1Ctx.fillText("PODIUM 1", 128, 22);
 
+
+
             if (gameWon) {
+
                 p1Ctx.fillStyle = '#39ff14';
+
                 p1Ctx.font = 'bold 16px monospace';
+
                 p1Ctx.fillText("VICTORY!", 128, 92);
+
             } else if (studioPoweredDown) {
+
                 p1Ctx.fillStyle = '#ff3366';
+
                 p1Ctx.font = 'bold 14px monospace';
+
                 p1Ctx.fillText("POWER OFF", 128, 92);
+
             } else if (playerAwayFromPodium) {
+
                 p1Ctx.fillStyle = '#00b894';
+
                 p1Ctx.fillRect(15, 60, 226, 45);
+
                 p1Ctx.fillStyle = '#05030a';
+
                 p1Ctx.font = 'bold 12px monospace';
+
                 p1Ctx.fillText("▶ FORCE CONTINUE", 128, 87);
+
             } else if (lockedOutTimer > 0) {
+
                 p1Ctx.fillStyle = '#ff7675';
+
                 p1Ctx.font = 'bold 12px monospace';
+
                 p1Ctx.fillText(`LOCKED (${Math.ceil(lockedOutTimer)}s)`, 128, 92);
+
             } else if (showHostState === 'WAITING_FOR_HOST') {
+
                 p1Ctx.fillStyle = '#00ff66';
+
                 p1Ctx.fillRect(20, 45, 216, 85);
+
                 p1Ctx.fillStyle = '#05030a';
+
                 p1Ctx.font = 'bold 16px monospace';
+
                 p1Ctx.fillText("CLICK TO START", 128, 92);
 
+
+
             } else if (showHostState === 'DICE_ROLL') {
+
                 p1Ctx.fillStyle = '#00ff66';
+
                 p1Ctx.fillRect(20, 45, 216, 85);
+
                 p1Ctx.fillStyle = '#05030a';
+
                 p1Ctx.font = 'bold 14px monospace';
+
                 p1Ctx.fillText(diceFlickering ? "PRESS TO ROLL" : `ROLL: ${diceVal1}`, 128, 92);
 
+
+
             } else if (showHostState === 'TRIVIA') {
+
                 p1Ctx.fillStyle = '#ffda66';
+
                 p1Ctx.font = 'bold 10px monospace';
+
                 let headerTxt = !triviaTimerActive ? "HOST READING..." : (answerLockedIn ? "ANSWER LOCKED" : `30s TIMER (${Math.ceil(triviaCountdownSeconds)}s)`);
+
                 p1Ctx.fillText(headerTxt, 128, 38);
 
+
+
                 const ansLabels = ["A", "B", "C", "D"];
+
                 ansLabels.forEach((ansLbl, aIdx) => {
+
                     let ax = 18 + (aIdx * 56);
+
                     let isAnsSelected = (playerSelectedAnswer === aIdx);
 
+
+
                     p1Ctx.fillStyle = isAnsSelected ? '#0984e3' : (!triviaTimerActive ? '#1b1428' : (answerLockedIn ? '#110822' : '#220f3d'));
+
                     p1Ctx.strokeStyle = !triviaTimerActive ? '#444' : '#00f0ff';
+
                     p1Ctx.lineWidth = 2;
+
                     p1Ctx.fillRect(ax, 52, 48, 48);
+
                     p1Ctx.strokeRect(ax, 52, 48, 48);
 
+
+
                     p1Ctx.fillStyle = !triviaTimerActive ? '#555' : '#ffffff';
+
                     p1Ctx.font = 'bold 18px monospace';
+
                     p1Ctx.fillText(ansLbl, ax + 24, 80);
+
                 });
 
+
+
                 p1Ctx.fillStyle = '#220f3d';
+
                 p1Ctx.fillRect(20, 110, 216, 38);
+
                 p1Ctx.fillStyle = !triviaTimerActive ? '#ff3366' : '#888';
+
                 p1Ctx.font = 'bold 11px monospace';
+
                 p1Ctx.fillText(!triviaTimerActive ? "WAIT FOR HOST..." : (answerLockedIn ? "REVIEWING..." : "SELECT A, B, C, OR D"), 128, 132);
+
             } else {
+
                 p1Ctx.fillStyle = '#ffda66';
+
                 p1Ctx.font = '12px monospace';
+
                 p1Ctx.fillText("IN PROGRESS...", 128, 92);
+
             }
 
+
+
             podiumTex1.needsUpdate = true;
+
         }
+
+
 
         renderPodium1Screen();
 
+
+
         const podiumMat = new THREE.MeshStandardMaterial({ color: '#2b154a', roughness: 0.5, metalness: 0.5 });
+
         const podiumTopMat = new THREE.MeshStandardMaterial({ color: '#00f0ff', emissive: '#00f0ff', emissiveIntensity: 0.3, roughness: 0.3 });
 
+
+
         function createStagePodiumWithScreen(x, z, tex, name) {
+
             const podGroup = new THREE.Group();
+
             podGroup.position.set(x, 0, z);
 
+
+
             const base = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 2.5, 24), podiumMat);
+
             base.position.y = 1.25;
 
+
+
             const top = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.2, 24), podiumTopMat);
+
             top.position.y = 2.5;
 
+
+
             const screenMesh = new THREE.Mesh(
+
                 new THREE.PlaneGeometry(2.2, 1.35),
+
                 new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })
+
             );
+
             screenMesh.name = "podiumScreen";
+
             screenMesh.userData = { podiumId: 1 };
+
             screenMesh.position.set(0, 3.7, 0.45);
+
             screenMesh.rotation.y = Math.PI;
 
+
+
             podGroup.add(base, top, screenMesh);
+
             return podGroup;
+
         }
+
+
 
         const podiumLeft = createStagePodiumWithScreen(0.0, -10.5, podiumTex1, "PODIUM 1");
+
         goodyStageRoot.add(podiumLeft);
 
+
+
         const goodyGroup = new THREE.Group();
+
         goodyGroup.position.set(-6.0, 0, -9.5);
+
         goodyGroup.lookAt(0, 0, -10.5);
 
+
+
         const gPodium = new THREE.Mesh(
+
             new THREE.CylinderGeometry(1.2, 1.5, 2.0, 24),
+
             new THREE.MeshStandardMaterial({ color: '#2b154a', roughness: 0.5, metalness: 0.5 })
+
         );
+
         gPodium.position.y = 1.0;
+
         goodyGroup.add(gPodium);
 
+
+
         const silverMetalMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.95, roughness: 0.15 });
+
         const gHead = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.6, 0.6), silverMetalMat);
+
         gHead.position.set(0, 2.6, 0);
+
         const gFaceCanvas = document.createElement('canvas'); gFaceCanvas.width = 128; gFaceCanvas.height = 128;
+
         const fctx = gFaceCanvas.getContext('2d'); fctx.fillStyle = '#030108'; fctx.fillRect(0, 0, 128, 128);
+
         fctx.fillStyle = '#39ff14'; fctx.fillRect(40, 50, 16, 16); fctx.fillRect(72, 50, 16, 16);
+
         fctx.fillRect(48, 82, 32, 10);
+
         const gFaceTex = new THREE.CanvasTexture(gFaceCanvas);
+
         const gFace = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.5), new THREE.MeshBasicMaterial({ map: gFaceTex }));
+
         gFace.position.set(0, 2.6, 0.31);
+
         goodyGroup.add(gHead, gFace);
+
         goodyStageRoot.add(goodyGroup);
 
+
+
         const camStand = new THREE.Group();
+
         camStand.position.set(6.0, 0, -3.0);
+
         const standPole = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 2.2, 16), ironMat);
+
         standPole.position.y = 1.1;
+
         const camBox = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.5, 0.9), ironMat);
+
         camBox.position.set(0, 2.3, 0);
+
         const camLens = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.4, 16), new THREE.MeshBasicMaterial({ color: '#00f0ff' }));
+
         camLens.rotation.x = Math.PI / 2;
+
         camLens.position.set(0, 2.3, -0.5);
+
         camStand.add(standPole, camBox, camLens);
+
         goodyStageRoot.add(camStand);
 
+
+
         function createFlagTexture(cName) {
+
             const c = document.createElement('canvas'); c.width = 128; c.height = 128;
+
             const ctx = c.getContext('2d');
+
             ctx.fillStyle = '#22143b'; ctx.fillRect(0, 0, 128, 128);
+
             ctx.fillStyle = '#39ff14'; ctx.font = 'bold 20px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
             ctx.fillText(cName.substring(0, 4).toUpperCase(), 64, 64);
+
             return new THREE.CanvasTexture(c);
+
         }
+
+
 
         const totalTiles = 31;
+
         const boardTiles = [];
 
+
+
         const extendedCountriesList = [];
+
         extendedCountriesList.push({ country: "Start Zone", poolKey: "Start" });
+
         for (let i = 1; i < totalTiles - 1; i++) {
+
             let countryObj = COUNTRIES_LIST[(i - 1) % COUNTRIES_LIST.length];
+
             extendedCountriesList.push({ country: countryObj.name, poolKey: countryObj.poolKey });
+
         }
+
         extendedCountriesList.push({ country: "United Kingdom", poolKey: "UK" });
 
+
+
         const startCanvas = document.createElement('canvas'); startCanvas.width = 128; startCanvas.height = 128;
+
         const stCtx = startCanvas.getContext('2d');
+
         const startTex = new THREE.CanvasTexture(startCanvas);
 
+
+
         function updateStartTileTexture(time) {
+
             stCtx.fillStyle = `hsl(${Math.floor(time * 120) % 360}, 100%, 50%)`;
+
             stCtx.fillRect(0, 0, 128, 128);
+
             stCtx.fillStyle = '#ffffff';
+
             stCtx.font = 'bold 18px monospace';
+
             stCtx.textAlign = 'center';
+
             stCtx.textBaseline = 'middle';
+
             stCtx.fillText("START", 64, 64);
+
             startTex.needsUpdate = true;
+
         }
+
+
 
         let currentTriviaCountryIndex = 0;
+
         let currentTriviaQuestionInPoolIndex = 0;
 
+
+
         for (let i = 0; i < totalTiles; i++) {
+
             let angle = i * 0.52;
+
             let radius = 1.0 + (i * 0.24);
+
             let tx = Math.cos(angle) * radius;
+
             let tz = Math.sin(angle) * radius + 2.0;
 
+
+
             let countryData = extendedCountriesList[i];
+
             let tileMat;
+
             if (i === 0) {
+
                 tileMat = new THREE.MeshBasicMaterial({ map: startTex });
+
             } else if (i === totalTiles - 1) {
+
                 tileMat = new THREE.MeshBasicMaterial({ map: createFlagTexture("UK WIN") });
+
             } else {
+
                 tileMat = new THREE.MeshBasicMaterial({ map: createFlagTexture(countryData.country) });
+
             }
+
+
 
             let tile = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.1, 24), tileMat);
+
             tile.position.set(tx, 0.1 + (i * 0.02), tz);
+
             tile.userData = { country: countryData.country, poolKey: countryData.poolKey, tileIndex: i };
+
             goodyStageRoot.add(tile);
+
             boardTiles.push(tile);
+
         }
+
+
 
         function createPlayerPawn(colorHex, initialName) {
+
             const pawn = new THREE.Group();
+
             const baseMat = new THREE.MeshStandardMaterial({ color: colorHex, metalness: 0.6, roughness: 0.25 });
+
             const base = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.24, 0.1, 16), baseMat);
+
             base.position.y = 0.05; pawn.add(base);
+
             const body = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.4, 16), baseMat);
+
             body.position.y = 0.3; pawn.add(body);
+
             const head = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 16), baseMat);
+
             head.position.y = 0.55; pawn.add(head);
 
+
+
             const bCanvas = document.createElement('canvas'); bCanvas.width = 128; bCanvas.height = 64;
+
             const ctx = bCanvas.getContext('2d');
+
             ctx.fillStyle = '#0a0314'; ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 4;
+
             ctx.fillRect(0, 0, 128, 64); ctx.strokeRect(2, 2, 124, 60);
+
             ctx.fillStyle = '#ffffff'; ctx.font = 'bold 20px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
             ctx.fillText(initialName, 64, 32);
+
             const bTex = new THREE.CanvasTexture(bCanvas);
+
             const badgeMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.4), new THREE.MeshBasicMaterial({ map: bTex, side: THREE.DoubleSide }));
+
             badgeMesh.position.set(0, 0.85, 0);
+
             pawn.add(badgeMesh);
+
             return pawn;
+
         }
+
+
 
         const pawnSpot = createPlayerPawn(0x00d2d3, "PLAYER 1");
+
         pawnSpot.position.set(boardTiles[0].position.x, boardTiles[0].position.y + 0.1, boardTiles[0].position.z);
+
         goodyStageRoot.add(pawnSpot);
 
+
+
         function triggerPawnHop(targetIndex) {
+
             targetIndex = Math.min(targetIndex, boardTiles.length - 1);
+
             if (counterPositionIndex === targetIndex) return;
 
+
+
             hopStartIndex = counterPositionIndex;
+
             hopTargetIndex = targetIndex;
+
             counterPositionIndex = targetIndex;
+
             hopProgress = 0.0;
+
             isHopping = true;
+
         }
+
+
 
         function updatePawnHopAnimation(delta) {
+
             if (!isHopping) return;
 
+
+
             hopProgress += delta / hopDuration;
+
             if (hopProgress >= 1.0) {
+
                 hopProgress = 1.0;
+
                 isHopping = false;
+
             }
+
+
 
             let startTile = boardTiles[hopStartIndex];
+
             let targetTile = boardTiles[hopTargetIndex];
 
+
+
             let curX = THREE.MathUtils.lerp(startTile.position.x, targetTile.position.x, hopProgress);
+
             let curZ = THREE.MathUtils.lerp(startTile.position.z, targetTile.position.z, hopProgress);
+
             let baseBaseY = THREE.MathUtils.lerp(startTile.position.y, targetTile.position.y, hopProgress) + 0.1;
 
+
+
             let jumpHeight = Math.sin(hopProgress * Math.PI) * 0.8;
+
             pawnSpot.position.set(curX, baseBaseY + jumpHeight, curZ);
 
+
+
             if (!isHopping && hopTargetIndex >= boardTiles.length - 1) {
+
                 counterPositionIndex = boardTiles.length - 1;
+
                 gameWon = true;
+
                 pawnSpot.position.set(0.0, 2.7, -10.5);
+
                 visitedCountryName = "United Kingdom (Victory)";
+
                 playElevatorPing();
 
+
+
                 let speechWin = "Fantastic! You reached United Kingdom on the 31st tile and hopped onto the podium to claim total victory!";
+
                 if ('speechSynthesis' in window) {
+
                     window.speechSynthesis.cancel();
+
                     window.speechSynthesis.speak(new SpeechSynthesisUtterance(speechWin));
+
                 }
+
                 renderStageQuestionBoard();
+
                 renderPodium1Screen();
+
             }
+
         }
+
+
 
         const studioPerimeterLineMat = new THREE.MeshBasicMaterial({ color: '#00f0ff' });
+
         const studioPerimeterLine = new THREE.Mesh(
+
             new THREE.RingGeometry(studioWidth * 0.44, studioWidth * 0.44 + 0.4, 48),
+
             studioPerimeterLineMat
+
         );
+
         studioPerimeterLine.rotation.x = -Math.PI / 2;
+
         studioPerimeterLine.position.set(-35.0, finalLandingY + 0.02, studioCenterZ);
+
         studioGroup.add(studioPerimeterLine);
 
+
+
         let rooftopGroup = new THREE.Group();
+
         const rooftopMat = new THREE.MeshStandardMaterial({ color: '#1c1236', roughness: 0.95, metalness: 0.05, side: THREE.DoubleSide });
+
         const roofLeft = new THREE.Mesh(new THREE.BoxGeometry(59.5, 0.6, 50), rooftopMat);
+
         roofLeft.position.set(-70.25, 17.0, -25);
+
         const roofRight = new THREE.Mesh(new THREE.BoxGeometry(130.5, 0.6, 50), rooftopMat);
+
         roofRight.position.set(34.75, 17.0, -25);
+
         const roofFront = new THREE.Mesh(new THREE.BoxGeometry(11, 0.6, 39.5), rooftopMat);
+
         roofFront.position.set(-35, 17.0, -19.75);
+
         const roofBack = new THREE.Mesh(new THREE.BoxGeometry(11, 0.6, 49.5), rooftopMat);
+
         roofBack.position.set(-35, 17.0, -75.25);
+
         rooftopGroup.add(roofLeft, roofRight, roofFront, roofBack);
+
         scene.add(rooftopGroup);
 
+
+
         const railMat = new THREE.MeshStandardMaterial({ color: '#00f0ff', emissive: '#00f0ff', emissiveIntensity: 0.6, metalness: 0.3, roughness: 0.7 });
+
         const railGeo = new THREE.BoxGeometry(0.2, 50.0, 0.2);
+
         const rail1 = new THREE.Mesh(railGeo, railMat); rail1.position.set(-40.2, 0.0, -49.8);
+
         const rail2 = new THREE.Mesh(railGeo, railMat); rail2.position.set(-29.8, 0.0, -49.8);
+
         const rail3 = new THREE.Mesh(railGeo, railMat); rail3.position.set(-40.2, 0.0, -40.2);
+
         const rail4 = new THREE.Mesh(railGeo, railMat); rail4.position.set(-29.8, 0.0, -40.2);
+
         scene.add(rail1, rail2, rail3, rail4);
 
+
+
         const doorPivot = new THREE.Group();
+
         doorPivot.position.set(-2.0, 0, 0);
+
         wallGroup.add(doorPivot);
 
+
+
         const doorMat = new THREE.MeshStandardMaterial({ color: '#ff0055', emissive: '#ff0055', emissiveIntensity: 0.4, metalness: 0.2, roughness: 0.8 });
+
         const doorPanelMesh = new THREE.Mesh(new THREE.BoxGeometry(4.0, 6.0, 0.3), doorMat);
+
         doorPanelMesh.position.set(2.0, 3.2, 0);
+
         doorPanelMesh.name = "partitionDoor";
+
         doorPivot.add(doorPanelMesh);
 
+
+
         function buildWiredPerimeterWall(x, z, rotY, width) {
+
             const wg = new THREE.Group();
+
             const panel = new THREE.Mesh(new THREE.BoxGeometry(width, 40, 2), wallMat);
+
             panel.position.set(0, 5, 0);
+
             wg.add(panel);
+
             wg.position.set(x, 0, z);
+
             wg.rotation.y = rotY;
+
             scene.add(wg);
+
         }
+
         buildWiredPerimeterWall(0, -100, 0, 200);  
+
         buildWiredPerimeterWall(0, 100, Math.PI, 200);  
+
         buildWiredPerimeterWall(-100, 0, Math.PI/2, 200);
+
         buildWiredPerimeterWall(100, 0, -Math.PI/2, 200);
 
+
+
         const gearGroup = new THREE.Group();
+
         gearGroup.position.set(0, 0.2, -4);
+
         scene.add(gearGroup);
+
         const gearCore = new THREE.Mesh(
+
             new THREE.CylinderGeometry(3, 3, 0.6, 24),
+
             new THREE.MeshStandardMaterial({ color: '#3b3d4f', roughness: 0.7, metalness: 0.3 })
+
         );
+
         gearGroup.add(gearCore);
+
         for(let i=0; i<20; i++) {
+
             const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.8), gearCore.material);
+
             let angle = (i / 20) * Math.PI * 2;
+
             tooth.position.set(Math.cos(angle) * 3, 0, Math.sin(angle) * 3);
+
             tooth.rotation.y = -angle;
+
             gearGroup.add(tooth);
+
         }
+
+
 
         const elevatorGroup = new THREE.Group();
+
         elevatorGroup.position.set(-35, 0, -45);
+
         scene.add(elevatorGroup);
 
+
+
         const liftHeight = 6.3;
+
         const backWall = new THREE.Mesh(new THREE.BoxGeometry(10, liftHeight, 0.6), wallMat); backWall.position.set(0, liftHeight/2, -5);
+
         const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.6, liftHeight, 10), wallMat); leftWall.position.set(-5, liftHeight/2, 0);
+
         const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.6, liftHeight, 10), wallMat); rightWall.position.set(5, liftHeight/2, 0);
+
         const ceiling = new THREE.Mesh(new THREE.BoxGeometry(10.6, 0.4, 10.6), wallMat); ceiling.position.set(0, liftHeight, 0);
+
         const shaftFloor = new THREE.Mesh(new THREE.BoxGeometry(10.6, 0.4, 10.6), wallMat); shaftFloor.position.set(0, -0.2, 0);
+
         elevatorGroup.add(backWall, leftWall, rightWall, ceiling, shaftFloor);
 
+
+
         const cctvMount = new THREE.Group();
+
         cctvMount.position.set(4.6, liftHeight - 0.4, -4.6);
+
         const cctvBase = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.2, 12), ironMat);
+
         const cctvHousing = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.6), new THREE.MeshStandardMaterial({ color: '#110a24', metalness: 0.3, roughness: 0.8 }));
+
         cctvHousing.position.set(-0.1, -0.15, 0.15);
+
         cctvHousing.rotation.set(0.4, -0.6, 0);
+
         cctvMount.add(cctvBase, cctvHousing);
+
         elevatorGroup.add(cctvMount);
 
+
+
         const leftDoor = new THREE.Mesh(new THREE.BoxGeometry(2.4, 5.8, 0.3), glassMat); leftDoor.position.set(-1.2, 3.1, 4.8);
+
         const rightDoor = new THREE.Mesh(new THREE.BoxGeometry(2.4, 5.8, 0.3), glassMat); rightDoor.position.set(1.2, 3.1, 4.8);
+
         const frameMatElev = new THREE.MeshStandardMaterial({ color: '#00f0ff', emissive: '#00f0ff', emissiveIntensity: 0.5, metalness: 0.3, roughness: 0.7 });
+
         const leftTrim = new THREE.Mesh(new THREE.BoxGeometry(0.15, 5.8, 0.35), frameMatElev); leftTrim.position.set(-2.35, 3.1, 4.8);
+
         const rightTrim = new THREE.Mesh(new THREE.BoxGeometry(0.15, 5.8, 0.35), frameMatElev); rightTrim.position.set(2.35, 3.1, 4.8);
+
         const leftGapGlass = new THREE.Mesh(new THREE.BoxGeometry(2.3, 5.8, 0.3), glassMat); leftGapGlass.position.set(-3.7, 3.1, 4.8);
+
         const rightGapGlass = new THREE.Mesh(new THREE.BoxGeometry(2.3, 5.8, 0.3), glassMat); rightGapGlass.position.set(3.7, 3.1, 4.8);
+
         elevatorGroup.add(leftDoor, rightDoor, leftTrim, rightTrim, leftGapGlass, rightGapGlass);
 
+
+
         let elevatorState = "CLOSED";
+
         let doorAnimProgress = 0;
+
         let currentFloor = "GROUND FLOOR";
+
         let targetFloor = "GROUND FLOOR";
+
         let elevatorYProgress = 0;
+
         let playerCurrentFloor = "GROUND FLOOR";
 
+
+
         const displayCanvas = document.createElement('canvas');
+
         displayCanvas.width = 256; displayCanvas.height = 160;
+
         const dCtx = displayCanvas.getContext('2d');
+
         const displayTex = new THREE.CanvasTexture(displayCanvas);
+
         const displayMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.3), new THREE.MeshBasicMaterial({ map: displayTex, side: THREE.DoubleSide }));
+
         displayMesh.position.set(0, 5.6, 5.1);
+
         elevatorGroup.add(displayMesh);
 
+
+
         const ledBarMat = new THREE.MeshBasicMaterial({ color: '#00ff66' });
+
         const ledBarMesh = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.1, 0.1), ledBarMat);
+
         ledBarMesh.position.set(0, 6.0, 5.1);
+
         elevatorGroup.add(ledBarMesh);
 
+
+
         const callButtonCanvas = document.createElement('canvas');
+
         callButtonCanvas.width = 128; callButtonCanvas.height = 256;
+
         const cbCtx = callButtonCanvas.getContext('2d');
+
         const callButtonTex = new THREE.CanvasTexture(callButtonCanvas);
+
         const callButtonMat = new THREE.MeshBasicMaterial({ map: callButtonTex, side: THREE.DoubleSide });
 
+
+
         const landingCallButtons = [];
+
         floorListKeys.forEach((fKey) => {
+
             const btn = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 1.6), callButtonMat);
+
             btn.position.set(-38.6, FLOOR_HEIGHTS[fKey] + 3.0, -39.95);
+
             btn.name = "callButton";
+
             btn.userData = { floor: fKey };
+
             scene.add(btn);
+
             landingCallButtons.push(btn);
+
         });
 
+
+
         const panelCanvas = document.createElement('canvas');
+
         panelCanvas.width = 256; panelCanvas.height = 420;
+
         const pCtx = panelCanvas.getContext('2d');
+
         const panelTex = new THREE.CanvasTexture(panelCanvas);
+
         const panelMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 5.8), new THREE.MeshBasicMaterial({ map: panelTex, side: THREE.DoubleSide }));
+
         panelMesh.position.set(-4.2, 3.1, 0);
+
         panelMesh.rotation.y = Math.PI / 2;
+
         panelMesh.name = "elevatorPanel";
+
         elevatorGroup.add(panelMesh);
 
+
+
         function drawElevatorPanels() {
+
             dCtx.fillStyle = '#0a0614'; dCtx.fillRect(0, 0, 256, 160);
+
             dCtx.strokeStyle = '#ff0055'; dCtx.lineWidth = 6; dCtx.strokeRect(4, 4, 248, 152);
+
             dCtx.fillStyle = (elevatorState === "CLOSED") ? '#ff0055' : '#00ff66';
+
             dCtx.fillRect(16, 16, 224, 8);
+
             dCtx.fillStyle = '#00f0ff'; dCtx.font = "bold 20px monospace"; dCtx.textAlign = "center"; dCtx.textBaseline = "middle";
+
             let displayLabel = (currentFloor === "ROOFTOP" || currentFloor === "GROUND FLOOR" || currentFloor === "BASEMENT") ? currentFloor : ("FLOOR " + currentFloor);
+
             dCtx.fillText(displayLabel, 128, 95);
+
             displayTex.needsUpdate = true;
 
+
+
             cbCtx.fillStyle = '#0e0a18'; cbCtx.fillRect(0, 0, 128, 256);
+
             cbCtx.strokeStyle = '#00f0ff'; cbCtx.lineWidth = 4; cbCtx.strokeRect(4, 4, 120, 248);
+
             cbCtx.fillStyle = (elevatorState === "CLOSED") ? '#ff0055' : '#00ff66';
+
             cbCtx.fillRect(14, 14, 100, 228);
+
             cbCtx.fillStyle = '#05030a';
+
             cbCtx.font = 'bold 36px monospace';
+
             cbCtx.textAlign = 'center'; cbCtx.textBaseline = 'middle';
+
             cbCtx.fillText("CALL", 64, 85);
+
             cbCtx.fillText((elevatorState === "CLOSED") ? "▲" : "▼", 64, 170);
+
             callButtonTex.needsUpdate = true;
 
+
+
             pCtx.fillStyle = '#150f29'; pCtx.fillRect(0, 0, 256, 420);
+
             pCtx.strokeStyle = '#00f0ff'; pCtx.lineWidth = 4; pCtx.strokeRect(4, 4, 248, 412);
+
             pCtx.fillStyle = '#ff0055'; pCtx.font = "bold 16px monospace"; pCtx.textAlign = "center";
+
             pCtx.textBaseline = "alphabetic";
+
             pCtx.fillText("LIFT CONTROL", 128, 40);
 
+
+
             let btnY = 65;
+
             buttonsList.forEach((btnName) => {
+
                 let isSelected = (btnName === targetFloor);
+
                 pCtx.fillStyle = isSelected ? '#00ff66' : '#281c47';
+
                 pCtx.fillRect(20, btnY, 216, 60);
+
                 pCtx.strokeStyle = isSelected ? '#ffffff' : '#00f0ff';
+
                 pCtx.strokeRect(20, btnY, 216, 60);
+
                 pCtx.fillStyle = isSelected ? '#0b0716' : '#00f0ff';
+
                 pCtx.font = "bold 14px monospace";
+
                 pCtx.textBaseline = "middle";
+
                 pCtx.fillText(btnName, 128, btnY + 30);
+
                 btnY += 75;
+
             });
+
             panelTex.needsUpdate = true;
+
         }
+
         drawElevatorPanels();
 
+
+
         const screenCanvas = document.createElement('canvas');
+
         screenCanvas.width = 1024; screenCanvas.height = 340;
+
         const sCtx = screenCanvas.getContext('2d');
+
         const screenTexture = new THREE.CanvasTexture(screenCanvas);
+
         const screenMat = new THREE.MeshBasicMaterial({ map: screenTexture, transparent: true, opacity: 0.9, side: THREE.DoubleSide });
+
         const screenMesh = new THREE.Mesh(new THREE.PlaneGeometry(32, 10.6), screenMat);
+
         screenMesh.position.set(0, 11.5, 0);
+
         scene.add(screenMesh);
+
+
 
         spawnKnight();
 
+
+
         let gameRunning = false;
+
         const keys = {};
+
         const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
         const raycaster = new THREE.Raycaster();
+
         const mouseVec = new THREE.Vector2();
 
+
+
         let touchLookPitch = 0.35;
+
         let touchLookYaw = 0;
+
         let activeLookTouchId = null;
+
         let lastTouchX = 0;
+
         let lastTouchY = 0;
 
+
+
         infoBtn.onclick = () => uiModal.classList.toggle('open');
+
         modalClose.onclick = () => uiModal.classList.remove('open');
 
+
+
         if (startBtn) {
+
             startBtn.addEventListener('click', () => {
+
                 startScreen.style.display = 'none';
+
                 try {
+
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
                 } catch (e) {
+
                     console.warn("Audio Context blocked or unsupported", e);
+
                 }
+
                 gameRunning = true;
+
                 clock.start();
+
                 gameLoop();
+
             });
+
         }
+
+
 
         window.onkeydown = (e) => {
+
             let k = e.key.toLowerCase();
+
             keys[k] = true;
+
             if (k === 'f') toggleTorch();
+
             if (k === 'e') handleInteractionKey();
+
         };
+
         window.onkeyup = (e) => {
+
             let k = e.key.toLowerCase();
+
             keys[k] = false;
+
         };
+
+
 
         window.onmousemove = (e) => {
+
             mouse.x = e.clientX;
+
             mouse.y = e.clientY;
+
         };
+
         window.onmouseleave = () => {
+
             mouse.x = window.innerWidth / 2;
+
             mouse.y = window.innerHeight / 2;
+
         };
+
         window.oncontextmenu = (e) => e.preventDefault();
 
+
+
         if (isMobileDevice) {
+
             const bindTouchHold = (elemId, keyName) => {
+
                 const el = document.getElementById(elemId);
+
                 if (!el) return;
+
                 const activate = (e) => { e.preventDefault(); keys[keyName] = true; el.classList.add('active-press'); };
+
                 const deactivate = (e) => { e.preventDefault(); keys[keyName] = false; el.classList.remove('active-press'); };
+
                 el.addEventListener('touchstart', activate);
+
                 el.addEventListener('touchend', deactivate);
+
                 el.addEventListener('touchcancel', deactivate);
+
             };
+
             bindTouchHold('btn-up', 'w');
+
             bindTouchHold('btn-down', 's');
+
             bindTouchHold('btn-left', 'a');
+
             bindTouchHold('btn-right', 'd');
 
+
+
             window.addEventListener('touchstart', (e) => {
+
                 for (let i = 0; i < e.targetTouches.length; i++) {
+
                     const touch = e.targetTouches[i];
+
                     if (!(touch.clientX < 180 && touch.clientY > window.innerHeight - 180)) {
+
                         if (activeLookTouchId === null) {
+
                             activeLookTouchId = touch.identifier;
+
                             lastTouchX = touch.clientX;
+
                             lastTouchY = touch.clientY;
+
                         }
+
                     }
+
                 }
+
             }, { passive: false });
+
+
 
             window.addEventListener('touchmove', (e) => {
+
                 for (let i = 0; i < e.targetTouches.length; i++) {
+
                     const touch = e.targetTouches[i];
+
                     if (touch.identifier === activeLookTouchId) {
+
                         const dx = touch.clientX - lastTouchX;
+
                         const dy = touch.clientY - lastTouchY;
+
                         lastTouchX = touch.clientX;
+
                         lastTouchY = touch.clientY;
 
+
+
                         const MAX_PITCH = 0.2;   
+
                         const MAX_YAW = 1.3;     
 
+
+
                         touchLookPitch -= dy * 0.008;
+
                         touchLookPitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, touchLookPitch));
 
+
+
                         touchLookYaw -= dx * 0.008;
+
                         touchLookYaw = Math.max(-MAX_YAW, Math.min(MAX_YAW, touchLookYaw));
 
+
+
                         const btnLeftEl = document.getElementById('btn-left');
+
                         const btnRightEl = document.getElementById('btn-right');
+
+
 
                         if (dx < -3) {
+
                             keys['a'] = true;
+
                             keys['d'] = false;
+
                             if(btnLeftEl) btnLeftEl.classList.add('active-press');
+
                             if(btnRightEl) btnRightEl.classList.remove('active-press');
+
                         } else if (dx > 3) {
+
                             keys['d'] = true;
+
                             keys['a'] = false;
+
                             if(btnRightEl) btnRightEl.classList.add('active-press');
+
                             if(btnLeftEl) btnLeftEl.classList.remove('active-press');
+
                         }
+
                     }
+
                 }
+
             }, { passive: false });
 
+
+
             const endTouchLook = (e) => {
+
                 for (let i = 0; i < e.changedTouches.length; i++) {
+
                     if (e.changedTouches[i].identifier === activeLookTouchId) {
+
                         activeLookTouchId = null;
+
                         keys['a'] = false;
+
                         keys['d'] = false;
+
                         const btnLeftEl = document.getElementById('btn-left');
+
                         const btnRightEl = document.getElementById('btn-right');
+
                         if(btnLeftEl) btnLeftEl.classList.remove('active-press');
+
                         if(btnRightEl) btnRightEl.classList.remove('active-press');
+
                     }
+
                 }
+
             };
+
             window.addEventListener('touchend', endTouchLook);
+
             window.addEventListener('touchcancel', endTouchLook);
+
         }
+
+
 
         function applyDirectionalRigging(zone, delta) {
+
             const normX = (mouse.x / window.innerWidth) * 2 - 1;
+
             const normY = (mouse.y / window.innerHeight) * 2 - 1;
 
+
+
             let targetHeadPitch = (-normY * 0.75) + touchLookPitch;
+
             let targetHeadYaw = (-normX * 0.95) + touchLookYaw;
 
+
+
             const LIMIT_UP = 0.2;     
+
             const LIMIT_DOWN = -0.2;  
+
             const LIMIT_LEFT = 1.3;   
+
             const LIMIT_RIGHT = -1.3; 
 
+
+
             targetHeadPitch = Math.max(LIMIT_DOWN, Math.min(LIMIT_UP, targetHeadPitch));
+
             targetHeadYaw = Math.max(LIMIT_RIGHT, Math.min(LIMIT_LEFT, targetHeadYaw));
+
             const targetHeadRoll = -normX * normY * 0.15;
 
+
+
             const tHeadRot = new THREE.Euler(targetHeadPitch, targetHeadYaw, targetHeadRoll);
+
             let tSwordRot = knight.defaultSwordRot.clone();
+
             let tSwordPos = knight.defaultSwordPos.clone();
+
             let tShieldRot = knight.defaultShieldRot.clone();
+
             let tShieldPos = knight.defaultShieldPos.clone();
 
+
+
             let lerpSpeed = knight.isAttacking ? 0.85 : 0.45;
+
             // ... [knight combat/animation routing remains intact]
+
             knight.headPivot.rotation.x = THREE.MathUtils.lerp(knight.headPivot.rotation.x, tHeadRot.x, lerpSpeed);
+
             knight.headPivot.rotation.y = THREE.MathUtils.lerp(knight.headPivot.rotation.y, tHeadRot.y, lerpSpeed);
+
             knight.headPivot.rotation.z = THREE.MathUtils.lerp(knight.headPivot.rotation.z, tHeadRot.z, lerpSpeed);
 
+
+
             knight.sword.position.lerp(tSwordPos, lerpSpeed);
+
             knight.sword.rotation.x = THREE.MathUtils.lerp(knight.sword.rotation.x, tSwordRot.x, lerpSpeed);
+
             knight.sword.rotation.y = THREE.MathUtils.lerp(knight.sword.rotation.y, tSwordRot.y, lerpSpeed);
+
             knight.sword.rotation.z = THREE.MathUtils.lerp(knight.sword.rotation.z, tSwordRot.z, lerpSpeed);
 
+
+
             knight.shield.position.lerp(tShieldPos, lerpSpeed);
+
             knight.shield.rotation.x = THREE.MathUtils.lerp(knight.shield.rotation.x, tShieldRot.x, lerpSpeed);
+
             knight.shield.rotation.y = THREE.MathUtils.lerp(knight.shield.rotation.y, tShieldRot.y, lerpSpeed);
+
             knight.shield.rotation.z = THREE.MathUtils.lerp(knight.shield.rotation.z, tShieldRot.z, lerpSpeed);
 
+
+
             rebuildKnightArms();
+
         }
+
+
 
         function gameLoop() {
+
             requestAnimationFrame(gameLoop);
+
             const delta = Math.min(clock.getDelta(), 0.1);
+
             const time = clock.getElapsedTime();
 
-            updateSpiralCarpetTexture(time);
-            updateStartTileTexture(time);
-            
-// --- MANUAL ADDITION: PATROL ANIMATION & CAMERA SHAKE ---
-        if (giantGroup) {
-            let patrolCycle = Math.sin(time * 0.8) * 35.0; 
-            giantGroup.position.x = -35.0 + patrolCycle;
-            giantGroup.rotation.y = (Math.cos(time * 0.8) > 0) ? Math.PI / 2 : -Math.PI / 2;
 
-            // Shake camera slightly when he walks past the windows close to you
-            if (Math.abs(patrolCycle) > 30 && camera) {
-                camera.position.x += (Math.random() - 0.5) * 0.08;
-                camera.position.y += (Math.random() - 0.5) * 0.08;
-            }
-        }
-            
+
+            updateSpiralCarpetTexture(time);
+
+            updateStartTileTexture(time);
+
+
+
             // --- ANIMATE GIANT CUSTODIAN (BIG MAN) & CAMERA SHAKE ---
+
             if (giantGroup) {
+
                 let patrolCycle = Math.sin(time * 0.8) * 35.0; 
+
                 giantGroup.position.x = -35.0 + patrolCycle;
+
                 giantGroup.rotation.y = (Math.cos(time * 0.8) > 0) ? Math.PI / 2 : -Math.PI / 2;
 
+
+
                 if (Math.abs(patrolCycle) > 30 && camera) {
+
                     camera.position.x += (Math.random() - 0.5) * 0.08;
+
                     camera.position.y += (Math.random() - 0.5) * 0.08;
+
                 }
+
             }
+
+
 
             if (knight) {
+
                 let isInTunnels = (playerCurrentFloor === "BASEMENT" && undergroundGroup.visible);
+
                 let mobileTunnelSpeedBonus = (isMobileDevice && isInTunnels) ? 2.2 : 1.0;
 
+
+
                 const currentMaxSpeed = (isActuallyInsideCar ? 0.38 : 0.70) * mobileTunnelSpeedBonus;
+
                 const currentAccel = isActuallyInsideCar ? 0.05 : 0.08;
 
+
+
                 const isMovingForward = (keys['w'] || keys['arrowup']);
+
                 const isMovingBackward = (keys['s'] || keys['arrowdown']);
+
                 const isTurningLeft = (keys['a'] || keys['arrowleft']);
+
                 const isTurningRight = (keys['d'] || keys['arrowright']);
 
+
+
                 if (isMovingForward) {
+
                     knight.speed = Math.min(currentMaxSpeed, knight.speed + currentAccel);
+
                 } else if (isMovingBackward) {
+
                     knight.speed = Math.max(-currentMaxSpeed * 0.6, knight.speed - currentAccel);
+
                 } else {
+
                     if (knight.speed > 0) knight.speed = Math.max(0, knight.speed - knight.decel);
+
                     if (knight.speed < 0) knight.speed = Math.min(0, knight.speed + knight.decel);
+
                 }
 
+
+
                 let isInGameShowArea = knight.group.position.z < gateZ;
+
                 let turnSpeed = (isMobileDevice && isInGameShowArea) ? 0.085 : 0.045;
 
+
+
                 if (isTurningLeft) knight.angle += turnSpeed;
+
                 if (isTurningRight) knight.angle -= turnSpeed;
+
                 knight.group.rotation.y = knight.angle;
 
+
+
                 let nextPos = knight.group.position.clone();
+
                 nextPos.x -= Math.sin(knight.angle) * knight.speed;
+
                 nextPos.z -= Math.cos(knight.angle) * knight.speed;
 
+
+
                 knight.group.position.copy(nextPos);
+
                 applyDirectionalRigging(knight.activeZone, delta);
+
             }
 
+
+
             renderer.render(scene, camera);
+
         }
 
+
+
         window.addEventListener('resize', () => {
+
             camera.aspect = window.innerWidth / window.innerHeight;
+
             camera.updateProjectionMatrix();
+
             renderer.setSize(window.innerWidth, window.innerHeight);
+
         });
 
+
+
         renderer.render(scene, camera);
+
     </script>
+
 </body>
+
 </html>
