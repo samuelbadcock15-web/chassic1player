@@ -2608,26 +2608,28 @@
                         lastTouchX = touch.clientX;
                         lastTouchY = touch.clientY;
 
-                        // Head look / aim
-                        touchLookYaw -= dx * 0.008;
-                        touchLookPitch -= dy * 0.008;
-                        touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
+                        // Head look / aim with strict limits
+touchLookYaw -= dx * 0.008;
+touchLookYaw = Math.max(-0.8, Math.min(0.8, touchLookYaw)); // Limit Left / Right
+
+touchLookPitch -= dy * 0.008;
+touchLookPitch = Math.max(-0.5, Math.min(0.4, touchLookPitch)); // Limit Down / Up
 
                         // Swipe left/right auto-steer integration with D-pad highlighting
-const btnLeftEl = document.getElementById('btn-left');
-const btnRightEl = document.getElementById('btn-right');
+                        const btnLeftEl = document.getElementById('btn-left');
+                        const btnRightEl = document.getElementById('btn-right');
 
-if (dx < -3) {
-    keys['a'] = true;
-    keys['d'] = false;
-    if(btnLeftEl) btnLeftEl.classList.add('active-press');
-    if(btnRightEl) btnRightEl.classList.remove('active-press');
-} else if (dx > 3) {
-    keys['d'] = true;
-    keys['a'] = false;
-    if(btnRightEl) btnRightEl.classList.add('active-press');
-    if(btnLeftEl) btnLeftEl.classList.remove('active-press');
-}
+                        if (dx < -3) {
+                            keys['a'] = true;
+                            keys['d'] = false;
+                            if(btnLeftEl) btnLeftEl.classList.add('active-press');
+                            if(btnRightEl) btnRightEl.classList.remove('active-press');
+                        } else if (dx > 3) {
+                            keys['d'] = true;
+                            keys['a'] = false;
+                            if(btnRightEl) btnRightEl.classList.add('active-press');
+                            if(btnLeftEl) btnLeftEl.classList.remove('active-press');
+                        }
                     }
                 }
             }, { passive: false });
@@ -3202,12 +3204,15 @@ if (dx < -3) {
             const normX = (mouse.x / window.innerWidth) * 2 - 1;
             const normY = (mouse.y / window.innerHeight) * 2 - 1;
 
-            const targetHeadPitch = (-normY * 0.75) + touchLookPitch;
-// Remove touchLookYaw or keep it purely bound to cursor/aim vector, 
-// ensuring A/D turning does NOT alter the head's world rotation:
-const targetHeadYaw = (-normX * 0.95); 
-const targetHeadRoll = -normX * normY * 0.15;
-            
+            let targetHeadPitch = (-normY * 0.75) + touchLookPitch;
+let targetHeadYaw = (-normX * 0.95) + touchLookYaw;
+
+// ---> ADD THESE LIMITS HERE <---
+const LIMIT_UP = 0.3;     // Max head tilt UP
+const LIMIT_DOWN = -0.4;  // Max head tilt DOWN
+const LIMIT_LEFT = 0.6;   // Max head turn LEFT
+const LIMIT_RIGHT = -0.6; // Max head turn RIGHT
+
             const tHeadRot = new THREE.Euler(targetHeadPitch, targetHeadYaw, targetHeadRoll);
             let tSwordRot = knight.defaultSwordRot.clone();
             let tSwordPos = knight.defaultSwordPos.clone();
@@ -3786,8 +3791,8 @@ const targetHeadRoll = -normX * normY * 0.15;
                     const targetHeight = isInStudio ? 4.5 : 4.2;
                     const lookHeight = 2.2;
 
-                   const targetCamX = knight.group.position.x + Math.sin(knight.angle) * targetDist;
-const targetCamZ = knight.group.position.z + Math.cos(knight.angle) * targetDist;
+                    const targetCamX = knight.group.position.x + Math.sin(knight.angle) * targetDist;
+                    const targetCamZ = knight.group.position.z + Math.cos(knight.angle) * targetDist;
                     const targetCamY = knight.group.position.y + targetHeight;
 
                     camera.position.x += (targetCamX - camera.position.x) * 0.16;
