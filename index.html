@@ -2310,13 +2310,13 @@
             headPivot.add(visor);
 
             const torchLight = new THREE.SpotLight('#ff0033', 18.0, 180, Math.PI / 5.5, 0.3, 1.0);
-            torchLight.position.set(0, 0.0, -0.6);
-            headPivot.add(torchLight);
+torchLight.position.set(0, 2.2, -0.6); // Positioned near chest/neck height
+torso.add(torchLight);                // <--- Attached to torso (body) instead of head!
 
-            const torchTarget = new THREE.Object3D();
-            torchTarget.position.set(0, -0.5, -25);
-            headPivot.add(torchTarget);
-            torchLight.target = torchTarget;
+const torchTarget = new THREE.Object3D();
+torchTarget.position.set(0, 2.2, -25.6); // Points strictly forward relative to body
+torso.add(torchTarget);
+torchLight.target = torchTarget;
 
             const legGeom = new THREE.CylinderGeometry(0.2, 0.2, 3);
             legGeom.translate(0, -1.5, 0);
