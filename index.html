@@ -2600,37 +2600,25 @@
             }, { passive: false });
 
             window.addEventListener('touchmove', (e) => {
-                for (let i = 0; i < e.targetTouches.length; i++) {
-                    const touch = e.targetTouches[i];
-                    if (touch.identifier === activeLookTouchId) {
-                        const dx = touch.clientX - lastTouchX;
-                        const dy = touch.clientY - lastTouchY;
-                        lastTouchX = touch.clientX;
-                        lastTouchY = touch.clientY;
+    for (let i = 0; i < e.targetTouches.length; i++) {
+        const touch = e.targetTouches[i];
+        // If touch is on the right-side look pad area
+        if (touch.identifier === activeLookTouchId) {
+            const dx = touch.clientX - lastTouchX;
+            const dy = touch.clientY - lastTouchY;
+            lastTouchX = touch.clientX;
+            lastTouchY = touch.clientY;
 
-                        // Head look / aim
-                        touchLookYaw -= dx * 0.008;
-                        touchLookPitch -= dy * 0.008;
-                        touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
+            // EXCLUSIVELY update head pitch and yaw (aim / flashlight only)
+            touchLookYaw -= dx * 0.008;
+            touchLookPitch -= dy * 0.008;
+            touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
 
-                        // Swipe left/right auto-steer integration with D-pad highlighting
-                        const btnLeftEl = document.getElementById('btn-left');
-                        const btnRightEl = document.getElementById('btn-right');
-
-                        if (dx < -3) {
-                            keys['a'] = true;
-                            keys['d'] = false;
-                            if(btnLeftEl) btnLeftEl.classList.add('active-press');
-                            if(btnRightEl) btnRightEl.classList.remove('active-press');
-                        } else if (dx > 3) {
-                            keys['d'] = true;
-                            keys['a'] = false;
-                            if(btnRightEl) btnRightEl.classList.add('active-press');
-                            if(btnLeftEl) btnLeftEl.classList.remove('active-press');
-                        }
-                    }
-                }
-            }, { passive: false });
+            // NOTE: Automatic steering triggers (keys['a'] and keys['d']) 
+            // have been completely removed here so body movement is unaffected!
+        }
+    }
+}, { passive: false });
 
             const endTouchLook = (e) => {
                 for (let i = 0; i < e.changedTouches.length; i++) {
