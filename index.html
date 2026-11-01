@@ -2600,13 +2600,13 @@
             }, { passive: false });
 
             window.addEventListener('touchmove', (e) => {
-                for (let i = 0; i < e.targetTouches.length; i++) {
-                    const touch = e.targetTouches[i];
-                    if (touch.identifier === activeLookTouchId) {
-                        const dx = touch.clientX - lastTouchX;
-                        const dy = touch.clientY - lastTouchY;
-                        lastTouchX = touch.clientX;
-                        lastTouchY = touch.clientY;
+    for (let i = 0; i < e.targetTouches.length; i++) {
+        const touch = e.targetTouches[i];
+        if (touch.identifier === activeLookTouchId) {
+            const dx = touch.clientX - lastTouchX;
+            const dy = touch.clientY - lastTouchY;
+            lastTouchX = touch.clientX;
+            lastTouchY = touch.clientY;
 
                         // Head look / aim (restricted angles)
 touchLookYaw -= dx * 0.008;
