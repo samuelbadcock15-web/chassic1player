@@ -2614,20 +2614,20 @@
                         touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
 
                         // Swipe left/right auto-steer integration with D-pad highlighting
-                        const btnLeftEl = document.getElementById('btn-left');
-                        const btnRightEl = document.getElementById('btn-right');
+const btnLeftEl = document.getElementById('btn-left');
+const btnRightEl = document.getElementById('btn-right');
 
-                        if (dx < -3) {
-                            keys['a'] = true;
-                            keys['d'] = false;
-                            if(btnLeftEl) btnLeftEl.classList.add('active-press');
-                            if(btnRightEl) btnRightEl.classList.remove('active-press');
-                        } else if (dx > 3) {
-                            keys['d'] = true;
-                            keys['a'] = false;
-                            if(btnRightEl) btnRightEl.classList.add('active-press');
-                            if(btnLeftEl) btnLeftEl.classList.remove('active-press');
-                        }
+if (dx < -3) {
+    keys['a'] = true;
+    keys['d'] = false;
+    if(btnLeftEl) btnLeftEl.classList.add('active-press');
+    if(btnRightEl) btnRightEl.classList.remove('active-press');
+} else if (dx > 3) {
+    keys['d'] = true;
+    keys['a'] = false;
+    if(btnRightEl) btnRightEl.classList.add('active-press');
+    if(btnLeftEl) btnLeftEl.classList.remove('active-press');
+}
                     }
                 }
             }, { passive: false });
