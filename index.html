@@ -3625,9 +3625,9 @@
                 const insideLiftFootprint = (knight.group.position.x > -40.5 && knight.group.position.x < -29.5 && knight.group.position.z > -50.5 && knight.group.position.z < -39.5);
                 const isActuallyInsideCar = insideLiftFootprint && Math.abs(knight.group.position.y - currentLiftY) < 1.8;
 
-                // Mobile tunnel movement speed booster
-                let isInTunnels = (playerCurrentFloor === "BASEMENT" && undergroundGroup.visible);
-                let mobileTunnelSpeedBonus = (isMobileDevice && isInTunnels) ? 1.45 : 1.0;
+                // Mobile tunnel movement speed booster (increased speed down in the tunnels)
+let isInTunnels = (playerCurrentFloor === "BASEMENT" && undergroundGroup.visible);
+let mobileTunnelSpeedBonus = (isMobileDevice && isInTunnels) ? 2.8 : 1.0;
 
                 const currentMaxSpeed = (isActuallyInsideCar ? 0.38 : 0.70) * mobileTunnelSpeedBonus;
                 const currentAccel = isActuallyInsideCar ? 0.05 : 0.08;
