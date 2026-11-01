@@ -99,7 +99,7 @@
         }
         #speedometer {
             position: absolute;
-            bottom: 120px;
+            bottom: 20px;
             right: 20px;
             color: #00f0ff;
             background: rgba(14, 10, 24, 0.9);
@@ -245,58 +245,82 @@
             color: #111;
         }
 
-        /* Dedicated Bottom Mobile Control Panel */
         #mobile-controls {
             position: absolute;
-            bottom: 0;
+            top: 0;
             left: 0;
             width: 100%;
-            height: 110px;
-            background: rgba(5, 3, 10, 0.85);
-            border-top: 2px solid #ff0055;
-            backdrop-filter: blur(6px);
-            pointer-events: auto;
+            height: 100%;
+            pointer-events: none;
             z-index: 120;
             display: none;
-            align-items: center;
-            justify-content: space-around;
-            padding: 0 10px;
         }
         #dpad-container {
-            position: relative;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
             width: 130px;
-            height: 90px;
+            height: 130px;
+            pointer-events: auto;
         }
         .dpad-btn {
             position: absolute;
-            background: rgba(14, 10, 24, 0.9);
+            background: rgba(14, 10, 24, 0.85);
             border: 2px solid #ff0055;
             color: #00f0ff;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 0 8px rgba(255,0,85,0.3);
+            box-shadow: 0 0 10px rgba(255,0,85,0.3);
         }
         .dpad-btn:active {
             background: #ff0055;
             color: #fff;
         }
-        #btn-up { top: 0; left: 40px; width: 45px; height: 40px; }
-        #btn-down { bottom: 0; left: 40px; width: 45px; height: 40px; }
-        #btn-left { top: 25px; left: 0; width: 40px; height: 40px; }
-        #btn-right { top: 25px; right: 0; width: 40px; height: 40px; }
+        #btn-up { top: 0; left: 40px; width: 50px; height: 42px; }
+        #btn-down { bottom: 0; left: 40px; width: 50px; height: 42px; }
+        #btn-left { top: 42px; left: 0; width: 42px; height: 46px; }
+        #btn-right { top: 42px; right: 0; width: 42px; height: 46px; }
+
+        /* Combat action panel at bottom center for mobile */
+        #mobile-combat-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 165px;
+            display: flex;
+            gap: 6px;
+            pointer-events: auto;
+        }
+        .combat-btn {
+            background: rgba(14, 10, 24, 0.9);
+            border: 2px solid #00f0ff;
+            color: #00f0ff;
+            padding: 10px 14px;
+            font-size: 11px;
+            font-weight: bold;
+            font-family: monospace;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+        .combat-btn:active {
+            background: #00f0ff;
+            color: #05030a;
+        }
 
         #mobile-lookpad {
-            position: relative;
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
             width: 130px;
-            height: 90px;
-            background: rgba(14, 10, 24, 0.9);
+            height: 110px;
+            background: rgba(14, 10, 24, 0.85);
             border: 2px solid #ff0055;
-            border-radius: 6px;
+            border-radius: 8px;
             color: #00f0ff;
             display: flex;
             flex-direction: column;
@@ -305,31 +329,10 @@
             font-size: 10px;
             font-weight: bold;
             text-align: center;
-            box-shadow: 0 0 8px rgba(255,0,85,0.3);
+            pointer-events: auto;
+            box-shadow: 0 0 10px rgba(255,0,85,0.3);
             padding: 4px;
             line-height: 1.2;
-            cursor: ew-resize;
-        }
-        
-        .mobile-action-btn-group {
-            display: flex;
-            gap: 8px;
-        }
-        .mob-action-btn {
-            background: rgba(14, 10, 24, 0.9);
-            border: 2px solid #00f0ff;
-            color: #00f0ff;
-            font-family: monospace;
-            font-weight: bold;
-            font-size: 13px;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            box-shadow: 0 0 8px rgba(0,240,255,0.3);
-        }
-        .mob-action-btn:active {
-            background: #00f0ff;
-            color: #05030a;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -344,7 +347,6 @@
 
     <div id="info-btn" title="Toggle Instructions">i</div>
 
-    <!-- Dedicated Bottom Mobile Control Panel -->
     <div id="mobile-controls">
         <div id="dpad-container">
             <div class="dpad-btn" id="btn-up">▲</div>
@@ -352,13 +354,13 @@
             <div class="dpad-btn" id="btn-left">◀</div>
             <div class="dpad-btn" id="btn-right">▶</div>
         </div>
-        <div id="mobile-lookpad">
-            <div>👁️ HEAD / LOOK</div>
-            <div style="font-size:8px; color:#ffda66; margin-top:2px;">Drag left/right (Rubber-band return)</div>
+        <div id="mobile-combat-panel">
+            <button class="combat-btn" id="btn-slash">⚔️ SLASH</button>
+            <button class="combat-btn" id="btn-shove">🛡️ SHOVE</button>
         </div>
-        <div class="mobile-action-btn-group">
-            <button class="mob-action-btn" id="btn-mob-torch">🔦 TORCH</button>
-            <button class="mob-action-btn" id="btn-mob-interact">⚙️ LIFT</button>
+        <div id="mobile-lookpad">
+            <div>👀 HEAD/TORSO</div>
+            <div style="font-size:8px; color:#ffda66; margin-top:2px;">Swipe here to aim head & torso</div>
         </div>
     </div>
 
@@ -388,9 +390,9 @@
         <b>Controls:</b><br>
         • <b>W / S</b>: Move Forward / Backward<br>
         • <b>A / D</b>: Steer / Rotate Knight<br>
-        • <b>F</b>: Toggle Head Mounted Torch 🔦<br>
         • <b>E</b>: Call Lift<br>
-        • <b>Look Pad (Bottom Panel)</b>: Natural head rotation with rubber-band spring return<br>
+        • <b>World Drag / Swipe</b>: Rotate World View / Environment<br>
+        • <b>Look Pad (Bottom Right)</b>: Turn Knight's Head & Torso<br>
         • <b>Click / Tap</b>: Slash / Strike / Spin Portal Reels / Click Podium & Studio Touch Screens & Trivia Answers<br>
     </div>
 
@@ -406,7 +408,7 @@
         const isMobileDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || /Mobi|Android/i.test(navigator.userAgent);
         if (isMobileDevice) {
             const mobileControlsEl = document.getElementById('mobile-controls');
-            if (mobileControlsEl) mobileControlsEl.style.display = 'flex';
+            if (mobileControlsEl) mobileControlsEl.style.display = 'block';
            
             const speedEl = document.getElementById('speedometer');
             if (speedEl) speedEl.style.display = 'none';
@@ -415,7 +417,7 @@
         let selectedGameMode = 'solo';
         let studioGameActive = false;
         let showGameStarted = false;
-        let studioPower = false;
+        let studioPower = false; // Starts OFF in Heck/Studio
         let showClockSeconds = 20 * 60;
         let soloGameLockedIn = false;
         let rollCountdownSeconds = 10.0;
@@ -438,7 +440,6 @@
         let hopTargetIndex = 0;
 
         let playerAwayFromPodium = false;
-        let awayCountdownTimer = 0.0;
         let powerOffCountdown = 10.0;
         let studioPoweredDown = false;
         let lockedOutTimer = 0.0;
@@ -459,17 +460,24 @@
 
         function updateStudioLighting(power) {
             studioPower = power;
+            if (studioLightCenter && studioLightWarm) {
+                studioLightCenter.intensity = power ? 3.0 : 0.0;
+                studioLightWarm.intensity = power ? 2.5 : 0.0;
+            }
+            if (overheadLight) {
+                overheadLight.intensity = power ? 0.8 : 0.1;
+            }
         }
 
         function enterStudioAutomatically() {
             if (!studioGameActive) {
                 selectedGameMode = 'solo';
                 studioGameActive = true;
-                updateStudioLighting(true);
+                updateStudioLighting(false); // Studio starts dark/unpowered until activated
 
                 document.getElementById('contestant-controller-overlay').style.display = 'block';
 
-                let speechText = "Welcome to the Goody Tonight Show! Click Podium 1, the main studio screen, or use your solo terminal to start.";
+                let speechText = "Welcome to the darkened studio of Heck. Touch the glowing screen on Goody's podium to power up!";
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.speak(new SpeechSynthesisUtterance(speechText));
                 }
@@ -1144,7 +1152,6 @@
         const overallsMat = new THREE.MeshStandardMaterial({ color: '#1b365d', roughness: 0.7 });
         const shirtMat = new THREE.MeshStandardMaterial({ color: '#e67e22', roughness: 0.6 });
         const skinMat = new THREE.MeshStandardMaterial({ color: '#f5cd79', roughness: 0.5 });
-        const bootsMat = new THREE.MeshStandardMaterial({ color: '#2d3436', roughness: 0.8 });
 
         const giantBody = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.5, 1.0), overallsMat);
         giantBody.position.y = 2.2;
@@ -1188,7 +1195,9 @@
             spCtx.rotate(time * 0.4);
             const arms = 12;
             for (let i = 0; i < arms; i++) {
-                spCtx.fillStyle = (i % 2 === 0) ? '#ff0055' : '#00f0ff';
+                // If studio is unpowered, tint flashing pink/dark
+                let colActive = studioPower ? ((i % 2 === 0) ? '#ff0055' : '#00f0ff') : ((Math.sin(time * 8 + i) > 0) ? '#ff0055' : '#110511');
+                spCtx.fillStyle = colActive;
                 spCtx.beginPath();
                 spCtx.moveTo(0, 0);
                 spCtx.arc(0, 0, 350, (i * Math.PI * 2) / arms, ((i + 1) * Math.PI * 2) / arms);
@@ -1200,7 +1209,7 @@
             spCtx.beginPath();
             spCtx.arc(256, 256, 90, 0, Math.PI * 2);
             spCtx.fill();
-            spCtx.strokeStyle = '#39ff14';
+            spCtx.strokeStyle = studioPower ? '#39ff14' : '#ff0033';
             spCtx.lineWidth = 6;
             spCtx.beginPath();
             spCtx.arc(256, 256, 90, 0, Math.PI * 2);
@@ -1306,9 +1315,9 @@
         const showClockTex = new THREE.CanvasTexture(showClockCanvas);
 
         function renderShowClockTexture() {
-            sClockCtx.fillStyle = '#06020f';
+            sClockCtx.fillStyle = studioPower ? '#06020f' : '#1a0000';
             sClockCtx.fillRect(0, 0, 256, 96);
-            sClockCtx.strokeStyle = '#ff0055';
+            sClockCtx.strokeStyle = studioPower ? '#ff0055' : '#ff3333';
             sClockCtx.lineWidth = 4;
             sClockCtx.strokeRect(2, 2, 252, 92);
 
@@ -1316,12 +1325,12 @@
             let seconds = Math.floor(showClockSeconds % 60);
             let timeStr = (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
 
-            sClockCtx.fillStyle = '#ff0055';
+            sClockCtx.fillStyle = studioPower ? '#ff0055' : '#ff3333';
             sClockCtx.font = 'bold 13px monospace';
             sClockCtx.textAlign = 'center';
-            sClockCtx.fillText("GOODY SHOW TIMER", 128, 22);
+            sClockCtx.fillText(studioPower ? "GOODY SHOW TIMER" : "STUDIO STANDBY", 128, 22);
 
-            sClockCtx.fillStyle = '#ff7675';
+            sClockCtx.fillStyle = studioPower ? '#ff7675' : '#7f8c8d';
             sClockCtx.font = 'bold 32px monospace';
             sClockCtx.fillText(`⏱ ${timeStr}`, 128, 64);
 
@@ -1350,11 +1359,23 @@
         }
 
         function renderStageQuestionBoard() {
-            qBoardCtx.fillStyle = '#120726';
+            qBoardCtx.fillStyle = studioPower ? '#120726' : '#100510';
             qBoardCtx.fillRect(0, 0, 512, 384);
-            qBoardCtx.strokeStyle = '#00f0ff';
+            qBoardCtx.strokeStyle = studioPower ? '#00f0ff' : '#ff3333';
             qBoardCtx.lineWidth = 6;
             qBoardCtx.strokeRect(3, 3, 506, 378);
+
+            if (!studioPower) {
+                qBoardCtx.fillStyle = '#ff3333';
+                qBoardCtx.font = 'bold 26px monospace';
+                qBoardCtx.textAlign = 'center';
+                qBoardCtx.fillText("STUDIO UNPOWERED", 256, 140);
+                qBoardCtx.fillStyle = '#ffda66';
+                qBoardCtx.font = 'bold 16px monospace';
+                qBoardCtx.fillText(">>> CLICK TO POWER ON SHOW <<<", 256, 210);
+                qBoardTex.needsUpdate = true;
+                return;
+            }
 
             if (gameWon) {
                 qBoardCtx.fillStyle = '#39ff14';
@@ -1537,18 +1558,22 @@
         const podiumTex1 = new THREE.CanvasTexture(podiumCanvas1);
 
         function renderPodium1Screen() {
-            p1Ctx.fillStyle = '#0a0514';
+            p1Ctx.fillStyle = studioPower ? '#0a0514' : '#150000';
             p1Ctx.fillRect(0, 0, 256, 160);
-            p1Ctx.strokeStyle = '#00f0ff';
+            p1Ctx.strokeStyle = studioPower ? '#00f0ff' : '#ff3333';
             p1Ctx.lineWidth = 4;
             p1Ctx.strokeRect(4, 4, 248, 152);
 
-            p1Ctx.fillStyle = '#ff0055';
+            p1Ctx.fillStyle = studioPower ? '#ff0055' : '#ff3333';
             p1Ctx.font = 'bold 12px monospace';
             p1Ctx.textAlign = 'center';
-            p1Ctx.fillText("PODIUM 1", 128, 22);
+            p1Ctx.fillText(studioPower ? "PODIUM 1" : "PODIUM [OFF]", 128, 22);
 
-            if (gameWon) {
+            if (!studioPower) {
+                p1Ctx.fillStyle = '#ff3333';
+                p1Ctx.font = 'bold 14px monospace';
+                p1Ctx.fillText("CLICK TO POWER ON", 128, 92);
+            } else if (gameWon) {
                 p1Ctx.fillStyle = '#39ff14';
                 p1Ctx.font = 'bold 16px monospace';
                 p1Ctx.fillText("VICTORY!", 128, 92);
@@ -1661,10 +1686,22 @@
         const silverMetalMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.95, roughness: 0.15 });
         const gHead = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.6, 0.6), silverMetalMat);
         gHead.position.set(0, 2.6, 0);
+        
         const gFaceCanvas = document.createElement('canvas'); gFaceCanvas.width = 128; gFaceCanvas.height = 128;
-        const fctx = gFaceCanvas.getContext('2d'); fctx.fillStyle = '#030108'; fctx.fillRect(0, 0, 128, 128);
-        fctx.fillStyle = '#39ff14'; fctx.fillRect(40, 50, 16, 16); fctx.fillRect(72, 50, 16, 16);
-        fctx.fillRect(48, 82, 32, 10);
+        const fctx = gFaceCanvas.getContext('2d'); 
+        function updateGoodyFace() {
+            fctx.fillStyle = '#030108'; fctx.fillRect(0, 0, 128, 128);
+            let faceCol = studioPower ? '#39ff14' : '#ff3333';
+            fctx.fillStyle = faceCol; 
+            fctx.fillRect(40, 50, 16, 16); fctx.fillRect(72, 50, 16, 16);
+            if (studioPower) {
+                fctx.fillRect(48, 82, 32, 10); // Happy smile when powered
+            } else {
+                fctx.fillRect(48, 86, 32, 6); // Sad/powered down line
+            }
+            gFaceTex.needsUpdate = true;
+        }
+        updateGoodyFace();
         const gFaceTex = new THREE.CanvasTexture(gFaceCanvas);
         const gFace = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.5), new THREE.MeshBasicMaterial({ map: gFaceTex }));
         gFace.position.set(0, 2.6, 0.31);
@@ -1827,33 +1864,20 @@
         studioPerimeterLine.position.set(-35.0, finalLandingY + 0.02, studioCenterZ);
         studioGroup.add(studioPerimeterLine);
 
-        const studioLightCenter = new THREE.PointLight('#00f0ff', 3.0, 140);
+        const studioLightCenter = new THREE.PointLight('#00f0ff', 0.0, 140);
         studioLightCenter.position.set(-35.0, finalLandingY + 18.0, studioCenterZ);
-        const studioLightWarm = new THREE.PointLight('#ff0055', 2.5, 120);
+        const studioLightWarm = new THREE.PointLight('#ff0055', 0.0, 120);
         studioLightWarm.position.set(-35.0, finalLandingY + 16.0, studioCenterZ - 30.0);
         studioGroup.add(studioLightCenter, studioLightWarm);
 
         function renderWallReelCanvas(wall, delta) {
             const ctx = wall.ctx;
-            ctx.fillStyle = '#05020c';
+            ctx.fillStyle = studioPower ? '#05020c' : '#150005';
             ctx.fillRect(0, 0, 512, 512);
 
-            ctx.strokeStyle = wall.isUnlocked ? '#00ff66' : '#ff0055';
+            ctx.strokeStyle = wall.isUnlocked ? '#00ff66' : (studioPower ? '#ff0055' : '#ff3333');
             ctx.lineWidth = 6;
             ctx.strokeRect(6, 6, 500, 500);
-
-            ctx.strokeStyle = wall.isUnlocked ? 'rgba(0, 255, 102, 0.4)' : 'rgba(0, 240, 255, 0.4)';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(170, 0); ctx.lineTo(170, 512);
-            ctx.moveTo(341, 0); ctx.lineTo(341, 512);
-            ctx.moveTo(0, 170); ctx.lineTo(512, 170);
-            ctx.moveTo(0, 341); ctx.lineTo(512, 341);
-            ctx.stroke();
-
-            ctx.strokeStyle = wall.isUnlocked ? '#00ff66' : '#ff0055';
-            ctx.lineWidth = 4;
-            ctx.strokeRect(173, 173, 165, 165);
 
             ctx.font = '64px sans-serif';
             ctx.textAlign = 'center';
@@ -1871,20 +1895,6 @@
                 }
             }
 
-            if (wall.isUnlocked && wall.lastResult && wall.lastResult.winLine !== undefined) {
-                ctx.save();
-                ctx.strokeStyle = '#39ff14';
-                ctx.lineWidth = 8;
-                ctx.shadowColor = '#39ff14';
-                ctx.shadowBlur = 15;
-                const lineY = wall.lastResult.winLine * 170 + 85;
-                ctx.beginPath();
-                ctx.moveTo(10, lineY);
-                ctx.lineTo(502, lineY);
-                ctx.stroke();
-                ctx.restore();
-            }
-
             ctx.fillStyle = 'rgba(10, 5, 20, 0.88)';
             ctx.fillRect(10, 10, 492, 55);
             ctx.fillStyle = wall.isUnlocked ? '#39ff14' : '#00f0ff';
@@ -1893,9 +1903,9 @@
             ctx.textBaseline = 'middle';
 
             if (wall.isUnlocked) {
-                ctx.fillText(`GATE UNLOCKED! [${wall.lastResult ? wall.lastResult.matchType : 'WIN'}]`, 256, 37);
+                ctx.fillText(`GATE UNLOCKED!`, 256, 37);
             } else {
-                ctx.fillText(`PORTAL MATRIX // FREE SPIN`, 256, 37);
+                ctx.fillText(studioPower ? `PORTAL MATRIX // FREE SPIN` : `HECK MATRIX // UNPOWERED`, 256, 37);
             }
 
             wall.texture.needsUpdate = true;
@@ -1910,7 +1920,6 @@
                 wall.stopTimes[i] = now + 0.40 + (i * 0.25);
             }
             wall.pendingSuccess = true;
-
             playElevatorPing();
         }
 
@@ -1921,11 +1930,7 @@
             wall.symbols[1][2] = winSymbol;
 
             wall.isUnlocked = true;
-            wall.lastResult = {
-                success: true,
-                matchType: `3x ${winSymbol}`,
-                winLine: 1
-            };
+            wall.lastResult = { success: true, matchType: `3x ${winSymbol}`, winLine: 1 };
 
             wall.borderMesh.material.color.set('#00ff66');
             wall.borderMesh.material.opacity = 0.4;
@@ -2213,15 +2218,7 @@
             osc.stop(audioCtx.currentTime + 0.42);
         }
 
-        function toggleTorch() {
-            torchOn = !torchOn;
-            if (knight) {
-                knight.torchLight.visible = torchOn;
-            }
-        }
-
         let knight = null;
-        let torchOn = true;
 
         const _vSegment = new THREE.Vector3();
         const _vNorm = new THREE.Vector3();
@@ -2328,15 +2325,6 @@
             visor.position.set(0, 0.1, -0.7);
             headPivot.add(visor);
 
-            const torchLight = new THREE.SpotLight('#ff0033', 18.0, 180, Math.PI / 5.5, 0.3, 1.0);
-            torchLight.position.set(0, 0.0, -0.6);
-            headPivot.add(torchLight);
-
-            const torchTarget = new THREE.Object3D();
-            torchTarget.position.set(0, -0.5, -25);
-            headPivot.add(torchTarget);
-            torchLight.target = torchTarget;
-
             const legGeom = new THREE.CylinderGeometry(0.2, 0.2, 3);
             legGeom.translate(0, -1.5, 0);
 
@@ -2436,7 +2424,6 @@
 
             const pipBoyModel = createPipBoy3DModel();
             pipBoyModel.position.set(0, 0.48, 0.16);
-            pipBoyModel.rotation.set(0, 0, 0);
             lForeArm.add(pipBoyModel);
 
             armsGroup.add(
@@ -2463,7 +2450,6 @@
                 mat: armorMat,
                 leftLeg: leftLeg,
                 rightLeg: rightLeg,
-                torchLight: torchLight,
                 pipBoyModel: pipBoyModel,
                 speed: 0,
                 maxSpeed: 0.7,
@@ -2538,10 +2524,11 @@
         const raycaster = new THREE.Raycaster();
         const mouseVec = new THREE.Vector2();
 
-        let worldCameraAngle = 0; // Camera world view rotation angle
-        let headLookOffset = 0;   // Natural head turn offset with rubber-band spring return
+        let worldCameraAngle = 0; // World rotation angle controlled by Environment / World Drag
         let activeLookTouchId = null;
+        let activeWorldDragTouchId = null;
         let lastTouchX = 0;
+        let lastTouchY = 0;
 
         const infoBtn = document.getElementById('info-btn');
         const uiModal = document.getElementById('ui-modal');
@@ -2569,7 +2556,6 @@
         window.onkeydown = (e) => {
             let k = e.key.toLowerCase();
             keys[k] = true;
-            if (k === 'f') toggleTorch();
             if (k === 'e') handleInteractionKey();
         };
         window.onkeyup = (e) => {
@@ -2577,8 +2563,21 @@
             keys[k] = false;
         };
 
-        // Desktop mouse tracking for head movement / action
+        // Combat button listeners for mobile
+        const btnSlash = document.getElementById('btn-slash');
+        const btnShove = document.getElementById('btn-shove');
+        if (btnSlash) btnSlash.onclick = () => triggerAttack('sword_mid_slash');
+        if (btnShove) btnShove.onclick = () => triggerAttack('shield_mid_shove');
+
+        // Mouse handlers: Dragging in the general world rotates environment; look pad / right click handles head/torso
+        let isRightMouseDown = false;
+        let isWorldDragging = false;
         window.onmousedown = (e) => {
+            if (e.button === 2) { 
+                isRightMouseDown = true;
+                lastTouchX = e.clientX;
+                return;
+            }
             if (!knight || !gameRunning) return;
             if (checkObjectClick(e)) return;
 
@@ -2595,31 +2594,38 @@
                 }
             }
 
-            let chosenType = '';
             if (e.button === 0) {
-                chosenType = 'sword_mid_slash';
-            }
-
-            if (chosenType) {
-                triggerAttack(chosenType);
+                isWorldDragging = true;
+                lastTouchX = e.clientX;
             }
         };
 
         window.onmousemove = (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
-            // Desktop mouse X maps to head look offset naturally
-            let normX = (e.clientX / window.innerWidth) * 2 - 1;
-            headLookOffset = -normX * 1.0;
+            if (isRightMouseDown) {
+                // Right click or look pad controls knight head/torso
+            } else if (isWorldDragging) {
+                const dx = e.clientX - lastTouchX;
+                lastTouchX = e.clientX;
+                worldCameraAngle -= dx * 0.008; // Rotate environment / world view
+            }
+        };
+
+        window.onmouseup = (e) => {
+            if (e.button === 2) isRightMouseDown = false;
+            if (e.button === 0) isWorldDragging = false;
         };
 
         window.onmouseleave = () => {
             mouse.x = window.innerWidth / 2;
             mouse.y = window.innerHeight / 2;
+            isRightMouseDown = false;
+            isWorldDragging = false;
         };
         window.oncontextmenu = (e) => e.preventDefault();
 
-        // Touch listeners for bottom mobile control panel
+        // Touch listeners for mobile devices
         if (isMobileDevice) {
             const bindTouchHold = (elemId, keyName) => {
                 const el = document.getElementById(elemId);
@@ -2633,48 +2639,52 @@
             bindTouchHold('btn-left', 'a');
             bindTouchHold('btn-right', 'd');
 
-            const btnMobTorch = document.getElementById('btn-mob-torch');
-            if (btnMobTorch) {
-                btnMobTorch.addEventListener('touchstart', (e) => { e.preventDefault(); toggleTorch(); });
-            }
-            const btnMobInteract = document.getElementById('btn-mob-interact');
-            if (btnMobInteract) {
-                btnMobInteract.addEventListener('touchstart', (e) => { e.preventDefault(); handleInteractionKey(); });
-            }
-
-            const lookpadEl = document.getElementById('mobile-lookpad');
-            if (lookpadEl) {
-                lookpadEl.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    if (e.targetTouches.length > 0) {
-                        activeLookTouchId = e.targetTouches[0].identifier;
-                        lastTouchX = e.targetTouches[0].clientX;
-                    }
-                }, { passive: false });
-
-                lookpadEl.addEventListener('touchmove', (e) => {
-                    e.preventDefault();
-                    for (let i = 0; i < e.targetTouches.length; i++) {
-                        const t = e.targetTouches[i];
-                        if (t.identifier === activeLookTouchId) {
-                            const dx = t.clientX - lastTouchX;
-                            lastTouchX = t.clientX;
-                            headLookOffset -= dx * 0.015;
-                            headLookOffset = Math.max(-1.3, Math.min(1.3, headLookOffset));
+            window.addEventListener('touchstart', (e) => {
+                for (let i = 0; i < e.targetTouches.length; i++) {
+                    const touch = e.targetTouches[i];
+                    // Look pad area (bottom right corner) -> controls head/torso
+                    if (touch.clientX > window.innerWidth - 160 && touch.clientY > window.innerHeight - 130) {
+                        if (activeLookTouchId === null) {
+                            activeLookTouchId = touch.identifier;
+                            lastTouchX = touch.clientX;
+                            lastTouchY = touch.clientY;
+                        }
+                    } else {
+                        // General environment / world drag area
+                        if (activeWorldDragTouchId === null) {
+                            activeWorldDragTouchId = touch.identifier;
+                            lastTouchX = touch.clientX;
                         }
                     }
-                }, { passive: false });
+                }
+            }, { passive: false });
 
-                const endLookpad = (e) => {
-                    for (let i = 0; i < e.changedTouches.length; i++) {
-                        if (e.changedTouches[i].identifier === activeLookTouchId) {
-                            activeLookTouchId = null;
-                        }
+            window.addEventListener('touchmove', (e) => {
+                for (let i = 0; i < e.targetTouches.length; i++) {
+                    const touch = e.targetTouches[i];
+                    if (touch.identifier === activeLookTouchId) {
+                        const dx = touch.clientX - lastTouchX;
+                        const dy = touch.clientY - lastTouchY;
+                        lastTouchX = touch.clientX;
+                        lastTouchY = touch.clientY;
+                        mouse.x += dx * 2.0;
+                        mouse.y += dy * 2.0;
+                    } else if (touch.identifier === activeWorldDragTouchId) {
+                        const dx = touch.clientX - lastTouchX;
+                        lastTouchX = touch.clientX;
+                        worldCameraAngle -= dx * 0.008; // Rotate environment / world view
                     }
-                };
-                lookpadEl.addEventListener('touchend', endLookpad);
-                lookpadEl.addEventListener('touchcancel', endLookpad);
-            }
+                }
+            }, { passive: false });
+
+            const endTouchLook = (e) => {
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === activeLookTouchId) activeLookTouchId = null;
+                    if (e.changedTouches[i].identifier === activeWorldDragTouchId) activeWorldDragTouchId = null;
+                }
+            };
+            window.addEventListener('touchend', endTouchLook);
+            window.addEventListener('touchcancel', endTouchLook);
         }
 
         function handleInteractionKey() {
@@ -2758,6 +2768,23 @@
         }
 
         function handlePodiumScreenClick(podiumId, uv) {
+            if (!studioPower) {
+                // Clicking unpowered podium powers on the studio!
+                studioPower = true;
+                updateStudioLighting(true);
+                updateGoodyFace();
+                playElevatorPing();
+                let speechPower = "Powering on the Goody Tonight Show studio! Lights on, Goody online!";
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(new SpeechSynthesisUtterance(speechPower));
+                }
+                renderStageQuestionBoard();
+                renderPodium1Screen();
+                renderShowClockTexture();
+                return;
+            }
+
             if (studioPoweredDown) return;
             if (playerAwayFromPodium) {
                 forceContinueGameShow();
@@ -2798,6 +2825,22 @@
         }
 
         function handleMainStudioScreenClick(uv) {
+            if (!studioPower) {
+                studioPower = true;
+                updateStudioLighting(true);
+                updateGoodyFace();
+                playElevatorPing();
+                let speechPower = "Studio systems online! Welcome to the Goody Tonight Show!";
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(new SpeechSynthesisUtterance(speechPower));
+                }
+                renderStageQuestionBoard();
+                renderPodium1Screen();
+                renderShowClockTexture();
+                return;
+            }
+
             if (studioPoweredDown) {
                 studioPoweredDown = false;
                 powerOffCountdown = 10.0;
@@ -3131,10 +3174,6 @@
             return false;
         }
 
-        function calculateSector() {
-            return 4;
-        }
-
         function triggerAttack(type) {
             if (!knight) return;
             knight.isAttacking = true;
@@ -3143,16 +3182,10 @@
         }
 
         function applyDirectionalRigging(zone, delta) {
-            // Natural head turn offset with rubber-band spring return
-            if (activeLookTouchId === null && !isMobileDevice) {
-                // Desktop: spring head back towards center if mouse stationary
-                headLookOffset *= 0.92;
-            } else if (activeLookTouchId === null && isMobileDevice) {
-                // Mobile: rubber-band spring return to center
-                headLookOffset *= 0.88;
-            }
+            let normX = (mouse.x / window.innerWidth) * 2 - 1;
+            let normY = -((mouse.y / window.innerHeight) * 2 - 1);
 
-            let tHeadRot = new THREE.Euler(0, headLookOffset, 0);
+            let tHeadRot = new THREE.Euler(-normY * 0.4, -normX * 0.7, 0);
             let tSwordRot = knight.defaultSwordRot.clone();
             let tSwordPos = knight.defaultSwordPos.clone();
             let tShieldRot = knight.defaultShieldRot.clone();
@@ -3172,6 +3205,13 @@
                 tSwordPos.set(slashX, 0.6, slashZ);
                 tSwordRot.set(-0.3, -0.6 + p * 1.4, -Math.PI / 2.3);
                 tShieldPos.set(-1.3, 0.3, 0.0); tShieldRot.set(0.1, 0.4, 0.0);
+                lerpSpeed = 1.0;
+                if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
+            } else if (knight.isAttacking && knight.attackType === 'shield_mid_shove') {
+                knight.attackProgress += delta * 4.0;
+                const p = Math.min(1.0, knight.attackProgress);
+                tShieldPos.set(-1.6, 0.4, -1.2);
+                tShieldRot.set(0, 0.5, 0);
                 lerpSpeed = 1.0;
                 if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
             } else {
@@ -3270,7 +3310,7 @@
                 if (lockedOutTimer < 0) lockedOutTimer = 0;
             }
 
-            if (soloGameLockedIn && studioGameActive && !gameWon && !studioPoweredDown) {
+            if (soloGameLockedIn && studioGameActive && studioPower && !gameWon && !studioPoweredDown) {
                 let boardCentreWorldPos = new THREE.Vector3(-35.0, finalLandingY, studioCenterZ - 30.0);
                 let playerWorldPos = knight.group.position;
                 let distFromCentre = playerWorldPos.distanceTo(boardCentreWorldPos);
@@ -3295,7 +3335,7 @@
                 }
             }
 
-            if (!playerAwayFromPodium && !studioPoweredDown) {
+            if (studioPower && !playerAwayFromPodium && !studioPoweredDown) {
                 if (soloGameLockedIn && showClockSeconds > 0) {
                     showClockSeconds -= delta;
                     if (showClockSeconds <= 0) {
@@ -3507,9 +3547,6 @@
 
                 knight.group.position.copy(nextPos);
 
-                const zone = calculateSector();
-                knight.activeZone = zone;
-
                 if (Math.abs(knight.speed) > 0.02) {
                     knight.ticker += isActuallyInsideCar ? 0.11 : 0.18;
                     const wave = Math.sin(knight.ticker);
@@ -3523,7 +3560,7 @@
                     knight.torso.position.y = 1.5;
                 }
 
-                applyDirectionalRigging(zone, delta);
+                applyDirectionalRigging(0, delta);
 
                 if (isActuallyInsideCar) {
                     const cctvCamX = -31.4;
@@ -3544,9 +3581,10 @@
                     const targetHeight = isInStudio ? 4.5 : 4.2;
                     const lookHeight = 2.2;
 
-                    // Camera behind knight following knight's facing angle
-                    const targetCamX = knight.group.position.x + Math.sin(knight.angle) * targetDist;
-                    const targetCamZ = knight.group.position.z + Math.cos(knight.angle) * targetDist;
+                    // Camera position rotates around the knight using worldCameraAngle
+                    const combinedAngle = knight.angle + worldCameraAngle;
+                    const targetCamX = knight.group.position.x + Math.sin(combinedAngle) * targetDist;
+                    const targetCamZ = knight.group.position.z + Math.cos(combinedAngle) * targetDist;
                     const targetCamY = knight.group.position.y + targetHeight;
 
                     camera.position.x += (targetCamX - camera.position.x) * 0.16;
