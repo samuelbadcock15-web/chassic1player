@@ -257,8 +257,8 @@
         }
         #dpad-container {
             position: absolute;
-            bottom: 30px;
-            left: 30px;
+            bottom: 20px;
+            left: 20px;
             width: 140px;
             height: 140px;
             pointer-events: auto;
@@ -276,10 +276,12 @@
             border-radius: 8px;
             cursor: pointer;
             box-shadow: 0 0 10px rgba(255,0,85,0.3);
+            transition: background 0.1s, color 0.1s, border-color 0.1s;
         }
-        .dpad-btn:active {
+        .dpad-btn:active, .dpad-btn.active-press {
             background: #ff0055;
             color: #fff;
+            border-color: #39ff14;
         }
         #btn-up { top: 0; left: 45px; width: 50px; height: 45px; }
         #btn-down { bottom: 0; left: 45px; width: 50px; height: 45px; }
@@ -288,10 +290,10 @@
 
         #mobile-lookpad {
             position: absolute;
-            bottom: 30px;
+            bottom: 20px;
             right: 20px;
-            width: 140px;
-            height: 120px;
+            width: 150px;
+            height: 110px;
             background: rgba(14, 10, 24, 0.85);
             border: 2px solid #ff0055;
             border-radius: 8px;
@@ -329,8 +331,8 @@
             <div class="dpad-btn" id="btn-right">▶</div>
         </div>
         <div id="mobile-lookpad">
-            <div>👆 WORLD LOOK PAD</div>
-            <div style="font-size:9px; color:#ffda66; margin-top:2px;">Swipe to rotate camera/world view</div>
+            <div>👆 LOOK PAD</div>
+            <div style="font-size:9px; color:#ffda66; margin-top:2px;">Swipe to look / aim</div>
         </div>
     </div>
 
@@ -353,8 +355,14 @@
 
     <div id="ui-modal">
         <div class="modal-header">
-            <span>KNIGHT COMBAT CONTROLS</span>
+            <span>KNIGHT COMBAT & STATUS</span>
             <span class="close-btn" id="modal-close">&times;</span>
+        </div>
+        <hr>
+        <div id="mobile-status-info" style="margin-bottom: 10px; font-size: 13px; line-height: 1.4;">
+            Floor: <span class="stat-tag" id="modal-floor">GROUND FLOOR</span><br>
+            Status: <span class="stat-tag" id="modal-status">Idle</span><br>
+            Zone: <span id="modal-zone" class="sector-tag">Neutral</span>
         </div>
         <hr>
         <b>Controls:</b><br>
@@ -362,9 +370,9 @@
         • <b>A / D</b>: Steer / Rotate Knight<br>
         • <b>F</b>: Toggle Head Mounted Torch 🔦<br>
         • <b>E</b>: Call Lift<br>
-        • <b>Look Pad (Bottom Right)</b>: Rotate World View / Camera Angle<br>
-        • <b>Mouse / Screen Drag</b>: Turn Knight's Head & Torso<br>
-        • <b>Click / Tap</b>: Slash / Strike / Spin Portal Reels / Click Podium & Studio Touch Screens & Trivia Answers<br>
+        • <b>Mouse / Screen Swipe</b>: Aim Head & Flashlight (Pitch & Yaw)<br>
+        • <b>Screen Swipe Left / Right</b>: Auto-steers Left/Right D-pad<br>
+        • <b>Tap Knight / Screen</b>: Slash / Strike / Spin Portal Reels / Trivia Answers<br>
     </div>
 
     <div id="speedometer">
@@ -380,7 +388,7 @@
         if (isMobileDevice) {
             const mobileControlsEl = document.getElementById('mobile-controls');
             if (mobileControlsEl) mobileControlsEl.style.display = 'block';
-           
+
             const speedEl = document.getElementById('speedometer');
             if (speedEl) speedEl.style.display = 'none';
         }
@@ -2511,9 +2519,11 @@
         const raycaster = new THREE.Raycaster();
         const mouseVec = new THREE.Vector2();
 
-        let worldCameraAngle = 0; // World rotation angle controlled by Look Pad / Right mouse dragging
+        let touchLookPitch = 0.35;
+        let touchLookYaw = 0;
         let activeLookTouchId = null;
         let lastTouchX = 0;
+        let lastTouchY = 0;
 
         const infoBtn = document.getElementById('info-btn');
         const uiModal = document.getElementById('ui-modal');
@@ -2549,77 +2559,26 @@
             keys[k] = false;
         };
 
-        // Mouse handlers: Left drag / normal mouse movement turns head/torso; Right drag rotates world view
-        let isRightMouseDown = false;
-        window.onmousedown = (e) => {
-            if (e.button === 2) { // Right click drag for world look
-                isRightMouseDown = true;
-                lastTouchX = e.clientX;
-                return;
-            }
-            if (!knight || !gameRunning) return;
-            if (checkObjectClick(e)) return;
-
-            if (playerCurrentFloor === "BASEMENT" && undergroundGroup.visible) {
-                const pPos = knight.group.position;
-                for (let w of reelWalls) {
-                    let dist = (w.axis === 'z')
-                        ? (Math.abs(pPos.x - w.x) < 4.0 && Math.abs(pPos.z - w.z) < 8.5)
-                        : (Math.abs(pPos.z - w.z) < 4.0 && Math.abs(pPos.x - w.x) < 8.5);
-                    if (dist) {
-                        triggerWallSpin(w);
-                        break;
-                    }
-                }
-            }
-
-            let chosenType = '';
-            if (e.button === 0) {
-                if (knight.activeZone === 1) chosenType = 'shield_high_shove';
-                else if (knight.activeZone === 2) chosenType = 'sword_high_cleave';
-                else if (knight.activeZone === 3) chosenType = 'shield_mid_shove';
-                else if (knight.activeZone === 4) chosenType = 'sword_mid_slash';
-                else if (knight.activeZone === 5) chosenType = 'shield_low_shove';
-                else if (knight.activeZone === 6) chosenType = 'sword_low_slash';
-                else chosenType = 'sword_mid_slash';
-            }
-
-            if (chosenType) {
-                triggerAttack(chosenType);
-            }
-        };
-
         window.onmousemove = (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
-            if (isRightMouseDown) {
-                const dx = e.clientX - lastTouchX;
-                lastTouchX = e.clientX;
-                worldCameraAngle -= dx * 0.008;
-            }
         };
-
-        window.onmouseup = (e) => {
-            if (e.button === 2) {
-                isRightMouseDown = false;
-            }
-        };
-
         window.onmouseleave = () => {
             mouse.x = window.innerWidth / 2;
             mouse.y = window.innerHeight / 2;
-            isRightMouseDown = false;
         };
         window.oncontextmenu = (e) => e.preventDefault();
 
-        // Touch listeners for mobile devices (Look pad in bottom right rotates world view)
+        // Mobile controls with swipe-to-turn and auto-highlight dpad
         if (isMobileDevice) {
             const bindTouchHold = (elemId, keyName) => {
                 const el = document.getElementById(elemId);
                 if (!el) return;
-                el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; });
-                el.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
-                el.addEventListener('touchcancel', (e) => { e.preventDefault(); keys[keyName] = false; });
+                const activate = (e) => { e.preventDefault(); keys[keyName] = true; el.classList.add('active-press'); };
+                const deactivate = (e) => { e.preventDefault(); keys[keyName] = false; el.classList.remove('active-press'); };
+                el.addEventListener('touchstart', activate);
+                el.addEventListener('touchend', deactivate);
+                el.addEventListener('touchcancel', deactivate);
             };
             bindTouchHold('btn-up', 'w');
             bindTouchHold('btn-down', 's');
@@ -2629,11 +2588,12 @@
             window.addEventListener('touchstart', (e) => {
                 for (let i = 0; i < e.targetTouches.length; i++) {
                     const touch = e.targetTouches[i];
-                    // Look pad area (bottom right corner)
-                    if (touch.clientX > window.innerWidth - 180 && touch.clientY > window.innerHeight - 160) {
+                    // If touch is not on the dpad area (bottom-left)
+                    if (!(touch.clientX < 180 && touch.clientY > window.innerHeight - 180)) {
                         if (activeLookTouchId === null) {
                             activeLookTouchId = touch.identifier;
                             lastTouchX = touch.clientX;
+                            lastTouchY = touch.clientY;
                         }
                     }
                 }
@@ -2644,8 +2604,30 @@
                     const touch = e.targetTouches[i];
                     if (touch.identifier === activeLookTouchId) {
                         const dx = touch.clientX - lastTouchX;
+                        const dy = touch.clientY - lastTouchY;
                         lastTouchX = touch.clientX;
-                        worldCameraAngle -= dx * 0.008; // Rotate world view smoothly
+                        lastTouchY = touch.clientY;
+
+                        // Head look / aim
+                        touchLookYaw -= dx * 0.008;
+                        touchLookPitch -= dy * 0.008;
+                        touchLookPitch = Math.max(-1.2, Math.min(1.2, touchLookPitch));
+
+                        // Swipe left/right auto-steer integration with D-pad highlighting
+                        const btnLeftEl = document.getElementById('btn-left');
+                        const btnRightEl = document.getElementById('btn-right');
+
+                        if (dx < -3) {
+                            keys['a'] = true;
+                            keys['d'] = false;
+                            if(btnLeftEl) btnLeftEl.classList.add('active-press');
+                            if(btnRightEl) btnRightEl.classList.remove('active-press');
+                        } else if (dx > 3) {
+                            keys['d'] = true;
+                            keys['a'] = false;
+                            if(btnRightEl) btnRightEl.classList.add('active-press');
+                            if(btnLeftEl) btnLeftEl.classList.remove('active-press');
+                        }
                     }
                 }
             }, { passive: false });
@@ -2654,6 +2636,12 @@
                 for (let i = 0; i < e.changedTouches.length; i++) {
                     if (e.changedTouches[i].identifier === activeLookTouchId) {
                         activeLookTouchId = null;
+                        keys['a'] = false;
+                        keys['d'] = false;
+                        const btnLeftEl = document.getElementById('btn-left');
+                        const btnRightEl = document.getElementById('btn-right');
+                        if(btnLeftEl) btnLeftEl.classList.remove('active-press');
+                        if(btnRightEl) btnRightEl.classList.remove('active-press');
                     }
                 }
             };
@@ -3124,8 +3112,43 @@
         }
 
         function calculateSector() {
-            return 4; // Default mid-right slash zone
+            if (!knight) return 0;
+
+            const topHeadWorld = new THREE.Vector3(0, 4.5, 0).applyMatrix4(knight.group.matrixWorld);
+            const solesWorld = new THREE.Vector3(0, 0.0, 0).applyMatrix4(knight.group.matrixWorld);
+            const centerWorld = new THREE.Vector3(0, 2.5, 0).applyMatrix4(knight.group.matrixWorld);
+
+            const screenTop = toScreenXY(topHeadWorld);
+            const screenBottom = toScreenXY(solesWorld);
+            const screenCenter = toScreenXY(centerWorld);
+
+            const minY = Math.min(screenTop.y, screenBottom.y);
+            const maxY = Math.max(screenTop.y, screenBottom.y);
+
+            if (mouse.y < minY || mouse.y > maxY) return 0;
+
+            const third = (maxY - minY) / 3;
+            let row = 0;
+            if (mouse.y < minY + third) row = 1;
+            else if (mouse.y < minY + third * 2) row = 2;
+            else row = 3;
+
+            const isRightOfCenter = mouse.x >= screenCenter.x;
+
+            if (row === 1) return isRightOfCenter ? 2 : 1;
+            if (row === 2) return isRightOfCenter ? 4 : 3;
+            return isRightOfCenter ? 6 : 5;
         }
+
+        const ZONE_NAMES = [
+            "Neutral (Out of Range)",
+            "1: High-Left (NW Overhead Guard)",
+            "2: High-Right (NE Overhead Thrust)",
+            "3: Middle-Left (West Shield Brace)",
+            "4: Middle-Right (East Slash Stance)",
+            "5: Low-Left (SW Low Shield Leg Guard)",
+            "6: Low-Right (SE Underhand Low Thrust)"
+        ];
 
         function triggerAttack(type) {
             if (!knight) return;
@@ -3134,12 +3157,56 @@
             knight.attackType = type;
         }
 
-        function applyDirectionalRigging(zone, delta) {
-            // Mouse tracking: calculate head/torso turn based on cursor position on the screen
-            let normX = (mouse.x / window.innerWidth) * 2 - 1;
-            let normY = -((mouse.y / window.innerHeight) * 2 - 1);
+        window.onmousedown = (e) => {
+            if (!knight || !gameRunning) return;
+            if (checkObjectClick(e)) return;
 
-            let tHeadRot = new THREE.Euler(-normY * 0.4, -normX * 0.7, 0);
+            if (playerCurrentFloor === "BASEMENT" && undergroundGroup.visible) {
+                const pPos = knight.group.position;
+                for (let w of reelWalls) {
+                    let dist = (w.axis === 'z')
+                        ? (Math.abs(pPos.x - w.x) < 4.0 && Math.abs(pPos.z - w.z) < 8.5)
+                        : (Math.abs(pPos.z - w.z) < 4.0 && Math.abs(pPos.x - w.x) < 8.5);
+                    if (dist) {
+                        triggerWallSpin(w);
+                        break;
+                    }
+                }
+            }
+
+            let chosenType = '';
+            if (e.button === 0) {
+                if (knight.activeZone === 1) chosenType = 'shield_high_shove';
+                else if (knight.activeZone === 2) chosenType = 'sword_high_cleave';
+                else if (knight.activeZone === 3) chosenType = 'shield_mid_shove';
+                else if (knight.activeZone === 4) chosenType = 'sword_mid_slash';
+                else if (knight.activeZone === 5) chosenType = 'shield_low_shove';
+                else if (knight.activeZone === 6) chosenType = 'sword_low_slash';
+                else chosenType = 'sword_mid_slash';
+            } else if (e.button === 2) {
+                if (knight.activeZone === 1) chosenType = 'shield_high_punch';
+                else if (knight.activeZone === 2) chosenType = 'sword_high_thrust';
+                else if (knight.activeZone === 3) chosenType = 'shield_mid_punch';
+                else if (knight.activeZone === 4) chosenType = 'sword_mid_thrust';
+                else if (knight.activeZone === 5) chosenType = 'shield_low_guard';
+                else if (knight.activeZone === 6) chosenType = 'sword_low_thrust';
+                else chosenType = 'sword_mid_thrust';
+            }
+
+            if (chosenType) {
+                triggerAttack(chosenType);
+            }
+        };
+
+        function applyDirectionalRigging(zone, delta) {
+            const normX = (mouse.x / window.innerWidth) * 2 - 1;
+            const normY = (mouse.y / window.innerHeight) * 2 - 1;
+
+            const targetHeadPitch = (-normY * 0.75) + touchLookPitch;
+            const targetHeadYaw = (-normX * 0.95) + touchLookYaw;
+            const targetHeadRoll = -normX * normY * 0.15;
+
+            const tHeadRot = new THREE.Euler(targetHeadPitch, targetHeadYaw, targetHeadRoll);
             let tSwordRot = knight.defaultSwordRot.clone();
             let tSwordPos = knight.defaultSwordPos.clone();
             let tShieldRot = knight.defaultShieldRot.clone();
@@ -3147,23 +3214,175 @@
 
             let lerpSpeed = knight.isAttacking ? 0.85 : 0.45;
 
-            if (knight.isAttacking && knight.attackType === 'sword_mid_slash') {
-                knight.attackProgress += delta * 4.0;
-                const p = Math.min(1.0, knight.attackProgress);
-                const stepDelta = Math.cos(p * Math.PI) * 0.10;
-                knight.group.position.x -= Math.sin(knight.angle) * stepDelta;
-                knight.group.position.z -= Math.cos(knight.angle) * stepDelta;
+            switch (zone) {
+                case 1:
+                    if (knight.isAttacking && knight.attackType === 'shield_high_punch') {
+                        knight.attackProgress += delta * 5.0;
+                        const arc = Math.sin(Math.min(1.0, knight.attackProgress) * Math.PI);
+                        tShieldPos.set(-1.5 - arc * 0.6, 1.45 - arc * 0.25, -0.6 - arc * 4.0);
+                        tShieldRot.set(-0.25, 0.35, 0.38);
+                        tSwordPos.set(1.4, 0.2, 0.2); tSwordRot.set(-0.15, -0.45, -0.1);
+                        lerpSpeed = 1.0;
+                        if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
+                    } else if (knight.isAttacking && knight.attackType === 'shield_high_shove') {
+                        knight.attackProgress += delta * 4.0;
+                        const arc = Math.sin(Math.min(1.0, knight.attackProgress) * Math.PI);
+                        const stepDelta = Math.cos(Math.min(1.0, knight.attackProgress) * Math.PI) * 0.08;
+                        knight.group.position.x -= Math.sin(knight.angle) * stepDelta;
+                        knight.group.position.z -= Math.cos(knight.angle) * stepDelta;
 
-                const slashX = THREE.MathUtils.lerp(1.9, -0.8, p);
-                const slashZ = -0.6 - Math.sin(p * Math.PI) * 3.8;
-                tSwordPos.set(slashX, 0.6, slashZ);
-                tSwordRot.set(-0.3, -0.6 + p * 1.4, -Math.PI / 2.3);
-                tShieldPos.set(-1.3, 0.3, 0.0); tShieldRot.set(0.1, 0.4, 0.0);
-                lerpSpeed = 1.0;
-                if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
-            } else {
-                tSwordPos.set(1.6, 0.4, -0.5); tSwordRot.set(0.1, -0.3, -Math.PI / 2.5);
-                tShieldPos.set(-0.7, 0.4, -0.4); tShieldRot.set(-0.1, -0.1, 0);
+                        tShieldPos.set(-1.1 - arc * 0.5, 2.2 + arc * 0.4, -1.0 - arc * 4.6);
+                        tShieldRot.set(-0.15, 0.25, 0.15);
+                        tSwordPos.set(1.4, 0.2, 0.5); tSwordRot.set(0.1, -0.5, 0.1);
+                        lerpSpeed = 1.0;
+                        if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
+                    } else {
+                        tShieldPos.set(-1.4, 1.5, -0.6); tShieldRot.set(-0.35, 0.3, 0.2);
+                        tSwordPos.set(0.6, 0.2, -0.6); tSwordRot.set(0.1, -0.1, 0);
+                    }
+                    break;
+                case 2:
+                    if (knight.isAttacking && knight.attackType === 'sword_high_thrust') {
+                        knight.attackProgress += delta * 5.0;
+                        const arc = Math.sin(Math.min(1.0, knight.attackProgress) * Math.PI);
+                        tSwordPos.set(1.5 + arc * 0.5, 1.45 - arc * 0.25, -0.6 - arc * 4.0);
+                        tSwordRot.set(-1.52, -0.35, -0.38);
+                        tShieldPos.set(-1.4, 0.2, 0.2); tShieldRot.set(0.15, 0.45, 0.1);
+                        lerpSpeed = 1.0;
+                        if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
+                    } else if (knight.isAttacking && knight.attackType === 'sword_high_cleave') {
+                        knight.attackProgress += delta * 4.0;
+                        const p = Math.min(1.0, knight.attackProgress);
+                        const stepDelta = Math.cos(p * Math.PI) * 0.10;
+                        knight.group.position.x -= Math.sin(knight.angle) * stepDelta;
+                        knight.group.position.z -= Math.cos(knight.angle) * stepDelta;
+
+                        const slashX = THREE.MathUtils.lerp(1.8, -0.4, p);
+                        const slashY = THREE.MathUtils.lerp(2.6, 0.2, p);
+                        const slashZ = -0.6 - Math.sin(p * Math.PI) * 3.6;
+                        tSwordPos.set(slashX, slashY, slashZ);
+                        tSwordRot.set(-1.2 + p * 0.8, -0.4, -0.8 + p * 1.6);
+                        tShieldPos.set(-1.2, 0.3, -0.2); tShieldRot.set(0.1, 0.3, 0.1);
+                        lerpSpeed = 1.0;
+                        if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
+                    } else {
+                        tSwordPos.set(1.4, 1.5, -0.6); tSwordRot.set(-1.3, -0.3, -0.4);
+                        tShieldPos.set(-0.6, 0.2, -0.6); tShieldRot.set(0.1, 0.1, 0);
+                    }
+                    break;
+                case 3:
+                    if (knight.isAttacking && knight.attackType === 'shield_mid_punch') {
+                        knight.attackProgress += delta * 5.0;
+                        const arc = Math.sin(Math.min(1.0, knight.attackProgress) * Math.PI);
+                        tShieldPos.set(-1.5 - arc * 0.4, 0.5, -0.6 - arc * 4.2);
+                        tShieldRot.set(0.0, 0.25, 0.05);
+                        tSwordPos.set(1.3, 0.0, 0.3); tSwordRot.set(0.2, -0.5, 0.2);
+                        lerpSpeed = 1.0;
+                        if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
+                    } else if (knight.isAttacking && knight.attackType === 'shield_mid_shove') {
+                        knight.attackProgress += delta * 4.0;
+                        const arc = Math.sin(Math.min(1.0, knight.attackProgress) * Math.PI);
+                        const stepDelta = Math.cos(Math.min(1.0, knight.attackProgress) * Math.PI) * 0.08;
+                        knight.group.position.x -= Math.sin(knight.angle) * stepDelta;
+                        knight.group.position.z -= Math.cos(knight.angle) * stepDelta;
+
+                        tShieldPos.set(-1.2 - arc * 0.5, 0.7 + arc * 0.3, -1.0 - arc * 4.6);
+                        tShieldRot.set(-0.15, 0.25, 0.15);
+                        tSwordPos.set(1.4, 0.2, 0.5); tSwordRot.set(0.1, -0.5, 0.1);
+                        lerpSpeed = 1.0;
+                        if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
+                    } else {
+                        tShieldPos.set(-1.4, 0.5, -0.7); tShieldRot.set(-0.05, 0.85, 0.0);
+                        tSwordPos.set(0.5, 0.3, -0.3); tSwordRot.set(0.1, 0.2, 0.1);
+                    }
+                    break;
+                case 4:
+                    if (knight.isAttacking && knight.attackType === 'sword_mid_thrust') {
+                        knight.attackProgress += delta * 5.0;
+                        const arc = Math.sin(Math.min(1.0, knight.attackProgress) * Math.PI);
+                        tSwordPos.set(1.5 + arc * 0.4, 0.5, -0.6 - arc * 4.4);
+                        tSwordRot.set(-1.57, -0.2, 0.0);
+                        tShieldPos.set(-1.2, 0.3, 0.0); tShieldRot.set(0.0, 0.4, 0.1);
+                        lerpSpeed = 1.0;
+                        if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
+                    } else if (knight.isAttacking && knight.attackType === 'sword_mid_slash') {
+                        knight.attackProgress += delta * 4.0;
+                        const p = Math.min(1.0, knight.attackProgress);
+                        const stepDelta = Math.cos(p * Math.PI) * 0.10;
+                        knight.group.position.x -= Math.sin(knight.angle) * stepDelta;
+                        knight.group.position.z -= Math.cos(knight.angle) * stepDelta;
+
+                        const slashX = THREE.MathUtils.lerp(1.9, -0.8, p);
+                        const slashZ = -0.6 - Math.sin(p * Math.PI) * 3.8;
+                        tSwordPos.set(slashX, 0.6, slashZ);
+                        tSwordRot.set(-0.3, -0.6 + p * 1.4, -Math.PI / 2.3);
+                        tShieldPos.set(-1.3, 0.3, 0.0); tShieldRot.set(0.1, 0.4, 0.0);
+                        lerpSpeed = 1.0;
+                        if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
+                    } else {
+                        tSwordPos.set(1.6, 0.4, -0.5); tSwordRot.set(0.1, -0.3, -Math.PI / 2.5);
+                        tShieldPos.set(-0.7, 0.4, -0.4); tShieldRot.set(-0.1, -0.1, 0);
+                    }
+                    break;
+                case 5:
+                    if (knight.isAttacking && knight.attackType === 'shield_low_guard') {
+                        knight.attackProgress += delta * 5.0;
+                        const arc = Math.sin(Math.min(1.0, knight.attackProgress) * Math.PI);
+                        tShieldPos.set(-1.5 - arc * 0.35, -1.8 - arc * 0.4, -0.7 - arc * 2.8);
+                        tShieldRot.set(0.8, 0.35, -0.15);
+                        tSwordPos.set(1.2, 1.2, 0.0); tSwordRot.set(-0.8, -0.2, 0.2);
+                        lerpSpeed = 1.0;
+                        if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
+                    } else if (knight.isAttacking && knight.attackType === 'shield_low_shove') {
+                        knight.attackProgress += delta * 4.0;
+                        const arc = Math.sin(Math.min(1.0, knight.attackProgress) * Math.PI);
+                        const stepDelta = Math.cos(Math.min(1.0, knight.attackProgress) * Math.PI) * 0.08;
+                        knight.group.position.x -= Math.sin(knight.angle) * stepDelta;
+                        knight.group.position.z -= Math.cos(knight.angle) * stepDelta;
+
+                        tShieldPos.set(-0.9 - arc * 0.3, -1.2 + arc * 0.8, -1.0 - arc * 4.4);
+                        tShieldRot.set(0.35, 0.1, 0.0);
+                        tSwordPos.set(1.3, 0.9, 0.2); tSwordRot.set(-0.5, -0.3, 0.1);
+                        lerpSpeed = 1.0;
+                        if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
+                    } else {
+                        tShieldPos.set(-1.3, -1.2, -0.6); tShieldRot.set(0.45, 0.35, -0.15);
+                        tSwordPos.set(0.8, 0.9, -0.3); tSwordRot.set(-0.6, 0.2, 0.3);
+                    }
+                    break;
+                case 6:
+                    if (knight.isAttacking && knight.attackType === 'sword_low_thrust') {
+                        knight.attackProgress += delta * 5.0;
+                        const arc = Math.sin(Math.min(1.0, knight.attackProgress) * Math.PI);
+                        tSwordPos.set(1.4 + arc * 0.35, -0.8 - arc * 0.2, -0.7 - arc * 4.2);
+                        tSwordRot.set(-1.6, -0.1, -0.3);
+                        tShieldPos.set(-1.1, 0.8, -0.3); tShieldRot.set(-0.35, 0.25, 0.0);
+                        lerpSpeed = 1.0;
+                        if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
+                    } else if (knight.isAttacking && knight.attackType === 'sword_low_slash') {
+                        knight.attackProgress += delta * 4.0;
+                        const p = Math.min(1.0, knight.attackProgress);
+                        const stepDelta = Math.cos(p * Math.PI) * 0.10;
+                        knight.group.position.x -= Math.sin(knight.angle) * stepDelta;
+                        knight.group.position.z -= Math.cos(knight.angle) * stepDelta;
+
+                        const slashX = THREE.MathUtils.lerp(1.7, -0.6, p);
+                        const slashY = THREE.MathUtils.lerp(-1.0, 1.4, p);
+                        const slashZ = -0.7 - Math.sin(p * Math.PI) * 3.6;
+                        tSwordPos.set(slashX, slashY, slashZ);
+                        tSwordRot.set(-1.6 + p * 1.8, -0.3, -0.5 + p * 1.2);
+                        tShieldPos.set(-1.1, 0.7, -0.3); tShieldRot.set(-0.25, 0.2, 0.0);
+                        lerpSpeed = 1.0;
+                        if (knight.attackProgress >= 1.0) { knight.isAttacking = false; knight.attackProgress = 0; knight.attackType = ''; }
+                    } else {
+                        tSwordPos.set(1.2, -0.6, -0.8);
+                        tSwordRot.set(-1.65, 0.15, -0.35);
+                        tShieldPos.set(-0.75, 0.8, -0.5);
+                        tShieldRot.set(-0.35, 0.15, 0.0);
+                    }
+                    break;
+                default:
+                    break;
             }
 
             knight.headPivot.rotation.x = THREE.MathUtils.lerp(knight.headPivot.rotation.x, tHeadRot.x, lerpSpeed);
@@ -3313,6 +3532,18 @@
 
             renderStageQuestionBoard();
             renderPodium1Screen();
+
+            // Update modal & speedometer info
+            let currentZoneName = ZONE_NAMES[knight ? knight.activeZone : 0];
+            const zoneDisplayEl = document.getElementById('zone-display');
+            if (zoneDisplayEl) zoneDisplayEl.textContent = currentZoneName;
+            
+            const modalFloorEl = document.getElementById('modal-floor');
+            const modalStatusEl = document.getElementById('modal-status');
+            const modalZoneEl = document.getElementById('modal-zone');
+            if (modalFloorEl) modalFloorEl.textContent = playerCurrentFloor;
+            if (modalStatusEl) modalStatusEl.textContent = knight && knight.isAttacking ? 'Attacking' : (Math.abs(knight.speed) > 0.01 ? 'Moving' : 'Idle');
+            if (modalZoneEl) modalZoneEl.textContent = currentZoneName;
 
             if (knight && knight.group.position.z < gateZ && !studioGameActive) {
                 enterStudioAutomatically();
@@ -3497,16 +3728,38 @@
                 const zone = calculateSector();
                 knight.activeZone = zone;
 
-                if (Math.abs(knight.speed) > 0.02) {
+                const isHeavyStepAttack = knight.isAttacking && (knight.attackType.includes('shove') || knight.attackType.includes('slash') || knight.attackType.includes('cleave'));
+
+                if (isHeavyStepAttack) {
+                    const arc = Math.sin(Math.min(1.0, knight.attackProgress) * Math.PI);
+                    const isRightAttack = knight.attackType.includes('sword');
+
+                    if (isRightAttack) {
+                        knight.rightLeg.rotation.x = arc * 1.1;
+                        knight.leftLeg.rotation.x = -arc * 0.7;
+                        knight.upperRig.rotation.y = -arc * 0.25;
+                    } else {
+                        knight.leftLeg.rotation.x = arc * 1.1;
+                        knight.rightLeg.rotation.x = -arc * 0.7;
+                        knight.upperRig.rotation.y = arc * 0.25;
+                    }
+
+                    knight.torso.position.y = 1.5 - arc * 0.3;
+                    knight.upperRig.rotation.x = -arc * 0.2;
+                } else if (Math.abs(knight.speed) > 0.02) {
                     knight.ticker += isActuallyInsideCar ? 0.11 : 0.18;
                     const wave = Math.sin(knight.ticker);
 
                     knight.leftLeg.rotation.x = wave * 0.65;
                     knight.rightLeg.rotation.x = -wave * 0.65;
                     knight.torso.position.y = 1.5 + Math.abs(THREE.MathUtils.mapLinear(wave, -1, 1, 0, 0.22));
+                    knight.upperRig.rotation.x = wave * 0.04;
+                    knight.upperRig.rotation.y = -wave * 0.03;
                 } else {
                     knight.leftLeg.rotation.x *= 0.8;
                     knight.rightLeg.rotation.x *= 0.8;
+                    knight.upperRig.rotation.x *= 0.8;
+                    knight.upperRig.rotation.y *= 0.8;
                     knight.torso.position.y = 1.5;
                 }
 
@@ -3531,10 +3784,8 @@
                     const targetHeight = isInStudio ? 4.5 : 4.2;
                     const lookHeight = 2.2;
 
-                    // Camera position rotates around the knight using worldCameraAngle
-                    const combinedAngle = knight.angle + worldCameraAngle;
-                    const targetCamX = knight.group.position.x + Math.sin(combinedAngle) * targetDist;
-                    const targetCamZ = knight.group.position.z + Math.cos(combinedAngle) * targetDist;
+                    const targetCamX = knight.group.position.x + Math.sin(knight.angle) * targetDist;
+                    const targetCamZ = knight.group.position.z + Math.cos(knight.angle) * targetDist;
                     const targetCamY = knight.group.position.y + targetHeight;
 
                     camera.position.x += (targetCamX - camera.position.x) * 0.16;
